@@ -1,0 +1,5 @@
+#surefire
+#Wed Jun 27 17:08:04 CDT 2012
+user.dir=/Users/jordankellerstrass/openmrsspace/mergeconcepts/trunk/api
+localRepository=/Users/jordankellerstrass/.m2/repository
+basedir=/Users/jordankellerstrass/openmrsspace/mergeconcepts/trunk/api

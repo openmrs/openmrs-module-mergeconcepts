@@ -1,24 +1,22 @@
 <%@ include file="/WEB-INF/template/include.jsp"%>
 <%@ include file="/WEB-INF/template/header.jsp"%>
 
-<%@ include file="template/localHeader.jsp"%>
+<h2><spring:message code="mergeconcepts.title" /></h2>
 
-<p>Hello ${user.systemId}!</p>
-<form method="GET">
-	Choose a concept: <openmrs_tag:conceptField formFieldName="conceptId"/>
-	<input type="submit" value="View"/>
+This page lets you replace references to one concept with another concept. 
+<br/>
+WARNING: Only merge concepts if you are 100% sure they are duplicates. Please backup your database before proceeding.
+
+<form method="POST" >
+
+	Choose concept to merge:
+	<openmrs_tag:conceptField formFieldName="oldConceptId" />
+	
+	Choose concept to merge:
+	<openmrs_tag:conceptField formFieldName="newConceptId" />
+	
+	<input type="submit" value="Continue"/>
+
 </form>
-<hr/>
-
-<table>
-	<tr>
-		<th>Concept ID</th>
-		<td>${ concept.conceptId }</td>
-	</tr>
-	<tr>
-		<th>UUID</th>
-		<td>${ concept.uuid }</td>
-	</tr>
-</table>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>
