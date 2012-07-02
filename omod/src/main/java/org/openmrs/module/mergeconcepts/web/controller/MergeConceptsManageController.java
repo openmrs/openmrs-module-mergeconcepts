@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.openmrs.Concept;
 import org.openmrs.Field;
+import org.openmrs.FormField;
 import org.openmrs.Form;
 import org.openmrs.Obs;
 import org.openmrs.api.ObsService;
@@ -43,8 +44,8 @@ public class MergeConceptsManageController {
 		Concept newConcept = Context.getConceptService().getConcept(newConceptId);
 		
 		/*Jordan playing
-		? oldConceptUuid = ${ oldConcept.uuid }
-		? newConceptUuid = ${ newConcept.uuid }
+		String oldConceptUuid = ${ oldConcep }
+		String newConceptUuid = ${ newConcept.uuid }
 		*/
 		
 		List<Obs> obsToConvert;
@@ -64,6 +65,7 @@ public class MergeConceptsManageController {
 		
 		Set<Form> formsNeedingRebuilding = new HashSet<Form>();
 		
+		//method getForms() is in FormFields.java
 		for (Field f : fields) {
 			f.setConcept(newConcept);
 			if (f.getForms() != null)
