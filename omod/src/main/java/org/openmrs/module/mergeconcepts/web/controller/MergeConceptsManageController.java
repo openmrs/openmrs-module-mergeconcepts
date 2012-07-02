@@ -61,20 +61,28 @@ public class MergeConceptsManageController {
 			obsService.saveObs(o, msg);
 		}
 		
-		List<Field> fields = Context.getFormService().getFieldsByConcept(oldConcept);
+		Set<FormField> formFields1 = new HashSet();
 		
-		Set<Form> formsNeedingRebuilding = new HashSet<Form>();
+		List<Form> allForms = Context.getFormService().getAllForms();
+		Set<Form> oldConceptForms = new HashSet();
 		
-		//method getForms() is in FormFields.java
-		for (Field f : fields) {
-			f.setConcept(newConcept);
-			if (f.getForms() != null)
-				formsNeedingRebuilding.addAll(f.getForms());
-			Context.getFormService().saveField(f);
+		//FormFields with old concept (might be a better way to do this)
+		for(Form f : allForms){
+			formFields1.add(Context.getFormService().getFormField(f, oldConcept));
+		}		
+		
+		//update fields
+		for(FormField f : formFields1){
+			//forms that ref oldConcept
+			oldConceptForms.add(f.getForm());
+			
+			//update fields
+			f.getField().setConcept(newConcept);
+			Context.getFormService().saveField(f.getField());
 		}
 		
 		//change message
-		httpSession.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "Obs converted successfully. total converted: " + count + " Rebuild all forms that used this concept: " + formsNeedingRebuilding);
+		httpSession.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "Obs converted successfully. total converted: " + count + " Rebuild all forms that used this concept: " + oldConceptForms);
 		
 	}
 	
@@ -128,4 +136,12 @@ public class  MergeConceptsManageController {
 	public void manage(ModelMap model) {
 		model.addAttribute("user", Context.getAuthenticatedUser());
 	}
+	
+			//method getForms() is in FormFields.java
+		for (Field f : fields) {
+			f.setConcept(newConcept);
+			if (f.getForms() != null)
+				formsNeedingRebuilding.addAll(f.getForms());
+			Context.getFormService().saveField(f);
+		}
 }*/

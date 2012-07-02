@@ -41,7 +41,7 @@ WARNING: Only merge concepts if you are 100% sure they are duplicates. Please ba
 			</td>
 		</tr>
 	</table>
-	
+	<input type="submit" />
 
 </form>
 
