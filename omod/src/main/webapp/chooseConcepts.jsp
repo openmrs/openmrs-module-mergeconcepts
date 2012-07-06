@@ -8,7 +8,15 @@ This page lets you replace references to one concept with another concept. The l
 WARNING: Only merge concepts if you are 100% sure they are duplicates. Please backup your database before proceeding.
 <br/>
 <br/>
+<form action="preview.form">
+	<!-- choose concepts -->Choose concepts
+	<input type="submit" value="Preview" />
+</form>
 
+
+<%@ include file="/WEB-INF/template/footer.jsp"%>
+
+<!-- more code for later 
 <form method="POST" >
 
 	<table width="100%" id="conceptTable" cellpadding="1" cellspacing="0">
@@ -43,9 +51,7 @@ WARNING: Only merge concepts if you are 100% sure they are duplicates. Please ba
 	</table>
 	<input type="submit" />
 
-</form>
-
-<%@ include file="/WEB-INF/template/footer.jsp"%>
+</form> -->
 
 <%--
 	Choose concept to merge:

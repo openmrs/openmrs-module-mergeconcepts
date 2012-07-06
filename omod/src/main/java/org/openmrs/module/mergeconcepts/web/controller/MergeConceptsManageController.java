@@ -21,72 +21,129 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * The main controller.
+ * The controller.
  */
 @Controller
 public class MergeConceptsManageController {
 	
-	@RequestMapping(value="/module/mergeconcepts/chooseConceptsToMerge", 
+	/**
+	 * default page from admin link or results page
+	 * @param map
+	 */
+	@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
 			method=RequestMethod.GET)
-	public void showThePage(ModelMap map) {
+	public void showPage(ModelMap model) {
 			
 	}
-
-
-	@RequestMapping(value="/module/mergeconcepts/chooseConceptsToMerge", 
-					method=RequestMethod.POST)
-	public void afterPageSubmission(ModelMap map, 
-			@RequestParam("oldConceptId") Integer oldConceptId,
-			@RequestParam("newConceptId") Integer newConceptId,
-			HttpSession httpSession) {
+	
+	/**
+	 * going back to choose concepts page after an error or a "no, I'm not sure"
+	 */
+	@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
+			method=RequestMethod.POST)
+	public void choseConcepts(){
+		//were concepts submitted? is the concept being kept non-retired? etc
 		
-		Concept oldConcept = Context.getConceptService().getConcept(oldConceptId); 
-		Concept newConcept = Context.getConceptService().getConcept(newConceptId);
 		
-		/*Jordan playing
-		String oldConceptUuid = ${ oldConcep }
-		String newConceptUuid = ${ newConcept.uuid }
-		*/
-		
-		List<Obs> obsToConvert;
-		ObsService obsService = Context.getObsService();
-		obsToConvert = obsService.getObservationsByPersonAndConcept(null, oldConcept);
-		
-		String msg = "Converted question concept from " + oldConcept + " to " + newConcept;
-		
-		Integer count = 0;
-		for (Obs o : obsToConvert) {
-			count = count + 1;
-			o.setConcept(newConcept);
-			obsService.saveObs(o, msg);
-		}
-		
-		Set<FormField> formFields1 = new HashSet();
-		
-		List<Form> allForms = Context.getFormService().getAllForms();
-		Set<Form> oldConceptForms = new HashSet();
-		
-		//FormFields with old concept (might be a better way to do this)
-		for(Form f : allForms){
-			formFields1.add(Context.getFormService().getFormField(f, oldConcept));
-		}		
-		
-		//update fields
-		for(FormField f : formFields1){
-			//forms that ref oldConcept
-			oldConceptForms.add(f.getForm());
-			
-			//update fields
-			f.getField().setConcept(newConcept);
-			Context.getFormService().saveField(f.getField());
-		}
-		
-		//change message
-		httpSession.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "Obs converted successfully. total converted: " + count + " Rebuild all forms that used this concept: " + oldConceptForms);
+	}
+	
+	/**
+	 * after submitting chooseConcepts form
+	 * @param map
+	 */
+	@RequestMapping(value="/module/mergeconcepts/preview")
+	public void previewReferences(ModelMap model) {
+		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
+		//add attributes?
+	}
+	
+	/**
+	 * after submitting chooseConcepts form
+	 * @param map
+	 */
+	@RequestMapping(value="/module/mergeconcepts/executeMerge")
+	public String executeMerge(ModelMap map) {
+			//ask for conceptIds
+			//merge!
+			//retire oldConcept
+			return "redirect:results.form";
+	}
+	
+	/**
+	 * after execute merge
+	 * @param map
+	 */
+	@RequestMapping(value="/module/mergeconcepts/results")
+	public void results(ModelMap map) {
 		
 	}
 	
 }
+
+/**
+ * Pieces of code I might want later...
+ * 
+ * @param map
+ * @param oldConceptId
+ * @param newConceptId
+ * @param httpSession
+
+@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
+				method=RequestMethod.POST)
+public void afterPageSubmission(ModelMap map, 
+		@RequestParam("oldConceptId") Integer oldConceptId,
+		@RequestParam("newConceptId") Integer newConceptId,
+		@RequestParam(required=false, value="back") Boolean back,
+		HttpSession httpSession) {
+	
+	
+	
+	
+	Concept oldConcept = Context.getConceptService().getConcept(oldConceptId); 
+	Concept newConcept = Context.getConceptService().getConcept(newConceptId);
+	
+	
+	
+	
+	List<Obs> obsToConvert;
+	ObsService obsService = Context.getObsService();
+	obsToConvert = obsService.getObservationsByPersonAndConcept(null, oldConcept);
+	
+	String msg = "Converted question concept from " + oldConcept + " to " + newConcept;
+	
+	Integer count = 0;
+	for (Obs o : obsToConvert) {
+		count = count + 1;
+		o.setConcept(newConcept);
+		obsService.saveObs(o, msg);
+	}
+	
+	/*
+	Set<FormField> formFields1 = new HashSet<FormField>();
+	
+	List<Form> allForms = Context.getFormService().getAllForms();
+	Set<Form> oldConceptForms = new HashSet<Form>();
+	
+	//FormFields with old concept (might be a better way to do this)
+	for(Form f : allForms){
+		formFields1.add(Context.getFormService().getFormField(f, oldConcept));
+	}		
+	
+	//update fields
+	for(FormField f : formFields1){
+		//forms that ref oldConcept
+		oldConceptForms.add(f.getForm());
+		
+		//update fields
+		f.getField().setConcept(newConcept);
+		Context.getFormService().saveField(f.getField());
+	}
+	
+	//change message
+	httpSession.setAttribute(WebConstants.OPENMRS_MSG_ATTR, "Obs converted successfully. total converted: " + count); //+ " Rebuild all forms that used this concept: " + oldConceptForms);
+	
+}*/
+
 /**
  * The contents of this file are subject to the OpenMRS Public License
  * Version 1.0 (the "License"); you may not use this file except in

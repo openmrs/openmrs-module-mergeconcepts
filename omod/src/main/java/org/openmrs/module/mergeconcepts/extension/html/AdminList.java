@@ -44,7 +44,8 @@ public class AdminList extends AdministrationSectionExt {
 	 */
 	public Map<String, String> getLinks() {
 		LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
-		map.put("/module/mergeconcepts/chooseConceptsToMerge.form", "mergeconcepts.manage");
+		map.put("/module/mergeconcepts/chooseConcepts.form", "Merge Concepts");
+		//map.put("#", "mergeconcepts.manage");
 		return map;
 	}
 	
