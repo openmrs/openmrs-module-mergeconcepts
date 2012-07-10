@@ -1,21 +1,10 @@
 package org.openmrs.module.mergeconcepts.web.controller;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpSession;
-
 import org.openmrs.Concept;
-import org.openmrs.Field;
-import org.openmrs.FormField;
-import org.openmrs.Form;
-import org.openmrs.Obs;
-import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
-import org.openmrs.web.WebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class MergeConceptsManageController {
+	
+	@ModelAttribute
+	public Concept getNewConcept(@RequestParam(required=false, value="newConceptId") Concept newConcept){
+		return newConcept;
+	}
+
+	@ModelAttribute
+	public Concept getOldConcept(@RequestParam(required=false, value="oldConceptId") Concept oldConcept){
+		return oldConcept;
+	}
 	
 	/**
 	 * default page from admin link or results page
@@ -51,8 +50,9 @@ public class MergeConceptsManageController {
 	 * after submitting chooseConcepts form
 	 * @param map
 	 */
-	@RequestMapping(value="/module/mergeconcepts/preview")
+	@RequestMapping("/module/mergeconcepts/preview")
 	public void previewReferences(ModelMap model) {
+
 		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
 		//add attributes?
 	}
@@ -61,7 +61,7 @@ public class MergeConceptsManageController {
 	 * after submitting chooseConcepts form
 	 * @param map
 	 */
-	@RequestMapping(value="/module/mergeconcepts/executeMerge")
+	@RequestMapping("/module/mergeconcepts/executeMerge")
 	public String executeMerge(ModelMap map) {
 			//ask for conceptIds
 			//merge!
@@ -73,7 +73,7 @@ public class MergeConceptsManageController {
 	 * after execute merge
 	 * @param map
 	 */
-	@RequestMapping(value="/module/mergeconcepts/results")
+	@RequestMapping("/module/mergeconcepts/results")
 	public void results(ModelMap map) {
 		
 	}
@@ -178,10 +178,7 @@ public class  MergeConceptsManageController {
 	
 	protected final Log log = LogFactory.getLog(getClass());
 	
-	@ModelAttribute
-	public Concept getConcept(@RequestParam(required=false, value="conceptId") Concept concept){
-		return concept;
-	}
+
 	
 	
 	@RequestMapping (value="/module/mergeconcepts/chooseConceptsToMerge", method=RequestMethod.GET)

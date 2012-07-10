@@ -8,37 +8,29 @@ This page lets you replace references to one concept with another concept. The l
 WARNING: Only merge concepts if you are 100% sure they are duplicates. Please backup your database before proceeding.
 <br/>
 <br/>
-<form action="preview.form">
-	<!-- choose concepts -->Choose concepts
-	<input type="submit" value="Preview" />
+<form action="preview.form" method="GET" >
+
+	<table id="conceptTable" cellpadding="1" cellspacing="0">
+		<colgroup span="1" style="background-color:#6AFB92;"></colgroup>
+		
+		<tr>
+			<td>Choose concept to keep:<openmrs_tag:conceptField formFieldName="newConceptId" /></td>
+			<td>Choose concept to retire:<openmrs_tag:conceptField formFieldName="oldConceptId" /></td>
+		</tr>
+
+	</table>
+	<input type="submit" value="Preview"/>
 </form>
 
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>
 
 <!-- more code for later 
-<form method="POST" >
 
-	<table width="100%" id="conceptTable" cellpadding="1" cellspacing="0">
-		<colgroup span="1" style="background-color:#6AFB92;" width="46%"></colgroup>
-		<colgroup><col width=22></colgroup>
-		<%--choose concepts (need to make page respond to choosing a concept and
+<%--choose concepts (need to make page respond to choosing a concept and
 								disable keeping a concept that is already retired/voided)--%>
-		<tr>
-			<td>Choose concept to keep:<openmrs_tag:conceptField formFieldName="newConceptId" /></td>
-			<td>Choose concept to retire:<openmrs_tag:conceptField formFieldName="oldConceptId" /></td>
-		</tr>
 		
 		
-		<%--Forms--%>
-		<tr>
-			<td valign="top">
-				<h4>Forms</h4>
-			</td>
-			<td valign="top">
-				<h4>Forms</h4>
-			</td>
-		</tr>
 		<%--obs--%>
 		<tr>
 			<td valign="top">
@@ -48,10 +40,16 @@ WARNING: Only merge concepts if you are 100% sure they are duplicates. Please ba
 				<h4>Obs count</h4>
 			</td>
 		</tr>
-	</table>
-	<input type="submit" />
-
-</form> -->
+		<%--Forms--%>
+		<tr>
+			<td valign="top">
+				<h4>Forms</h4>
+			</td>
+			<td valign="top">
+				<h4>Forms</h4>
+			</td>
+		</tr>
+ -->
 
 <%--
 	Choose concept to merge:
