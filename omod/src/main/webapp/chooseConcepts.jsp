@@ -8,7 +8,7 @@ This page lets you replace references to one concept with another concept. The l
 WARNING: Only merge concepts if you are 100% sure they are duplicates. Please backup your database before proceeding.
 <br/>
 <br/>
-<form action="preview.form" method="GET" >
+<form action="preview.form" method="POST" >
 
 	<table id="conceptTable" cellpadding="1" cellspacing="0">
 		<colgroup span="1" style="background-color:#6AFB92;"></colgroup>

@@ -12,19 +12,19 @@ This page lets you see references to concepts chosen in the previous page
 		<%--Concept Name--%>
 		<tr>
 			<td valign="top">
-				<h4>Concept ID: </h4>
+				<h4>Concept ID: ${ newConcept.conceptId }</h4>
 			</td>
 			
 			<td valign="top">
-				<h4>Concept ID: </h4>
+				<h4>Concept ID: ${ oldConcept.conceptId }</h4>
 			</td>
 			
 		</tr>
 		<tr>
-			<td>${ newConcept.conceptId }</td>
-			<td>${ oldConcept.conceptId }</td>
+			<td></td>
+			<td></td>
 		</tr>
-		<%--Forms--%>
+		<%--Forms
 		<tr>
 			<td valign="top">
 				<h4>Forms</h4>
@@ -32,7 +32,7 @@ This page lets you see references to concepts chosen in the previous page
 			<td valign="top">
 				<h4>Forms</h4>
 			</td>
-		</tr>
+		</tr>--%>
 		
 		<%--obs--%>
 		<tr>

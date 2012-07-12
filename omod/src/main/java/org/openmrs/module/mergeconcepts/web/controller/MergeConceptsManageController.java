@@ -15,16 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class MergeConceptsManageController {
 	
-	@ModelAttribute
-	public Concept getNewConcept(@RequestParam(required=false, value="newConceptId") Concept newConcept){
-		return newConcept;
-	}
-
-	@ModelAttribute
-	public Concept getOldConcept(@RequestParam(required=false, value="oldConceptId") Concept oldConcept){
-		return oldConcept;
-	}
-	
 	/**
 	 * default page from admin link or results page
 	 * @param map
@@ -40,7 +30,7 @@ public class MergeConceptsManageController {
 	 */
 	@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
 			method=RequestMethod.POST)
-	public void choseConcepts(){
+	public void chooseConcepts(){
 		//were concepts submitted? is the concept being kept non-retired? etc
 		
 		
@@ -50,9 +40,12 @@ public class MergeConceptsManageController {
 	 * after submitting chooseConcepts form
 	 * @param map
 	 */
-	@RequestMapping("/module/mergeconcepts/preview")
-	public void previewReferences(ModelMap model) {
-
+	@RequestMapping(value="/module/mergeconcepts/preview", method=RequestMethod.POST)
+	public void preview(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
+			@RequestParam("newConceptId") Integer newConceptId) {
+		model.addAttribute("oldConcept", Context.getConceptService().getConcept(oldConceptId));
+		model.addAttribute("newConcept", Context.getConceptService().getConcept(newConceptId));
+		
 		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
 		//add attributes?
 	}
@@ -96,7 +89,16 @@ public void afterPageSubmission(ModelMap map,
 		@RequestParam(required=false, value="back") Boolean back,
 		HttpSession httpSession) {
 	
-	
+	//??
+	@ModelAttribute
+	public Concept getNewConcept(@RequestParam(required=false, value="newConceptId") Concept newConcept){
+		return newConcept;
+	}
+
+	@ModelAttribute
+	public Concept getOldConcept(@RequestParam(required=false, value="oldConceptId") Concept oldConcept){
+		return oldConcept;
+	}
 	
 	
 	Concept oldConcept = Context.getConceptService().getConcept(oldConceptId); 
