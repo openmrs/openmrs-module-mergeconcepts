@@ -19,7 +19,29 @@ public class MergeConceptsManageController {
 	
 	private Logger log = Logger.getLogger(MergeConceptsManageController.class);
 	
+	/**
+	 * Called when any page is requested, does not respond to concept search widgets 
+	 * @param newConceptId
+	 * @return
+	 */
+	@ModelAttribute("newConcept")
+	public Concept getNewConcept(@RequestParam(required=false, value="newConceptId") String newConceptId){
+		//going to make this use ConceptEditor instead
+		Concept newConcept = Context.getConceptService().getConcept(newConceptId);
+		return newConcept;
+	}
 	
+	/**
+	 * Called when any page is requested, does not respond to concept search widgets
+	 * @param oldConceptId
+	 * @return
+	 */
+	@ModelAttribute("oldConcept")
+	public Concept getOldConcept(@RequestParam(required=false, value="oldConceptId") String oldConceptId){
+		//going to make this use ConceptEditor instead
+		Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
+		return oldConcept;
+	}
 	
 	
 	/**
@@ -54,8 +76,6 @@ public class MergeConceptsManageController {
 	@RequestMapping(value="/module/mergeconcepts/preview", method=RequestMethod.POST)
 	public void preview(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
 			@RequestParam("newConceptId") Integer newConceptId) {
-		model.addAttribute("oldConcept", Context.getConceptService().getConcept(oldConceptId));
-		model.addAttribute("newConcept", Context.getConceptService().getConcept(newConceptId));
 		
 		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
 		//add attributes?
@@ -111,6 +131,9 @@ public void afterPageSubmission(ModelMap map,
 	public Concept getOldConcept(@RequestParam(required=false, value="oldConceptId") Concept oldConcept){
 		return oldConcept;
 	}
+	
+	model.addAttribute("oldConcept", Context.getConceptService().getConcept(oldConceptId));
+	model.addAttribute("newConcept", Context.getConceptService().getConcept(newConceptId));
 	
 	
 	Concept oldConcept = Context.getConceptService().getConcept(oldConceptId); 
