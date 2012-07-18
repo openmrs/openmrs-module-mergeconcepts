@@ -43,6 +43,16 @@ This page lets you see references to concepts chosen in the previous page
 				<h4>Obs count</h4>
 			</td>
 		</tr>
+		<tr>
+			<td align="center">
+				${ newObsCount }
+			</td>
+			
+			<td align="center">
+				${ oldObsCount }
+			</td>
+			
+		</tr>
 		
 	</table>
 

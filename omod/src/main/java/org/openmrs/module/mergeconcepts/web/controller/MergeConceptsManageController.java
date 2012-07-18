@@ -1,8 +1,15 @@
 package org.openmrs.module.mergeconcepts.web.controller;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.openmrs.Concept;
+import org.openmrs.Obs;
+import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -18,9 +25,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MergeConceptsManageController {
 	
 	private Logger log = Logger.getLogger(MergeConceptsManageController.class);
+	private Map<String, List> oldConceptRefs;
+	private Map<String, List> newConceptRefs;
+	
+	private Integer oldObsCount = -1;
+	private Integer newObsCount = -1;
 	
 	/**
-	 * Called when any page is requested, does not respond to concept search widgets 
+	 * Called when any page is requested, does not respond to concept search widgets
+	 * @should set model attribute "newConcept" to concept user wants to keep
 	 * @param newConceptId
 	 * @return
 	 */
@@ -33,6 +46,7 @@ public class MergeConceptsManageController {
 	
 	/**
 	 * Called when any page is requested, does not respond to concept search widgets
+	 * @should set model attribute "oldConcept" to concept user wants to retire
 	 * @param oldConceptId
 	 * @return
 	 */
@@ -43,6 +57,31 @@ public class MergeConceptsManageController {
 		return oldConcept;
 	}
 	
+	/**
+	 * @should generate fresh lists of references to each concept
+	 */
+	public void generateReferenceLists(@RequestParam(required=false, value="oldConceptId") String oldConceptId,
+										@RequestParam(required=false, value="newConceptId") String newConceptId){
+		oldConceptRefs = new HashMap<String, List>();
+		newConceptRefs = new HashMap<String, List>();
+		
+		//OBS
+		ObsService obsService = Context.getObsService(); //ObsEditor?
+		
+		List<Obs> obsToConvert;
+		obsToConvert = obsService.getObservationsByPersonAndConcept(null, getOldConcept(oldConceptId));
+		oldConceptRefs.put("obs", obsToConvert);
+		oldObsCount = oldConceptRefs.get("obs").size();
+		log.info("oldObsCount = "+oldObsCount);
+		
+		List<Obs> newConceptObs;
+		newConceptObs = obsService.getObservationsByPersonAndConcept(null, getNewConcept(newConceptId));
+		newConceptRefs.put("obs", newConceptObs);
+		newObsCount = newConceptRefs.get("obs").size();
+		log.info("newObsCount = "+newObsCount);
+		
+		//FORMS
+	}
 	
 	/**
 	 * Default page from admin link or results page
@@ -70,15 +109,20 @@ public class MergeConceptsManageController {
 	
 	/**
 	 * Method is called on submitting chooseConcepts form
-	 * @should 
+	 * @should display references to oldConcept and newConcept
 	 * @param map
 	 */
 	@RequestMapping(value="/module/mergeconcepts/preview", method=RequestMethod.POST)
-	public void preview(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
-			@RequestParam("newConceptId") Integer newConceptId) {
+	public void preview(ModelMap model, @RequestParam("oldConceptId") String oldConceptId,
+										@RequestParam("newConceptId") String newConceptId) {
 		
 		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
-		//add attributes?
+		
+		generateReferenceLists(oldConceptId, newConceptId);
+		
+		model.addAttribute("newObsCount", newObsCount);
+		model.addAttribute("oldObsCount", oldObsCount);
+		
 	}
 	
 	/**
@@ -96,6 +140,7 @@ public class MergeConceptsManageController {
 	
 	/**
 	 * Method is called after executeMerge() is finished
+	 * @should display updated references to oldConcept and newConcept
 	 * @param map
 	 */
 	@RequestMapping("/module/mergeconcepts/results")
