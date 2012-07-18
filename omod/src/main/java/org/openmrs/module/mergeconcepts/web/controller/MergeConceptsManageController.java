@@ -1,5 +1,7 @@
 package org.openmrs.module.mergeconcepts.web.controller;
 
+
+import org.apache.log4j.Logger;
 import org.openmrs.Concept;
 import org.openmrs.api.context.Context;
 import org.springframework.stereotype.Controller;
@@ -15,8 +17,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class MergeConceptsManageController {
 	
+	private Logger log = Logger.getLogger(MergeConceptsManageController.class);
+	
+	
+	
+	
 	/**
-	 * default page from admin link or results page
+	 * Default page from admin link or results page
+	 * @should do nothing
 	 * @param map
 	 */
 	@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
@@ -26,7 +34,9 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * going back to choose concepts page after an error or a "no, I'm not sure"
+	 * Method is called when going back to choose concepts page after an error
+	 * or from preview page "no, I'm not sure"
+	 * @should (eventually) prepopulate concept widgets
 	 */
 	@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
 			method=RequestMethod.POST)
@@ -37,7 +47,8 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * after submitting chooseConcepts form
+	 * Method is called on submitting chooseConcepts form
+	 * @should 
 	 * @param map
 	 */
 	@RequestMapping(value="/module/mergeconcepts/preview", method=RequestMethod.POST)
@@ -51,7 +62,8 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * after submitting chooseConcepts form
+	 * Method is called after user confirms preview page
+	 * @should merge concepts
 	 * @param map
 	 */
 	@RequestMapping("/module/mergeconcepts/executeMerge")
@@ -63,7 +75,7 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * after execute merge
+	 * Method is called after executeMerge() is finished
 	 * @param map
 	 */
 	@RequestMapping("/module/mergeconcepts/results")
