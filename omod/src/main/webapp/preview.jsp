@@ -9,51 +9,71 @@ This page lets you see references to concepts chosen in the previous page
 	<table id="previewTable" cellpadding="1" cellspacing="0">
 		<colgroup span="1" style="background-color:#6AFB92;"></colgroup>
 		
-		<%--Concept Name--%>
+		<%--Concept Name and Id--%>
 		<tr>
 			<td valign="top">
-				<h4>Concept ID: ${ newConcept.conceptId }</h4>
+				<h4>Concept Name: </h4>
+				<ul id="name1">
+					<li>${ newConcept.name }
+				</ul>
 			</td>
 			
 			<td valign="top">
-				<h4>Concept ID: ${ oldConcept.conceptId }</h4>
+				<h4>Concept Name: </h4>
+				<ul id="name2">
+					<li>${ oldConcept.name }
+				</ul>
+			</td>
+		</tr>		
+		<tr>
+			<td valign="top">
+				<h4>Concept Id: </h4>
+				<ul id="id1">
+					<li>${ newConcept.conceptId }
+				</ul>
 			</td>
 			
+			<td valign="top">
+				<h4>Concept Id: </h4>
+				<ul id="id2">
+					<li>${ oldConcept.conceptId }
+				</ul>
+			</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td></td>
-		</tr>
-		<%--Forms
+		</tr>	
+<tr>
+			<td valign="top">
+				<h4>Concept References</h4>
+	<table>
 		<tr>
-			<td valign="top">
-				<h4>Forms</h4>
-			</td>
-			<td valign="top">
-				<h4>Forms</h4>
-			</td>
-		</tr>--%>
-		
-		<%--obs--%>
-		<tr>
-			<td valign="top">
-				<h4>Obs count</h4>
-			</td>
-			<td valign="top">
-				<h4>Obs count</h4>
-			</td>
+			<th align="left">Obs Count</th>
+			<td id="ref10">${ newObsCount }</td>
 		</tr>
 		<tr>
-			<td align="center">
-				${ newObsCount }
+			<th align="left">Forms</th>
+			<td id="ref11">...</td>
+		</tr>
+	</table>
+
 			</td>
 			
-			<td align="center">
-				${ oldObsCount }
-			</td>
-			
+				<td valign="top">
+					<h4>Concept References</h4>
+	<table>
+		<tr>
+			<th align="left">Obs Count</th>
+			<td id="ref20">${ oldObsCount }</td>
 		</tr>
-		
+		<tr>
+			<th align="left">Forms</th>
+			<td id="ref21">...</td>
+		</tr>
+	</table>
+				</td>
+		</tr>
 	</table>
 
 <!-- Are you sure? -->

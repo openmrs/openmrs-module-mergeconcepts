@@ -7,10 +7,7 @@
 This page lets you see the updated references to each concept
 <br/>
 <!-- See what happened -->
-<form action="chooseConcepts.form" method="GET">
-	<!-- list of things referencing chosen concepts -->
-	<input type="submit" value="Merge More Concepts" />
-</form>
+<a href="chooseConcepts.form">Merge More Concepts</a>
 
 
 
