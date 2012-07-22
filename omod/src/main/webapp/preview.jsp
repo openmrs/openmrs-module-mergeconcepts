@@ -3,24 +3,32 @@
 <%@ include file="/WEB-INF/template/header.jsp"%>
 
 <!--links back to admin page etc -->
-This page lets you see references to concepts chosen in the previous page
+<h1>Merge Concepts</h1> 
+Are you sure you want to continue?
 <br/>
 
-	<table id="previewTable" cellpadding="1" cellspacing="0">
+	<table id="conceptTable" cellpadding="1" cellspacing="0">
 		<colgroup span="1" style="background-color:#6AFB92;"></colgroup>
+		<tr>
+			<td></td>
+			<td align="center" valign="middle" rowspan="9" id="patientDivider">
+				<img src="/openmrs/images/leftArrow.gif"/>
+			</td>
+			<td></td>
+		</tr>
 		
 		<%--Concept Name and Id--%>
 		<tr>
 			<td valign="top">
 				<h4>Concept Name: </h4>
-				<ul id="name1">
+				<ul type="none" id="name1">
 					<li>${ newConcept.name }
 				</ul>
 			</td>
 			
-			<td valign="top">
+			<td><!--  valign="top" -->
 				<h4>Concept Name: </h4>
-				<ul id="name2">
+				<ul type="none" id="name2">
 					<li>${ oldConcept.name }
 				</ul>
 			</td>
@@ -28,14 +36,14 @@ This page lets you see references to concepts chosen in the previous page
 		<tr>
 			<td valign="top">
 				<h4>Concept Id: </h4>
-				<ul id="id1">
+				<ul type="none" id="id1">
 					<li>${ newConcept.conceptId }
 				</ul>
 			</td>
 			
 			<td valign="top">
 				<h4>Concept Id: </h4>
-				<ul id="id2">
+				<ul type="none" id="id2">
 					<li>${ oldConcept.conceptId }
 				</ul>
 			</td>
