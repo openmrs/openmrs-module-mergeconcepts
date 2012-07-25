@@ -25,11 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class MergeConceptsManageController {
 	
 	private Logger log = Logger.getLogger(MergeConceptsManageController.class);
-	private Map<String, List> oldConceptRefs;
-	private Map<String, List> newConceptRefs;
-	
-	private Integer oldObsCount = -1;
-	private Integer newObsCount = -1;
 	
 	/**
 	 * Called when any page is requested, does not respond to concept search widgets
@@ -58,12 +53,11 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * @should generate fresh lists of references to each concept
+	 * @should generate fresh lists of references to old concept
 	 */
-	public void generateReferenceLists(@RequestParam(required=false, value="oldConceptId") String oldConceptId,
-										@RequestParam(required=false, value="newConceptId") String newConceptId){
-		oldConceptRefs = new HashMap<String, List>();
-		newConceptRefs = new HashMap<String, List>();
+	public Map<String, List> generateReferenceLists(@RequestParam(required=false, value="oldConceptId") String oldConceptId){
+		
+		Map<String, List> oldConceptRefs = new HashMap<String, List>();
 		
 		//OBS
 		ObsService obsService = Context.getObsService(); //ObsEditor?
@@ -71,14 +65,30 @@ public class MergeConceptsManageController {
 		List<Obs> obsToConvert;
 		obsToConvert = obsService.getObservationsByPersonAndConcept(null, getOldConcept(oldConceptId));
 		oldConceptRefs.put("obs", obsToConvert);
-		oldObsCount = oldConceptRefs.get("obs").size();
-		log.info("oldObsCount = "+oldObsCount);
+		log.info("oldObsCount = "+oldConceptRefs.get("obs").size());
+		
+		return oldConceptRefs;
+		
+		//FORMS
+	}
+	
+
+	/**
+	 * @should generate fresh lists of references to new concept
+	 */
+	public Map<String, List> generateNewReferenceLists(@RequestParam(required=false, value="newConceptId") String newConceptId){
+
+		Map<String, List> newConceptRefs = new HashMap<String, List>();
+		
+		//OBS
+		ObsService obsService = Context.getObsService(); //ObsEditor?
 		
 		List<Obs> newConceptObs;
 		newConceptObs = obsService.getObservationsByPersonAndConcept(null, getNewConcept(newConceptId));
 		newConceptRefs.put("obs", newConceptObs);
-		newObsCount = newConceptRefs.get("obs").size();
-		log.info("newObsCount = "+newObsCount);
+		log.info("newObsCount = "+newConceptRefs.get("obs").size());
+		
+		return newConceptRefs;
 		
 		//FORMS
 	}
@@ -118,10 +128,11 @@ public class MergeConceptsManageController {
 		
 		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
 		
-		generateReferenceLists(oldConceptId, newConceptId);
+		Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
+		Map<String, List> oldConceptRefs= generateNewReferenceLists(oldConceptId);
 		
-		model.addAttribute("newObsCount", newObsCount);
-		model.addAttribute("oldObsCount", oldObsCount);
+		model.addAttribute("newObsCount", newConceptRefs.get("obs").size());
+		model.addAttribute("oldObsCount", oldConceptRefs.get("obs").size());
 		
 	}
 	
