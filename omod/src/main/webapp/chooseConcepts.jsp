@@ -3,7 +3,10 @@
 
 <h2><spring:message code="mergeconcepts.title" /></h2>
 
-This page lets you replace references to one concept with another concept. The losing concept gets retired.
+Retire a duplicate concept and replace references to its concept id with another concept id. Choose duplicate concepts here.
+<br/>
+"Preview" will allow you to view all references that will be updated by merging chosen concepts.
+<br/>
 <br/>
 WARNING: Only merge concepts if you are 100% sure they are duplicates. Please backup your database before proceeding.
 <br/>

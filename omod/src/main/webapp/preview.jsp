@@ -4,11 +4,20 @@
 
 <!--links back to admin page etc -->
 <h1>Merge Concepts</h1> 
-Are you sure you want to continue?
-<br/>
 
+<br/>	
+		
 	<table id="conceptTable" cellpadding="1" cellspacing="0">
 		<colgroup span="1" style="background-color:#6AFB92;"></colgroup>
+		<tr>
+			<td>
+				<h3><i>Keep this concept</i></h3>
+			</td>
+			<td></td>
+			<td>
+				<h3><i>Retire this concept</i></h3>
+			</td>
+		</tr>
 		<tr>
 			<td></td>
 			<td align="center" valign="middle" rowspan="9" id="patientDivider">
@@ -16,7 +25,7 @@ Are you sure you want to continue?
 			</td>
 			<td></td>
 		</tr>
-		
+
 		<%--Concept Name and Id--%>
 		<tr>
 			<td valign="top">
@@ -85,8 +94,10 @@ Are you sure you want to continue?
 	</table>
 
 <!-- Are you sure? -->
+Are you sure you want to continue?
 <form action="executeMerge.form" method="POST">
-	<!-- list of things referencing chosen concepts -->
+	<input type="hidden" name="oldConceptId" value=${ oldConcept.conceptId }>
+	<input type="hidden" name="newConceptId" value=${ newConcept.conceptId }>
 	<input type="submit" value="Yes, Merge Concepts" />
 </form>
 

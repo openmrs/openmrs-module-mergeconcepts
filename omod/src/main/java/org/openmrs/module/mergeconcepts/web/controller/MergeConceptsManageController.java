@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.api.APIException;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.springframework.stereotype.Controller;
@@ -53,42 +54,88 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * @should generate fresh lists of references to old concept
+	 * getMatchingObs
+	 * @param concept - the concept to look up
+	 * @return a list of Obs using the concept as a question or answer, an empty List if none found
+	 * @should return a list of Obs that use the concept as a question or answer
+	 * @should return an empty List if no matches
+	 * @should return an empty list if Concept is null
 	 */
-	public Map<String, List> generateReferenceLists(@RequestParam(required=false, value="oldConceptId") String oldConceptId){
+	protected List<Obs> getMatchingObs(Concept concept){
+		ObsService obsService = Context.getObsService();
+
+		List<Concept> conceptList = new ArrayList<Concept>();
+		conceptList.add(concept);
 		
-		Map<String, List> oldConceptRefs = new HashMap<String, List>();
+		List<Obs> result = new ArrayList<Obs>();
 		
-		//OBS
-		ObsService obsService = Context.getObsService(); //ObsEditor?
+		if( concept == null )
+			return result; //TODO recondisder error handling strategy here
 		
-		List<Obs> obsToConvert;
-		obsToConvert = obsService.getObservationsByPersonAndConcept(null, getOldConcept(oldConceptId));
-		oldConceptRefs.put("obs", obsToConvert);
-		log.info("oldObsCount = "+oldConceptRefs.get("obs").size());
+		//answer concept
+		List<Obs> obsFound = obsService.getObservations(null, null, null, conceptList, null, null, null, null, null, null, null,
+				true);
+		if(obsFound!=null){
+			result.addAll(obsFound);
+			log.info("Found " + obsFound.size() + " obs with answers concept Id " + concept.getConceptId());
+		}
 		
-		return oldConceptRefs;
+		//question concept
+		obsFound = obsService.getObservations(null, null,  conceptList, null, null, null, null, null, null, null, null,
+				true);
+		if(obsFound!=null){
+			result.addAll(obsFound);
+			log.info("Found " + obsFound.size() + " obs with questions concept Id " + concept.getConceptId());
+
+		}
 		
-		//FORMS
+		return result;
 	}
-	
 
 	/**
 	 * @should generate fresh lists of references to new concept
 	 */
-	public Map<String, List> generateNewReferenceLists(@RequestParam(required=false, value="newConceptId") String newConceptId){
+	public Map<String, List> generateNewReferenceLists(String newConceptId){
 
 		Map<String, List> newConceptRefs = new HashMap<String, List>();
+		Concept concept = Context.getConceptService().getConcept(newConceptId);
 		
 		//OBS
-		ObsService obsService = Context.getObsService(); //ObsEditor?
+		//ObsService obsService = Context.getObsService(); //ObsEditor?
 		
 		List<Obs> newConceptObs;
-		newConceptObs = obsService.getObservationsByPersonAndConcept(null, getNewConcept(newConceptId));
+		//newConceptObs = obsService.getObservationsByPersonAndConcept(null, getNewConcept(newConceptId));
+		newConceptObs = this.getMatchingObs(concept);
 		newConceptRefs.put("obs", newConceptObs);
 		log.info("newObsCount = "+newConceptRefs.get("obs").size());
 		
-		return newConceptRefs;
+		//FORMS
+		//Everything else
+		
+		return newConceptRefs;		
+	}
+	
+	/**
+	 * @should generate fresh lists of references to old concept
+	 */
+	public Map<String, List> generateOldReferenceLists(String oldConceptId){
+		
+		Map<String, List> oldConceptRefs = new HashMap<String, List>();
+		Concept concept = Context.getConceptService().getConcept(oldConceptId);
+		
+		//OBS
+		//ObsService obsService = Context.getObsService(); //ObsEditor?
+		
+		List<Obs> oldConceptObs;
+		//oldConceptObs = obsService.getObservationsByPersonAndConcept(null, concept);
+		oldConceptObs = this.getMatchingObs(concept);
+		oldConceptRefs.put("obs", oldConceptObs);
+		log.info("newObsCount = "+oldConceptRefs.get("obs").size());
+		
+		//FORMS
+		//Everything else
+		
+		return oldConceptRefs;
 		
 		//FORMS
 	}
@@ -122,14 +169,14 @@ public class MergeConceptsManageController {
 	 * @should display references to oldConcept and newConcept
 	 * @param map
 	 */
-	@RequestMapping(value="/module/mergeconcepts/preview", method=RequestMethod.POST)
+	@RequestMapping("/module/mergeconcepts/preview")
 	public void preview(ModelMap model, @RequestParam("oldConceptId") String oldConceptId,
 										@RequestParam("newConceptId") String newConceptId) {
 		
 		//were concepts submitted? is the concept being kept non-retired? etc. if not, redirect
 		
 		Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
-		Map<String, List> oldConceptRefs= generateNewReferenceLists(oldConceptId);
+		Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
 		
 		model.addAttribute("newObsCount", newConceptRefs.get("obs").size());
 		model.addAttribute("oldObsCount", oldConceptRefs.get("obs").size());
@@ -142,11 +189,27 @@ public class MergeConceptsManageController {
 	 * @param map
 	 */
 	@RequestMapping("/module/mergeconcepts/executeMerge")
-	public String executeMerge(ModelMap map) {
-			//ask for conceptIds
-			//merge!
-			//retire oldConcept
-			return "redirect:results.form";
+	public String executeMerge(ModelMap model, @RequestParam("oldConceptId") String oldConceptId,
+											   @RequestParam("newConceptId") String newConceptId) throws APIException {
+		
+		Concept oldConcept = Context.getConceptService().getConcept(oldConceptId); 
+		Concept newConcept = Context.getConceptService().getConcept(newConceptId);
+
+		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
+
+		List<Obs> obsToConvert = this.getMatchingObs(oldConcept);
+		ObsService obsService = Context.getObsService();
+		for(Obs o: obsToConvert){
+			o.setConcept(newConcept);
+			obsService.saveObs(o, msg); //problème ici
+		}
+		
+		model.addAttribute("oldConceptId", oldConceptId);
+		model.addAttribute("newConceptId", newConceptId);
+			
+		//retire oldConcept
+			
+		return "redirect:results.form";
 	}
 	
 	/**
@@ -155,8 +218,16 @@ public class MergeConceptsManageController {
 	 * @param map
 	 */
 	@RequestMapping("/module/mergeconcepts/results")
-	public void results(ModelMap map) {
+	public void results(ModelMap model, @RequestParam("oldConceptId") String oldConceptId,
+									    @RequestParam("newConceptId") String newConceptId) {
 		
+		//redirect if something went wrong
+		
+		Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
+		Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
+		
+		model.addAttribute("newObsCount", newConceptRefs.get("obs").size());
+		model.addAttribute("oldObsCount", oldConceptRefs.get("obs").size());
 	}
 	
 }
