@@ -71,7 +71,13 @@
 		</tr>
 		<tr>
 			<th align="left">Forms</th>
-			<td id="ref11">...</td>
+			<td id="ref11">
+			<ul type="none" id="id3">
+				<c:forEach var="f" items="${ newForms }">
+				<li>${ f }
+				</c:forEach>
+			</ul>
+			</td>
 		</tr>
 	</table>
 
@@ -86,7 +92,13 @@
 		</tr>
 		<tr>
 			<th align="left">Forms</th>
-			<td id="ref21">...</td>
+			<td id="ref21">
+			<ul type="none" id="id3">
+				<c:forEach var="f" items="${ oldForms }">
+				<li>${ f }
+				</c:forEach>
+			</ul>
+			</td>
 		</tr>
 	</table>
 				</td>

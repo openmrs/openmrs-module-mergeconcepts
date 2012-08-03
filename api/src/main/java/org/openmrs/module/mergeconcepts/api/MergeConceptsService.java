@@ -13,6 +13,8 @@
  */
 package org.openmrs.module.mergeconcepts.api;
 
+import java.util.List;
+
 import org.openmrs.api.OpenmrsService;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,4 +35,14 @@ public interface MergeConceptsService extends OpenmrsService {
 	 * Add service methods here
 	 * 
 	 */
+	
+    /**
+     * @return the dao
+     * @should return a count of question concept obs
+     */
+	public int getObsCount(Integer conceptId);
+	
+	public List<Integer> getObsIds(Integer conceptId);
+
+	public void updateObs(Integer oldConceptId, Integer newConceptId);
 }

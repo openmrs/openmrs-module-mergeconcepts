@@ -13,6 +13,8 @@
  */
 package org.openmrs.module.mergeconcepts.api.db;
 
+import java.util.List;
+
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 
 /**
@@ -23,4 +25,16 @@ public interface MergeConceptsDAO {
 	/*
 	 * Add DAO methods here
 	 */
+	
+    /**
+     * 
+     * @param conceptId
+     * @return
+     * @should return a count of the obs
+     */	
+	public Integer getObsCount(Integer conceptId);
+	
+	public void updateObs(Integer oldConceptId, Integer newConceptId);
+	
+	public List<Integer> getObsIds(Integer conceptId);
 }

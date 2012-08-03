@@ -13,11 +13,19 @@
  */
 package org.openmrs.module.mergeconcepts.api.impl;
 
+import java.util.List;
+
+import org.openmrs.Concept;
+import org.openmrs.Obs;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.ObsService;
+import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * It is a default implementation of {@link MergeConceptsService}.
@@ -41,4 +49,21 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     public MergeConceptsDAO getDao() {
 	    return dao;
     }
+    
+    public int getObsCount(Integer conceptId){
+    	int obsCount = dao.getObsCount(conceptId);
+    	return obsCount;
+    }
+    
+    public List<Integer> getObsIds(Integer conceptId){
+    	List<Integer> obsIds = dao.getObsIds(conceptId);
+    	return obsIds;
+    	
+    }
+    
+    @Transactional
+    public void updateObs(Integer oldConceptId, Integer newConceptId){
+    	dao.updateObs(oldConceptId, newConceptId);
+    }
+    
 }

@@ -26,9 +26,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.hibernate.JDBCException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 //import org.hibernate.jdbc.Work; cannot be resolved
+import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.api.APIException;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
@@ -59,19 +63,105 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     /**
      * 
      * @param conceptId
-     * @param retireConcept
+     * @return
+     * @should return a count of the obs
+     */
+    @Transactional
+    public Integer getObsCount(Integer conceptId){
+    	Long obsCount = null;
+
+    	Query query = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where concept_id = :conceptId and voided = 0")
+		        .setParameter("conceptId", conceptId);
+    	obsCount = (Long)query.uniqueResult();
+    	/**
+    	 * String select = "select count(*) from Patient";
+    	 * Query query = sessionFactory.getCurrentSession().createQuery(select);
+    	 * return ((Number) query.iterate().next()).intValue();
+    	 */
+    	return obsCount.intValue();
+    }
+    
+    /**
+     * 
+     * @param conceptId
+     * @return
+     * @should return a count of the obs
+     
+    @Transactional
+    public Integer getAnswerObsCount(Integer conceptId){
+    	Long obsCount = null;
+
+    	Query query = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where concept_id = :conceptId and voided = 0")
+		        .setParameter("conceptId", conceptId);
+    	obsCount = (Long) query.uniqueResult();
+    	/**
+    	 * String select = "select count(*) from Patient";
+    	 * Query query = sessionFactory.getCurrentSession().createQuery(select);
+    	 * return ((Number) query.iterate().next()).intValue();
+    	 
+    	return obsCount.intValue();
+    }*/
+    
+    
+    /**
+     * 
+     * @param conceptId
+     * @return
+     * @should return a list of the obs
+     */
+    @Transactional
+    public List<Integer> getObsIds(Integer conceptId) throws APIException {
+    	List<Integer> obsIds = null;
+
+    	Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where concept_id = :conceptId and voided = 0")
+		        .setParameter("conceptId", conceptId);
+    	
+    	obsIds = (List<Integer>) query.list();
+    	
+    	return obsIds;
+    }
+    
+    
+
+    
+    /**
+     * 
+     * @param conceptId
      * @return
      */
     @Transactional
-    public Integer obsQuery(Integer conceptId, boolean retireConcept){
-    	Integer obsCount = -1;
-
-    	if(!retireConcept){
-    		//sessionFactory.getCurrentSession().doWork( new Work() { void execute(Connection connection) { } } );
-    		return obsCount;
-    	}
+    public void updateObs(Integer oldConceptId, Integer newConceptId){
     	
-    	else{
+    	ConceptService conceptService = Context.getConceptService();
+		
+		Concept oldConcept = conceptService.getConcept(oldConceptId); 
+		Concept newConcept = conceptService.getConcept(newConceptId);
+
+		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
+
+		//Query query = sessionFactory.getCurrentSession().createQuery("select obs_id from Obs where concept_id = :conceptId")
+		  //      .setParameter("conceptId", oldConceptId);
+		
+		List<Integer> obsToConvert = this.getObsIds(oldConceptId);//query.list();
+		
+		ObsService obsService = Context.getObsService();
+		
+		for(Integer obsId: obsToConvert){
+			Obs o = obsService.getObs(obsId);
+			o.setConcept(newConcept);
+			obsService.saveObs(o, msg);
+		}
+		
+    }
+}
+
+
+/**
+ * 
+ * 
+ * //sessionFactory.getCurrentSession().doWork( new Work() { void execute(Connection connection) { } } );
+ * 
+ * else{
     		List<Integer> obsIds = new ArrayList<Integer>();//mysql query to make List obsIds
     		
     		ObsService obsService = Context.getObsService();
@@ -94,6 +184,8 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     	}
     	
     	
-    	return obsCount;
-    }
-}
+    	
+    	
+    	
+    	
+ */
