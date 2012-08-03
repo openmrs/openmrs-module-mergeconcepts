@@ -18,6 +18,7 @@ import org.openmrs.FormField;
 import org.openmrs.Obs;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.FormService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
@@ -141,17 +142,31 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * TO DO
+	 * TO DO - test logic here
 	 */
-	public void updateFormFields(Set<FormField> formFields, Concept concept){
-		for(FormField f : formFields){
+	public void updateFormFields(Concept oldConcept, Concept newConcept){
+		
+		Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);
+		
+		FormService formService = Context.getFormService();
+		
+		for(FormField f : formFieldsToUpdate){
+			
+			//update
 			Field field = f.getField();
-			field.setConcept(concept);
-			Context.getFormService().saveField(field);			
+			field.setConcept(newConcept);
+			
+			//save
+			formService.saveField(field);
+			f.setField(field);
+			formService.saveFormField(f);
+			formService.saveForm(f.getForm());
+			
 		}
 	}
 	
 	/**
+	 * TO DO - might not need this method
 	 * @should generate fresh lists of references to new concept
 	 */
 	public Map<String, List> generateNewReferenceLists(Integer newConceptId){
@@ -176,6 +191,7 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
+	 * TO DO - might not need this method
 	 * @should generate fresh lists of references to old concept
 	 */
 	public Map<String, List> generateOldReferenceLists(Integer oldConceptId){
@@ -213,6 +229,19 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
+	 * Default page from admin link or results page
+	 * @should do nothing
+	 * @param map
+	 
+	@RequestMapping(value="/module/mergeconcepts/experiment",
+			method=RequestMethod.GET)
+	public String showPreview(ModelMap model) {
+		return "preview";
+			
+	}*/
+	
+	
+	/**
 	 * Method is called when going back to choose concepts page after an error
 	 * or from preview page "no, I'm not sure"
 	 * @should prepopulate concept widgets
@@ -247,6 +276,7 @@ public class MergeConceptsManageController {
 		
 		
 		//handle less than two concepts
+		//TO DO - this needs to override the NullPointerException somehow
 		if(oldConceptId.equals(null) || newConceptId.equals(null)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose both concept ids and try again");
 			return "redirect:chooseConcepts.form";
@@ -275,7 +305,8 @@ public class MergeConceptsManageController {
 		model.addAttribute("newObsCount", newObsCount);
 		model.addAttribute("oldObsCount", oldObsCount);
 		
-		return "";
+		return "/module/mergeconcepts/preview";
+		
 		
 	}
 	
@@ -292,14 +323,22 @@ public class MergeConceptsManageController {
 		
 		MergeConceptsService service = Context.getService(MergeConceptsService.class);
 		
+		ConceptService conceptService = Context.getConceptService();
+		
+		Concept oldConcept = conceptService.getConcept(oldConceptId); 
+		Concept newConcept = conceptService.getConcept(newConceptId);
+		
 		model.addAttribute("oldConceptId", oldConceptId);
 		model.addAttribute("newConceptId", newConceptId);
+		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
+		model.addAttribute("newForms", this.getMatchingForms(newConcept));
 		
 		try {
 			//OBS
 			service.updateObs(oldConceptId, newConceptId);
 		
 			//FORMS
+			this.updateFormFields(oldConcept, newConcept);
 		
 		}
 		
@@ -308,7 +347,8 @@ public class MergeConceptsManageController {
 			return "redirect: chooseConcepts.form";
 		}
 		
-		//conceptService.retireConcept(oldConcept, msg);
+		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
+		conceptService.retireConcept(oldConcept, msg);
 			
 		return "redirect:results.form";
 	}
@@ -324,11 +364,18 @@ public class MergeConceptsManageController {
 		
 		//redirect if something went wrong
 		
+		ConceptService conceptService = Context.getConceptService();
+		
+		Concept oldConcept = conceptService.getConcept(oldConceptId); 
+		Concept newConcept = conceptService.getConcept(newConceptId);
+		
 		Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
 		Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
 		
 		model.addAttribute("newObsCount", newConceptRefs.get("obs").size());
 		model.addAttribute("oldObsCount", oldConceptRefs.get("obs").size());
+		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
+		model.addAttribute("newForms", this.getMatchingForms(newConcept));
 	}
 	
 }

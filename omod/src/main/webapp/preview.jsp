@@ -70,7 +70,7 @@
 			<td id="ref10">${ newObsCount }</td>
 		</tr>
 		<tr>
-			<th align="left">Forms</th>
+			<th align="left" valign="top">Forms</th>
 			<td id="ref11">
 			<ul type="none" id="id3">
 				<c:forEach var="f" items="${ newForms }">
@@ -91,7 +91,7 @@
 			<td id="ref20">${ oldObsCount }</td>
 		</tr>
 		<tr>
-			<th align="left">Forms</th>
+			<th align="left" valign="top">Forms</th>
 			<td id="ref21">
 			<ul type="none" id="id3">
 				<c:forEach var="f" items="${ oldForms }">

@@ -62,8 +62,14 @@ This page lets you see the updated references to each concept
 			<td id="ref10">${ newObsCount }</td>
 		</tr>
 		<tr>
-			<th align="left">Forms</th>
-			<td id="ref11">...</td>
+			<th align="left" valign="top">Forms</th>
+			<td id="ref11">
+			<ul type="none" id="id3">
+				<c:forEach var="f" items="${ newForms }">
+				<li>${ f }
+				</c:forEach>
+			</ul>
+			</td>
 		</tr>
 	</table>
 
@@ -77,8 +83,14 @@ This page lets you see the updated references to each concept
 			<td id="ref20">${ oldObsCount }</td>
 		</tr>
 		<tr>
-			<th align="left">Forms</th>
-			<td id="ref21">...</td>
+			<th align="left" valign="top">Forms</th>
+			<td id="ref21">
+			<ul type="none" id="id3">
+				<c:forEach var="f" items="${ oldForms }">
+				<li>${ f }
+				</c:forEach>
+			</ul>
+			</td>
 		</tr>
 	</table>
 				</td>
