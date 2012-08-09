@@ -264,35 +264,62 @@ public class MergeConceptsManageController {
 		
 		httpSession.removeAttribute(WebConstants.OPENMRS_ERROR_ATTR);
 		
-		ConceptService conceptService = Context.getConceptService();
-		
-		Concept oldConcept = conceptService.getConcept(oldConceptId); 
-		Concept newConcept = conceptService.getConcept(newConceptId);
-		
-		model.addAttribute("oldConceptId", oldConceptId);
-		model.addAttribute("newConceptId", newConceptId);
-		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
-		model.addAttribute("newForms", this.getMatchingForms(newConcept));
-		
-		
 		//handle less than two concepts
-		//TO DO - this needs to override the NullPointerException somehow
-		if(oldConceptId.equals(null) || newConceptId.equals(null)){
-			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose both concept ids and try again");
+		if(oldConceptId==null || newConceptId==null){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose two concepts and try again");
 			return "redirect:chooseConcepts.form";
 		}
 		
+		ConceptService conceptService = Context.getConceptService();
+
+		Concept oldConcept = conceptService.getConcept(oldConceptId); 
+		Concept newConcept = conceptService.getConcept(newConceptId);
+
 		//handle conceptIds are the same
 		if(oldConceptId.equals(newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please do not choose the same concept id twice and try again");
 			return "redirect:chooseConcepts.form";
 		}
-		
+
 		//handle concepts with different datatypes
+		//TO DO - unless oldConcept is N/A (what if it's the other way around?)
 		if(!(oldConcept.getDatatype().equals(newConcept.getDatatype()))){
-			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with similar datatypes and try again");
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with same datatypes and try again");
 			return "redirect:chooseConcepts.form";
 		}
+
+		//if both concepts' types are coded, make sure both answer sets are the same
+		if(oldConcept.getDatatype().isCoded() && !newConcept.getAnswers(false).containsAll(oldConcept.getAnswers(false))){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
+					"Concept chosen to be retired has answers that the concept to keep does not have - please try again");
+			return "redirect:chooseConcepts.form";
+		}
+
+		//if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
+		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() > conceptService.getConceptNumeric(newConceptId).getHiAbsolute()){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
+					"Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
+			return "redirect:chooseConcepts.form";
+		}
+		
+		//if both concepts' types are numeric, make sure both ranges, units, and precision (y/n)s are handled
+		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() < conceptService.getConceptNumeric(newConceptId).getLowAbsolute()){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
+					"Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
+			return "redirect:chooseConcepts.form";
+		}
+		
+		//if both concepts' types are complex, make sure handlers are the same
+		if(!conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler())){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
+					"Complex concepts do not have the same handler - please try again");
+			return "redirect:chooseConcepts.form";
+		}
+		
+		model.addAttribute("oldConceptId", oldConceptId);
+		model.addAttribute("newConceptId", newConceptId);
+		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
+		model.addAttribute("newForms", this.getMatchingForms(newConcept));
 		
 		MergeConceptsService service = Context.getService(MergeConceptsService.class);
 		
