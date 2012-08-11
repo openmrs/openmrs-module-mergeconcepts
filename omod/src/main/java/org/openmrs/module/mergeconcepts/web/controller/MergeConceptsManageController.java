@@ -16,12 +16,14 @@ import org.openmrs.Field;
 import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
+import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.FormService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
+import org.openmrs.util.PrivilegeConstants;
 import org.openmrs.web.WebConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -119,7 +121,7 @@ public class MergeConceptsManageController {
 		for(FormField f : formFields){
 			
 			//forms that ref oldConcept
-			if(!f.getForm().equals(null)){	
+			if(!f.getForm().equals(null)){
 				conceptForms.add(f.getForm());
 			}
 
@@ -246,6 +248,7 @@ public class MergeConceptsManageController {
 	 * or from preview page "no, I'm not sure"
 	 * @should prepopulate concept widgets
 	 */
+	@Authorized(PrivilegeConstants.VIEW_CONCEPTS) 
 	@RequestMapping(value="/module/mergeconcepts/chooseConcepts", 
 			method=RequestMethod.POST)
 	public void chooseConcepts(ModelMap model){
@@ -257,6 +260,7 @@ public class MergeConceptsManageController {
 	 * @should display references to oldConcept and newConcept
 	 * @param map
 	 */
+	@Authorized( {PrivilegeConstants.VIEW_CONCEPTS, PrivilegeConstants.VIEW_FORMS})
 	@RequestMapping("/module/mergeconcepts/preview")
 	public String preview(ModelMap model, @RequestParam(required=false, value= "oldConceptId") Integer oldConceptId,
 										  @RequestParam(required=false, value= "newConceptId") Integer newConceptId,
@@ -302,15 +306,25 @@ public class MergeConceptsManageController {
 			return "redirect:chooseConcepts.form";
 		}
 		
-		//if both concepts' types are numeric, make sure both ranges, units, and precision (y/n)s are handled
+		//if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
 		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() < conceptService.getConceptNumeric(newConceptId).getLowAbsolute()){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 		
+		//if both concepts' types are numeric, make sure units are the same
+		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits())){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
+					"The concepts you chose have different units - please try again");
+			return "redirect:chooseConcepts.form";
+		}
+		
+		//if both concepts' types are numeric, make sure both ranges, units, and precision (y/n)s are handled
+
+		
 		//if both concepts' types are complex, make sure handlers are the same
-		if(!conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler())){
+		if(oldConcept.getDatatype().isComplex() && !conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler())){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Complex concepts do not have the same handler - please try again");
 			return "redirect:chooseConcepts.form";
@@ -326,8 +340,8 @@ public class MergeConceptsManageController {
 		int newObsCount = service.getObsCount(newConceptId);
 		int oldObsCount = service.getObsCount(oldConceptId);
 		
-		Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
-		Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
+		//Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
+		//Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
 		
 		model.addAttribute("newObsCount", newObsCount);
 		model.addAttribute("oldObsCount", oldObsCount);
@@ -342,7 +356,7 @@ public class MergeConceptsManageController {
 	 * @should merge concepts
 	 * @param map
 	 */
-	//@Authorized(value = {"Add Observations","Edit Observations"})
+	@Authorized( {PrivilegeConstants.EDIT_OBS, PrivilegeConstants.MANAGE_CONCEPTS, PrivilegeConstants.MANAGE_FORMS})
 	@RequestMapping("/module/mergeconcepts/executeMerge")
 	public String executeMerge(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
 											   @RequestParam("newConceptId") Integer newConceptId, 
