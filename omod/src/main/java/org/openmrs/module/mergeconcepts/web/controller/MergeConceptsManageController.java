@@ -2,10 +2,8 @@ package org.openmrs.module.mergeconcepts.web.controller;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
@@ -167,56 +165,7 @@ public class MergeConceptsManageController {
 		}
 	}
 	
-	/**
-	 * TO DO - might not need this method
-	 * @should generate fresh lists of references to new concept
-	 */
-	public Map<String, List> generateNewReferenceLists(Integer newConceptId){
 
-		Map<String, List> newConceptRefs = new HashMap<String, List>();
-		Concept concept = Context.getConceptService().getConcept(newConceptId);
-		
-		
-		//OBS
-		//ObsService obsService = Context.getObsService(); //ObsEditor?
-		
-		List<Obs> newConceptObs;
-		//newConceptObs = obsService.getObservationsByPersonAndConcept(null, getNewConcept(newConceptId));
-		newConceptObs = this.getMatchingObs(concept);
-		newConceptRefs.put("obs", newConceptObs);
-		log.info("newObsCount = "+newConceptRefs.get("obs").size());
-		
-		//FORMS
-		//Everything else
-		
-		return newConceptRefs;		
-	}
-	
-	/**
-	 * TO DO - might not need this method
-	 * @should generate fresh lists of references to old concept
-	 */
-	public Map<String, List> generateOldReferenceLists(Integer oldConceptId){
-		
-		Map<String, List> oldConceptRefs = new HashMap<String, List>();
-		Concept concept = Context.getConceptService().getConcept(oldConceptId);
-		
-		//OBS
-		//ObsService obsService = Context.getObsService(); //ObsEditor?
-		
-		List<Obs> oldConceptObs;
-		//oldConceptObs = obsService.getObservationsByPersonAndConcept(null, concept);
-		oldConceptObs = this.getMatchingObs(concept);
-		oldConceptRefs.put("obs", oldConceptObs);
-		log.info("newObsCount = "+oldConceptRefs.get("obs").size());
-		
-		//FORMS
-		//Everything else
-		
-		return oldConceptRefs;
-		
-		//FORMS
-	}
 	
 	/**
 	 * Default page from admin link or results page
@@ -226,7 +175,6 @@ public class MergeConceptsManageController {
 	@RequestMapping(value="/module/mergeconcepts/chooseConcepts",
 			method=RequestMethod.GET)
 	public void showPage(ModelMap model) {
-		//return "chooseConcepts";
 			
 	}
 	
@@ -281,50 +229,54 @@ public class MergeConceptsManageController {
 
 		//handle conceptIds are the same
 		if(oldConceptId.equals(newConceptId)){
-			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please do not choose the same concept id twice and try again");
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "The same concept was chosen twice - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 
 		//handle concepts with different datatypes
 		//TO DO - unless oldConcept is N/A (what if it's the other way around?)
-		if(!(oldConcept.getDatatype().equals(newConcept.getDatatype()))){
+		if(!this.hasMatchingDatatypes(oldConcept, newConcept)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with same datatypes and try again");
 			return "redirect:chooseConcepts.form";
 		}
 
 		//if both concepts' types are coded, make sure both answer sets are the same
-		if(oldConcept.getDatatype().isCoded() && !newConcept.getAnswers(false).containsAll(oldConcept.getAnswers(false))){
+		if(oldConcept.getDatatype().isCoded() && !this.hasCodedAnswers(oldConcept, newConcept)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Concept chosen to be retired has answers that the concept to keep does not have - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 
 		//if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
-		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() > conceptService.getConceptNumeric(newConceptId).getHiAbsolute()){
+		if(oldConcept.getDatatype().isNumeric() && this.hasCorrectAbsoluteHi(oldConceptId, newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 		
 		//if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
-		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() < conceptService.getConceptNumeric(newConceptId).getLowAbsolute()){
+		if(oldConcept.getDatatype().isNumeric() && this.hasCorrectAbsoluteLow(oldConceptId, newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 		
 		//if both concepts' types are numeric, make sure units are the same
-		if(oldConcept.getDatatype().isNumeric() && conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits())){
+		if(oldConcept.getDatatype().isNumeric() && !this.hasMatchingUnits(oldConceptId, newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
-					"The concepts you chose have different units - please try again");
+					"Concepts you chose have different units - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 		
-		//if both concepts' types are numeric, make sure both ranges, units, and precision (y/n)s are handled
-
+		//if both concepts' types are numeric, make sure both precision (y/n)s are the same
+		if(oldConcept.getDatatype().isNumeric() && !this.hasMatchingPrecise(oldConceptId, newConceptId)){
+			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
+					"Concepts do not agree on precise (y/n) - please try again");
+			return "redirect:chooseConcepts.form";
+		}		
 		
 		//if both concepts' types are complex, make sure handlers are the same
-		if(oldConcept.getDatatype().isComplex() && !conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler())){
+		if(oldConcept.getDatatype().isComplex() && !this.hasMatchingComplexHandler(oldConceptId, newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Complex concepts do not have the same handler - please try again");
 			return "redirect:chooseConcepts.form";
@@ -340,15 +292,92 @@ public class MergeConceptsManageController {
 		int newObsCount = service.getObsCount(newConceptId);
 		int oldObsCount = service.getObsCount(oldConceptId);
 		
-		//Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
-		//Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
-		
 		model.addAttribute("newObsCount", newObsCount);
 		model.addAttribute("oldObsCount", oldObsCount);
 		
 		return "/module/mergeconcepts/preview";
 		
 		
+	}
+	
+	
+	/**
+	 * check if concepts have matching datatypes
+	 * TO DO - unless oldConcept is N/A (what if it's the other way around?)
+	 * @param oldConcept
+	 * @param newConcept
+	 * @return
+	 */
+	private boolean hasMatchingDatatypes(Concept oldConcept, Concept newConcept){
+		return (oldConcept.getDatatype().equals(newConcept.getDatatype()));
+	}
+	
+	/**
+	 * 
+	 * @param oldConcept
+	 * @param newConcept
+	 * @return
+	 */
+	private boolean hasCodedAnswers(Concept oldConcept, Concept newConcept){
+		if(newConcept.getAnswers(false) == null){
+			return true;
+		}
+		
+		else if(oldConcept.getAnswers(false) == null){
+			return false;
+		}
+
+		return newConcept.getAnswers(false).containsAll(oldConcept.getAnswers(false));
+	}
+	
+	/**
+	 * 
+	 * @param oldConceptId
+	 * @param newConceptId
+	 * @return
+	 */
+	private boolean hasCorrectAbsoluteHi(Integer oldConceptId, Integer newConceptId){
+		ConceptService conceptService = Context.getConceptService();
+		
+		if(conceptService.getConceptNumeric(newConceptId).getHiAbsolute() == null){
+			return true;
+		}
+		
+		else if(conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() == null){
+			return false;
+		}
+				
+		return (conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() > conceptService.getConceptNumeric(newConceptId).getHiAbsolute());
+	}
+	
+	private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId){
+		//if has absolute lows
+			ConceptService conceptService = Context.getConceptService();
+			return (conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() < conceptService.getConceptNumeric(newConceptId).getLowAbsolute());
+			
+		//else return true;
+	}
+	
+	//if both concepts' types are numeric, make sure units are the same
+	private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId){
+		
+		ConceptService conceptService = Context.getConceptService();
+		return conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits());
+	}
+	
+	//if both concepts' types are numeric, make sure both precision (y/n)s are the same
+	private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId){
+		
+		ConceptService conceptService = Context.getConceptService();
+		return conceptService.getConceptNumeric(oldConceptId).getPrecise().equals(conceptService.getConceptNumeric(newConceptId).getPrecise());
+	}	
+	
+	
+	//if both concepts' types are complex, make sure handlers are the same
+	private boolean hasMatchingComplexHandler(Integer oldConceptId, Integer newConceptId){
+		
+		ConceptService conceptService = Context.getConceptService();
+		return conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler());
 	}
 	
 	/**
@@ -399,6 +428,7 @@ public class MergeConceptsManageController {
 	 * @should display updated references to oldConcept and newConcept
 	 * @param map
 	 */
+	@Authorized( {PrivilegeConstants.VIEW_CONCEPTS, PrivilegeConstants.VIEW_FORMS})
 	@RequestMapping("/module/mergeconcepts/results")
 	public void results(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
 									    @RequestParam("newConceptId") Integer newConceptId) {
@@ -409,12 +439,14 @@ public class MergeConceptsManageController {
 		
 		Concept oldConcept = conceptService.getConcept(oldConceptId); 
 		Concept newConcept = conceptService.getConcept(newConceptId);
+
+		MergeConceptsService service = Context.getService(MergeConceptsService.class);
 		
-		Map<String, List> newConceptRefs= generateNewReferenceLists(newConceptId);
-		Map<String, List> oldConceptRefs= generateOldReferenceLists(oldConceptId);
+		int newObsCount = service.getObsCount(newConceptId);
+		int oldObsCount = service.getObsCount(oldConceptId);
 		
-		model.addAttribute("newObsCount", newConceptRefs.get("obs").size());
-		model.addAttribute("oldObsCount", oldConceptRefs.get("obs").size());
+		model.addAttribute("newObsCount", newObsCount);
+		model.addAttribute("oldObsCount", oldObsCount);
 		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
 		model.addAttribute("newForms", this.getMatchingForms(newConcept));
 	}

@@ -7,8 +7,8 @@ Retire a duplicate concept and replace references to its concept id with another
 <br/>
 "Preview" will allow you to view all references that will be updated by merging chosen concepts.
 <br/>
-<br/>
-WARNING: Only merge concepts if you are 100% sure they are duplicates. Please backup your database before proceeding.
+WARNING: Only merge concepts if you are 100% sure they are duplicates. Concepts should also have compatible datatypes.
+Please backup your database before proceeding.
 <br/>
 <br/>
 <form action="preview.form" method="POST" >
