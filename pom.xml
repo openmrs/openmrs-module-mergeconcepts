@@ -22,9 +22,9 @@
 	</organization>
 
 	<scm>
-		<connection>scm:svn:https://svn.openmrs.org/openmrs-modules/mergeconcepts/trunk/</connection>
-		<developerConnection>scm:svn:https://svn.openmrs.org/openmrs-modules/mergeconcepts/trunk/</developerConnection>
-		<url>https://svn.openmrs.org/openmrs-modules/mergeconcepts/trunk/</url>
+		<connection>scm:git:https://github.com/openmrs/openmrs-module-mergeconcepts/</connection>
+		<developerConnection>scm:git:https://github.com/openmrs/openmrs-module-mergeconcepts/</developerConnection>
+		<url>https://github.com/openmrs/openmrs-modules-mergeconcepts/</url>
 	</scm>
 
 	<modules>
