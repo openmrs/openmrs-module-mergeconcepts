@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.Field;
 import org.openmrs.Form;
 import org.openmrs.FormField;
@@ -65,7 +66,7 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * getMatchingObs
+	 * getMatchingObs - not used...
 	 * @param concept - the concept to look up
 	 * @return a list of Obs using the concept as a question or answer, an empty List if none found
 	 * @should return a list of Obs that use the concept as a question or answer
@@ -84,7 +85,7 @@ public class MergeConceptsManageController {
 			return result; //TODO recondisder error handling strategy here
 		
 		//answer concept
-		List<Obs> obsFound = obsService.getObservations(null, null, null, conceptList, null, null, null, null, null, null, null,
+		List<Obs> obsFound = obsService.getObservations(null, null, conceptList, conceptList, null, null, null, null, null, null, null,
 				false);
 		if(obsFound!=null){
 			result.addAll(obsFound);
@@ -165,7 +166,30 @@ public class MergeConceptsManageController {
 		}
 	}
 	
-
+	/**
+	 * getMatchingDrugs
+	 *
+	 */
+	protected List<Drug> getMatchingDrugs(Concept concept){
+		
+		ConceptService conceptService = Context.getConceptService();
+		
+		List<Drug> drugsToUpdate = conceptService.getDrugsByConcept(concept);
+		
+		return drugsToUpdate;
+		
+	}
+	
+	/**
+	 * 
+	 */
+	public void updateDrugs(Concept oldConcept, Concept newConcept){
+		List<Drug> drugsToUpdate = this.getMatchingDrugs(oldConcept);
+		
+		for (Drug d : drugsToUpdate){
+			d.setConcept(newConcept);
+		}
+	}
 	
 	/**
 	 * Default page from admin link or results page
@@ -234,7 +258,7 @@ public class MergeConceptsManageController {
 		}
 
 		//handle concepts with different datatypes
-		//TO DO - unless oldConcept is N/A (what if it's the other way around?)
+		//TO DO - unless oldConcept is N/A (what if it's the other way around?) <-- is that right?
 		if(!this.hasMatchingDatatypes(oldConcept, newConcept)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with same datatypes and try again");
 			return "redirect:chooseConcepts.form";
@@ -409,6 +433,9 @@ public class MergeConceptsManageController {
 		
 			//FORMS
 			this.updateFormFields(oldConcept, newConcept);
+			
+			//DRUGS
+			this.updateDrugs(oldConcept, newConcept);
 		
 		}
 		
