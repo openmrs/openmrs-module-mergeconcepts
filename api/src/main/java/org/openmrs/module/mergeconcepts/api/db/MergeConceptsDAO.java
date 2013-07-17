@@ -15,7 +15,12 @@ package org.openmrs.module.mergeconcepts.api.db;
 
 import java.util.List;
 
+import org.openmrs.Concept;
+import org.openmrs.Program;
+import org.openmrs.ProgramWorkflow;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
+import org.openmrs.ProgramWorkflowState;
+
 
 /**
  *  Database methods for {@link MergeConceptsService}.
@@ -37,4 +42,10 @@ public interface MergeConceptsDAO {
 	public void updateObs(Integer oldConceptId, Integer newConceptId);
 	
 	public List<Integer> getObsIds(Integer conceptId);
+
+	public List<Program> getProgramsByConcept(Concept concept);
+
+	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept);
+
+	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept);
 }

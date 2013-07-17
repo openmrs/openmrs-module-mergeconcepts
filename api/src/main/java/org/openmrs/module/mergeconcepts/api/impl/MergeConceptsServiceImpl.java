@@ -17,6 +17,9 @@ import java.util.List;
 
 import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.Program;
+import org.openmrs.ProgramWorkflow;
+import org.openmrs.ProgramWorkflowState;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
@@ -65,5 +68,24 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     public void updateObs(Integer oldConceptId, Integer newConceptId){
     	dao.updateObs(oldConceptId, newConceptId);
     }
+
+	@Override
+	public List<Program> getProgramsByConcept(Concept concept) {
+		List<Program> programs = dao.getProgramsByConcept(concept);
+		return programs;
+	}
+
+	@Override
+	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept) {
+		List<ProgramWorkflow> programWorkFlows = dao.getProgramWorkflowsByConcept(concept);
+		return programWorkFlows;
+	}
+
+	@Override
+	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(
+			Concept concept) {
+		List<ProgramWorkflowState> programWorkflowStates = dao.getProgramWorkflowStatesByConcept(concept);
+		return programWorkflowStates;
+	}
     
 }
