@@ -25,11 +25,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.hibernate.Criteria;
 import org.hibernate.JDBCException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
 //import org.hibernate.jdbc.Work; cannot be resolved
 import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.Obs;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
@@ -157,7 +161,80 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     	return obsCount.intValue();
     }*/
     
-    
+    /**
+     * 
+     * @param conceptId
+     * @return
+     * @throws APIException
+     
+	public List<Integer> getDrugRoutes(Integer conceptId) throws APIException {
+		List<Integer> drugIds = null;
+		
+		//TODO is this HQL correct? no.
+		Query query = sessionFactory.getCurrentSession().createQuery("from Drug where route = :conceptId")
+				.setParameter("conceptId", conceptId);
+		drugIds = (List<Integer>) query.list();
+    	
+    	return drugIds;
+		
+	}*/
+	
+    /**
+     * 
+     * @param conceptId
+     * @return
+     * @throws APIException
+     
+	public List<Integer> getDosageForms(Integer conceptId) throws APIException {
+		List<Integer> drugIds = null;
+		
+		//TODO is this HQL correct?
+		Query query = sessionFactory.getCurrentSession().createQuery("select concept_id from Drug where dosage_form = :conceptId")
+				.setParameter("conceptId", conceptId);
+		drugIds = (List<Integer>) query.list();
+    	
+    	return drugIds;
+		
+	}*/
+	
+	/**
+	 * @see org.openmrs.api.db.ConceptDAO#getDrugsByIngredient(org.openmrs.Concept)
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Drug> getDrugsByIngredient(Concept ingredient) {
+		Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
+		Criterion rhs = Restrictions.eq("drug.concept", ingredient);
+		searchDrugCriteria.createAlias("ingredients", "ingredients");
+		Criterion lhs = Restrictions.eq("ingredients.ingredient", ingredient);
+		searchDrugCriteria.add(Restrictions.or(lhs, rhs));
+
+		return (List<Drug>) searchDrugCriteria.list();
+	}
+	
+	/**
+	 * 
+	 * @param oldConceptId
+	 * @param newConceptId
+	 
+	public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId) throws APIException {
+		
+		if(this.getDrugRoutes(oldConceptId)!=null){
+			ConceptService conceptService = Context.getConceptService();
+			
+			List<Drug> drugRoutesToUpdate = new ArrayList<Drug>();
+		
+			if(this.getDrugRoutes(oldConceptId)!=null){
+				for (Integer d : this.getDrugRoutes(oldConceptId)){
+					drugRoutesToUpdate.addAll(conceptService.getDrugsByConcept(conceptService.getConcept(d)));
+				}
+			}
+			
+			for (Drug r : drugRoutesToUpdate){
+				r.setRoute(conceptService.getConcept(newConceptId));
+			}
+		}
+	}*/
+	
     /**
      * 
      * @param conceptId
@@ -167,7 +244,6 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     @Transactional
     public List<Integer> getObsIds(Integer conceptId) throws APIException {
     	List<Integer> obsIds = null;
-    	   	
     	
     	Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where concept_id = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);

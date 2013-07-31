@@ -16,9 +16,11 @@ package org.openmrs.module.mergeconcepts.api;
 import java.util.List;
 
 import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
+import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,4 +57,12 @@ public interface MergeConceptsService extends OpenmrsService {
 	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept);
 
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept);
+	
+	//public List<Integer> getDrugRoutes(Integer conceptId);
+	
+	//public List<Integer> getDosageForms(Integer conceptId);
+	
+	public List<Drug> getDrugsByIngredient(Concept ingredient);
+	
+	//public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId);
 }

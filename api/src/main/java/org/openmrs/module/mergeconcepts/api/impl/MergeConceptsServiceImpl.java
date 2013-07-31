@@ -16,6 +16,7 @@ package org.openmrs.module.mergeconcepts.api.impl;
 import java.util.List;
 
 import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.Obs;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
@@ -86,6 +87,31 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 			Concept concept) {
 		List<ProgramWorkflowState> programWorkflowStates = dao.getProgramWorkflowStatesByConcept(concept);
 		return programWorkflowStates;
+	}
+
+	/**
+	@Override
+	public List<Integer> getDrugRoutes(Integer conceptId) {
+		List<Integer> drugIds = dao.getDrugRoutes(conceptId);
+		return drugIds;
+	}
+
+	@Override
+	public List<Integer> getDosageForms(Integer conceptId) {
+		List<Integer> drugIds = dao.getDosageForms(conceptId);
+		return drugIds;
+	}
+	
+	@Override
+	public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId) {
+		dao.updateDrugRoutes(oldConceptId, newConceptId);
+		
+	}*/
+
+	@Override
+	public List<Drug> getDrugsByIngredient(Concept ingredient) {
+		List<Drug> drugsByIngredient = dao.getDrugsByIngredient(ingredient);
+		return drugsByIngredient;
 	}
     
 }

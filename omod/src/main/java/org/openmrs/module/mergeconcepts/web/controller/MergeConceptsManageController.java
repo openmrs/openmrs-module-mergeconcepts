@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.openmrs.BaseOpenmrsObject;
 import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.ConceptSet;
@@ -18,6 +19,7 @@ import org.openmrs.Form;
 import org.openmrs.FormField;
 import org.openmrs.Obs;
 import org.openmrs.Order;
+import org.openmrs.OrderType;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
@@ -45,9 +47,11 @@ import org.springframework.web.bind.annotation.RequestParam;
  * The controller.
  */
 @Controller
-public class MergeConceptsManageController {
+public class MergeConceptsManageController extends BaseOpenmrsObject {
 	
 	private Logger log = Logger.getLogger(MergeConceptsManageController.class);
+	
+	//TODO add event
 	
 	/**
 	 * Called when any page is requested, does not respond to concept search widgets
@@ -92,7 +96,7 @@ public class MergeConceptsManageController {
 		List<Obs> result = new ArrayList<Obs>();
 		
 		if( concept == null )
-			return result; //TODO recondisder error handling strategy here
+			return result; //TODO reconsider error handling strategy here
 		
 		//answer concept
 		List<Obs> obsFound = obsService.getObservations(null, null, conceptList, conceptList, null, null, null, null, null, null, null,
@@ -139,6 +143,11 @@ public class MergeConceptsManageController {
 		return conceptForms;
 	}
 	
+	/**
+	 * 
+	 * @param concept
+	 * @return
+	 */
 	protected Set<FormField> getMatchingFormFields(Concept concept){
 		Set<FormField> formFields = new HashSet<FormField>();
 		
@@ -177,8 +186,9 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * getMatchingDrugs
-	 *
+	 * 
+	 * @param concept
+	 * @return
 	 */
 	protected List<Drug> getMatchingDrugs(Concept concept){
 		
@@ -186,24 +196,56 @@ public class MergeConceptsManageController {
 		
 		List<Drug> drugsToUpdate = conceptService.getDrugsByConcept(concept);
 		
-		return drugsToUpdate;
-		
+		return drugsToUpdate;	
 	}
 	
 	/**
-	 * update drugs
+	 * 
+	 * @param concept
+	 * @return
+	 */
+	protected List<Drug> getMatchingDrugIngredientDrugs(Concept concept){
+		MergeConceptsService service = Context.getService(MergeConceptsService.class);
+		List<Drug> drugIngredientsToUpdate = service.getDrugsByIngredient(concept);
+		return drugIngredientsToUpdate;
+	}
+	
+	/**
+	 * 
+	 * @param oldConcept
+	 * @param newConcept
 	 */
 	public void updateDrugs(Concept oldConcept, Concept newConcept){
+		
+		MergeConceptsService service = Context.getService(MergeConceptsService.class);
+		ConceptService conceptService = Context.getConceptService();
+		
 		List<Drug> drugsToUpdate = this.getMatchingDrugs(oldConcept);
 		
-		for (Drug d : drugsToUpdate){
-			d.setConcept(newConcept);
+		if(drugsToUpdate!=null){
+			for (Drug d : drugsToUpdate){
+				d.setConcept(newConcept);
+			}
 		}
+		
+		//service.updateDrugRoutes(oldConcept.getConceptId(), newConcept.getConceptId());
+		/**
+		 * TODO need to fix hql in service before this will work
+		List<Drug> dosageFormsToUpdate = new ArrayList<Drug>();
+			
+		if(service.getDosageForms(oldConcept.getConceptId())!=null){
+			for (Integer d : service.getDosageForms(oldConcept.getConceptId())){
+				dosageFormsToUpdate.addAll(conceptService.getDrugsByConcept(conceptService.getConcept(d)));
+			}
+		}*/
+		
 	}
 	
+
 	/**
-	 * get matching orders
 	 * 
+	 * @param concept
+	 * @return
 	 */
 	protected List<Order> getMatchingOrders(Concept concept){
 		
@@ -212,14 +254,17 @@ public class MergeConceptsManageController {
 		
 		OrderService orderService = Context.getOrderService();
 		
-		List<Order> ordersToUpdate = orderService.getOrders(null, null, conceptList, null, null, null, null);
+		List<Order> ordersToUpdate = orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
 		
 		return ordersToUpdate;
 		
 	}
 	
+
 	/**
-	 * update orders
+	 * 
+	 * @param oldConcept
+	 * @param newConcept
 	 */
 	public void updateOrders(Concept oldConcept, Concept newConcept){
 		List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
@@ -229,8 +274,11 @@ public class MergeConceptsManageController {
 		}
 	}
 	
+
 	/**
-	 * get matching programs
+	 * 
+	 * @param concept
+	 * @return
 	 */
 	protected List<Program> getMatchingPrograms(Concept concept){
 		
@@ -241,8 +289,11 @@ public class MergeConceptsManageController {
 		return programsToUpdate;
 	}
 	
+
 	/**
-	 * getMatchingProgramWorkflows
+	 * 
+	 * @param concept
+	 * @return
 	 */
 	protected List<ProgramWorkflow> getMatchingProgramWorkflows(Concept concept){
 		
@@ -253,10 +304,10 @@ public class MergeConceptsManageController {
 		return programWorkflowsToUpdate;
 	}
 	
-	
-	
 	/**
-	 * getMatchingProgramWorkflowStates
+	 * 
+	 * @param concept
+	 * @return
 	 */
 	protected List<ProgramWorkflowState> getMatchingProgramWorkflowStates(Concept concept){
 		
@@ -268,9 +319,10 @@ public class MergeConceptsManageController {
 		
 	}
 	
-	
 	/**
-	 * updatePrograms
+	 * 
+	 * @param oldConcept
+	 * @param newConcept
 	 */
 	public void updatePrograms(Concept oldConcept, Concept newConcept){
 		List<Program> programsToUpdate = this.getMatchingPrograms(oldConcept);
@@ -290,8 +342,26 @@ public class MergeConceptsManageController {
 		}
 	}
 	
+
 	/**
-	 * getMatchingConceptSets
+	 * get concept_set.concept_id concepts
+	 * @param concept
+	 * @return
+	 */
+	protected List<ConceptSet> getMatchingConceptSetConcepts(Concept concept){
+		
+		ConceptService conceptService = Context.getConceptService();
+		
+		List<ConceptSet> conceptSetsToUpdate = conceptService.getSetsContainingConcept(concept);
+		
+		return conceptSetsToUpdate;
+		
+	}
+	
+	/**
+	 * get concept_set.concept_set concepts
+	 * @param concept
+	 * @return
 	 */
 	protected List<ConceptSet> getMatchingConceptSets(Concept concept){
 		
@@ -304,16 +374,27 @@ public class MergeConceptsManageController {
 	}
 	
 	/**
-	 * update concept sets
+	 * 
+	 * @param oldConcept
+	 * @param newConcept
 	 */
 	public void updateConceptSets(Concept oldConcept, Concept newConcept){
 		
-		List<ConceptSet> conceptSetsToUpdate = this.getMatchingConceptSets(oldConcept);
-		
-		for (ConceptSet cs : conceptSetsToUpdate){
-			cs.setConcept(newConcept);
+		//update concept_id
+		List<ConceptSet> conceptSetConceptsToUpdate = this.getMatchingConceptSetConcepts(oldConcept);
+		if(this.getMatchingConceptSetConcepts(oldConcept)!=null){
+			for (ConceptSet csc : conceptSetConceptsToUpdate){
+				csc.setConcept(newConcept);
+			}
 		}
 		
+		//concept_set
+		List<ConceptSet> conceptSetsToUpdate = this.getMatchingConceptSets(oldConcept);
+		if(this.getMatchingConceptSets(oldConcept)!=null){
+			for (ConceptSet cs : conceptSetsToUpdate){
+				cs.setConceptSet(newConcept);
+			}
+		}
 	}
 	
 	/**
@@ -321,7 +402,8 @@ public class MergeConceptsManageController {
 	 * @param concept
 	 * @return
 	 */
-	protected List<ConceptAnswer> getMatchingConceptAnswers(Concept concept){
+	protected List<ConceptAnswer> getMatchingConceptAnswerQuestions(Concept concept){
+		
 		List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
 		
 		for ( ConceptAnswer ca : concept.getAnswers()){
@@ -333,15 +415,68 @@ public class MergeConceptsManageController {
 	
 	/**
 	 * 
+	 * @param concept
+	 * @return
+	 */
+	protected List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept){
+		
+		ConceptService conceptService = Context.getConceptService();
+		List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
+		
+		//Concepts that are questions answered by this concept, and possibly others
+		for ( Concept c : conceptService.getConceptsByAnswer(concept) ){
+			
+			//ConceptAnswers of all possible answers to question concept above
+			for ( ConceptAnswer a : c.getAnswers() ){
+				
+				//only add ConceptAnswers with an answer matching this concept
+				if(a.getAnswerConcept().equals(concept)){
+					matchingConceptAnswers.add(a);
+				}
+			}
+		}
+		
+		return matchingConceptAnswers;
+	}
+	
+	/**
+	 * 
+	 * @param concept
+	 * @return
+	 */
+	protected List<ConceptAnswer> getMatchingConceptAnswers(Concept concept){
+		
+		List<ConceptAnswer> a = this.getMatchingConceptAnswerAnswers(concept);
+		
+		for ( ConceptAnswer c : this.getMatchingConceptAnswerQuestions(concept)){
+			a.add(c);
+		}
+		
+		return a;
+	}
+	
+	/**
+	 * ConceptAnswers contain references to concepts 
 	 * @param oldConcept
 	 * @param newConcept
 	 */
 	public void updateConceptAnswers(Concept oldConcept, Concept newConcept){
-		List<ConceptAnswer> conceptAnswersToUpdate = this.getMatchingConceptAnswers(oldConcept);
 		
-		for (ConceptAnswer ca : conceptAnswersToUpdate){
-			ca.setConcept(newConcept);
+		List<ConceptAnswer> conceptAnswerQuestionsToUpdate = this.getMatchingConceptAnswerQuestions(oldConcept);
+		
+		//update concept_id
+		for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate){
+			caq.setConcept(newConcept);
 		}
+		
+		List<ConceptAnswer> conceptAnswerAnswersToUpdate = this.getMatchingConceptAnswerAnswers(oldConcept);
+		
+		//update answer_concepts
+		for (ConceptAnswer caa : conceptAnswerAnswersToUpdate){
+			caa.setAnswerConcept(newConcept);
+		}
+		
+		
 	}
 	
 	/**
@@ -350,14 +485,14 @@ public class MergeConceptsManageController {
 	 * @return
 	 */
 	protected List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept){
-		
+
 		PersonService personService = Context.getPersonService();
 		List<PersonAttributeType> allPersonAttributeTypes = personService.getAllPersonAttributeTypes();
 		List<PersonAttributeType> matchingPersonAttributeTypes = new ArrayList<PersonAttributeType>();
 		
 		for (PersonAttributeType p : allPersonAttributeTypes){
 			if(p.getFormat().toLowerCase().contains("concept")){
-				if(p.getForeignKey().equals(concept.getConceptId())){	
+				if(p.getForeignKey() != null && p.getForeignKey().equals(concept.getConceptId())){	
 						matchingPersonAttributeTypes.add(p);
 				}
 			}
@@ -378,6 +513,9 @@ public class MergeConceptsManageController {
 			m.setForeignKey(newConcept.getConceptId());
 		}
 	}
+	
+	//TODO public void posibleDuplicateDataLogInfo()
+	//if this.getMatching... log.info(...
 	
 	/**
 	 * Default page from admin link or results page
@@ -436,7 +574,7 @@ public class MergeConceptsManageController {
 		}
 
 		//handle concepts with different datatypes
-		//TO DO - unless oldConcept is N/A (what if it's the other way around?) <-- is that right?
+		//TODO - unless oldConcept is N/A (what if it's the other way around?) <-- is that right?
 		if(!this.hasMatchingDatatypes(oldConcept, newConcept)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with same datatypes and try again");
 			return "redirect:chooseConcepts.form";
@@ -450,14 +588,14 @@ public class MergeConceptsManageController {
 		}
 
 		//if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
-		if(oldConcept.getDatatype().isNumeric() && this.hasCorrectAbsoluteHi(oldConceptId, newConceptId)){
+		if(oldConcept.getDatatype().isNumeric() && !this.hasCorrectAbsoluteHi(oldConceptId, newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
 			return "redirect:chooseConcepts.form";
 		}
 		
 		//if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
-		if(oldConcept.getDatatype().isNumeric() && this.hasCorrectAbsoluteLow(oldConceptId, newConceptId)){
+		if(oldConcept.getDatatype().isNumeric() && !this.hasCorrectAbsoluteLow(oldConceptId, newConceptId)){
 			httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, 
 					"Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
 			return "redirect:chooseConcepts.form";
@@ -484,20 +622,93 @@ public class MergeConceptsManageController {
 			return "redirect:chooseConcepts.form";
 		}
 		
+		//preview drugs by name
+		List<String> oldDrugNames = new ArrayList<String>();
+		if(this.getMatchingDrugs(oldConcept)!=null){
+			for (Drug od : this.getMatchingDrugs(oldConcept)){
+				oldDrugNames.add(od.getFullName(null));
+			}
+		}
+		List<String> newDrugNames = new ArrayList<String>();
+		if(this.getMatchingDrugs(newConcept)!=null){
+			for (Drug nd : this.getMatchingDrugs(newConcept)){
+				newDrugNames.add(nd.getFullName(null));
+			}
+		}			
+		model.addAttribute("oldDrugs", oldDrugNames);
+		model.addAttribute("newDrugs", newDrugNames);
+		
 		model.addAttribute("oldConceptId", oldConceptId);
 		model.addAttribute("newConceptId", newConceptId);
-		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
-		model.addAttribute("newForms", this.getMatchingForms(newConcept));
-		model.addAttribute("oldDrugs", this.getMatchingDrugs(oldConcept));
-		model.addAttribute("newDrugs", this.getMatchingDrugs(newConcept));
-		model.addAttribute("oldOrders", this.getMatchingOrders(oldConcept));
-		model.addAttribute("newOrders", this.getMatchingOrders(newConcept));
-		model.addAttribute("oldPrograms", this.getMatchingPrograms(oldConcept));
-		model.addAttribute("newPrograms", this.getMatchingPrograms(newConcept));
-		model.addAttribute("oldConceptAnswers", this.getMatchingConceptAnswers(oldConcept));
+		
+		if(this.getMatchingForms(oldConcept)!=null)
+			model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
+		
+		if(this.getMatchingForms(newConcept)!=null)
+			model.addAttribute("newForms", this.getMatchingForms(newConcept));		
+		
+		if(this.getMatchingOrders(oldConcept)!=null)
+			model.addAttribute("oldOrders", this.getMatchingOrders(oldConcept));
+		
+		if(this.getMatchingOrders(newConcept)!=null)
+			model.addAttribute("newOrders", this.getMatchingOrders(newConcept));
+		
+		if(this.getMatchingPrograms(oldConcept)!=null)
+			model.addAttribute("oldPrograms", this.getMatchingPrograms(oldConcept));
+		
+		if(this.getMatchingPrograms(newConcept)!=null)
+			model.addAttribute("newPrograms", this.getMatchingPrograms(newConcept));
+		
+		//preview concept answers by id
+		List<Integer> oldConceptAnswerIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptAnswers(oldConcept)!=null){
+			for(ConceptAnswer a : this.getMatchingConceptAnswers(oldConcept)){
+				oldConceptAnswerIds.add(a.getConceptAnswerId());
+			}
+		}	
+		
+		List<Integer> newConceptAnswerIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptAnswers(newConcept)!=null){
+			for(ConceptAnswer b : this.getMatchingConceptAnswers(newConcept)){
+				
+			}
+		}
+		
+		model.addAttribute("oldConceptAnswers", oldConceptAnswerIds);
 		model.addAttribute("newConceptAnswers", this.getMatchingConceptAnswers(newConcept));
-		model.addAttribute("oldPersonAttributeTypes", this.getMatchingPersonAttributeTypes(oldConcept));
-		model.addAttribute("newPersonAttributeTypes", this.getMatchingPersonAttributeTypes(newConcept));
+		
+		List<Integer> oldConceptSetIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptSets(oldConcept)!=null){
+			for(ConceptSet c : this.getMatchingConceptSets(oldConcept)){
+				oldConceptSetIds.add(c.getConceptSetId());
+			}
+			if(this.getMatchingConceptSetConcepts(oldConcept)!=null){
+				for(ConceptSet cs : this.getMatchingConceptSetConcepts(oldConcept)){
+					oldConceptSetIds.add(cs.getConceptSetId());
+				}
+			}
+		}
+			
+		List<Integer> newConceptSetIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptSets(newConcept)!=null){
+			for(ConceptSet d : this.getMatchingConceptSets(newConcept)){
+				newConceptSetIds.add(d.getConceptSetId());
+			}
+			if(this.getMatchingConceptSetConcepts(newConcept)!=null){
+				for(ConceptSet ds : this.getMatchingConceptSetConcepts(newConcept)){
+					newConceptSetIds.add(ds.getConceptSetId());
+				}
+			}
+		}
+			
+		model.addAttribute("oldConceptSets", oldConceptSetIds);
+		model.addAttribute("newConceptSets", newConceptSetIds);
+		
+		if(this.getMatchingPersonAttributeTypes(oldConcept)!=null)
+			model.addAttribute("oldPersonAttributeTypes", this.getMatchingPersonAttributeTypes(oldConcept));
+		
+		if(this.getMatchingPersonAttributeTypes(newConcept)!=null)
+			model.addAttribute("newPersonAttributeTypes", this.getMatchingPersonAttributeTypes(newConcept));
 		
 		MergeConceptsService service = Context.getService(MergeConceptsService.class);
 		
@@ -508,7 +719,6 @@ public class MergeConceptsManageController {
 		model.addAttribute("oldObsCount", oldObsCount);
 		
 		return "/module/mergeconcepts/preview";
-		
 		
 	}
 	
@@ -526,18 +736,20 @@ public class MergeConceptsManageController {
 	
 	/**
 	 * 
+	 * newConcept should have all answers of oldConcept
 	 * @param oldConcept
 	 * @param newConcept
 	 * @return
 	 */
 	private boolean hasCodedAnswers(Concept oldConcept, Concept newConcept){
 		if(newConcept.getAnswers(false) == null){
-			return true;
+			if(oldConcept.getAnswers(false) == null){
+				return true;
+			}
+			else return false;
 		}
 		
-		else if(oldConcept.getAnswers(false) == null){
-			return false;
-		}
+		else if(oldConcept.getAnswers(false) == null) return true;
 
 		return newConcept.getAnswers(false).containsAll(oldConcept.getAnswers(false));
 	}
@@ -559,21 +771,31 @@ public class MergeConceptsManageController {
 			return false;
 		}
 				
-		return (conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() > conceptService.getConceptNumeric(newConceptId).getHiAbsolute());
+		return (conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() <= conceptService.getConceptNumeric(newConceptId).getHiAbsolute());
 	}
 	
 	private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId){
-		//if has absolute lows
-			ConceptService conceptService = Context.getConceptService();
-			return (conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() < conceptService.getConceptNumeric(newConceptId).getLowAbsolute());
-			
-		//else return true;
+		
+		ConceptService conceptService = Context.getConceptService();
+		
+		if(conceptService.getConceptNumeric(newConceptId).getLowAbsolute() == null){
+			return true;
+		}
+		
+		else if(conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() == null){
+			return false;
+		}
+		
+		return (conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() >= conceptService.getConceptNumeric(newConceptId).getLowAbsolute());
+		
 	}
 	
 	//if both concepts' types are numeric, make sure units are the same
 	private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId){
 		
 		ConceptService conceptService = Context.getConceptService();
+		if(conceptService.getConceptNumeric(oldConceptId).getUnits()==null)
+			return true;
 		return conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits());
 	}
 	
@@ -627,7 +849,18 @@ public class MergeConceptsManageController {
 			
 			//ORDERS
 			this.updateOrders(oldConcept, newConcept);
-		
+			
+			//PROGRAMS
+			this.updatePrograms(oldConcept, newConcept);
+			
+			//CONCEPT SETS
+			this.updateConceptSets(oldConcept, newConcept);
+			
+			//CONCEPT ANSWERS
+			this.updateConceptAnswers(oldConcept, newConcept);
+			
+			//PERSON ATTRIBUTE TYPES
+			this.updatePersonAttributeTypes(oldConcept, newConcept);
 		}
 		
 		catch (Exception e){
@@ -660,14 +893,113 @@ public class MergeConceptsManageController {
 
 		MergeConceptsService service = Context.getService(MergeConceptsService.class);
 		
+		//preview drugs by name
+		List<String> oldDrugNames = new ArrayList<String>();
+		if(this.getMatchingDrugs(oldConcept)!=null){
+			for (Drug od : this.getMatchingDrugs(oldConcept)){
+				oldDrugNames.add(od.getFullName(null));
+			}
+		}
+		List<String> newDrugNames = new ArrayList<String>();
+		if(this.getMatchingDrugs(newConcept)!=null){
+			for (Drug nd : this.getMatchingDrugs(newConcept)){
+				newDrugNames.add(nd.getFullName(null));
+			}
+		}			
+		model.addAttribute("oldDrugs", oldDrugNames);
+		model.addAttribute("newDrugs", newDrugNames);
+		
+		model.addAttribute("oldConceptId", oldConceptId);
+		model.addAttribute("newConceptId", newConceptId);
+		
+		if(this.getMatchingForms(oldConcept)!=null)
+			model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
+		
+		if(this.getMatchingForms(newConcept)!=null)
+			model.addAttribute("newForms", this.getMatchingForms(newConcept));		
+		
+		if(this.getMatchingOrders(oldConcept)!=null)
+			model.addAttribute("oldOrders", this.getMatchingOrders(oldConcept));
+		
+		if(this.getMatchingOrders(newConcept)!=null)
+			model.addAttribute("newOrders", this.getMatchingOrders(newConcept));
+		
+		if(this.getMatchingPrograms(oldConcept)!=null)
+			model.addAttribute("oldPrograms", this.getMatchingPrograms(oldConcept));
+		
+		if(this.getMatchingPrograms(newConcept)!=null)
+			model.addAttribute("newPrograms", this.getMatchingPrograms(newConcept));
+		
+		//preview concept answers by id
+		List<Integer> oldConceptAnswerIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptAnswers(oldConcept)!=null){
+			for(ConceptAnswer a : this.getMatchingConceptAnswers(oldConcept)){
+				oldConceptAnswerIds.add(a.getConceptAnswerId());
+			}
+		}	
+		
+		List<Integer> newConceptAnswerIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptAnswers(newConcept)!=null){
+			for(ConceptAnswer b : this.getMatchingConceptAnswers(newConcept)){
+				
+			}
+		}
+		
+		model.addAttribute("oldConceptAnswers", oldConceptAnswerIds);
+		model.addAttribute("newConceptAnswers", this.getMatchingConceptAnswers(newConcept));
+		
+		List<Integer> oldConceptSetIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptSets(oldConcept)!=null){
+			for(ConceptSet c : this.getMatchingConceptSets(oldConcept)){
+				oldConceptSetIds.add(c.getConceptSetId());
+			}
+			
+			if(this.getMatchingConceptSetConcepts(oldConcept)!=null){
+				for(ConceptSet cs : this.getMatchingConceptSetConcepts(oldConcept)){
+					oldConceptSetIds.add(cs.getConceptSetId());
+				}
+			}
+		}
+			
+		List<Integer> newConceptSetIds = new ArrayList<Integer>();
+		if(this.getMatchingConceptSets(newConcept)!=null){
+			for(ConceptSet d : this.getMatchingConceptSets(newConcept)){
+				newConceptSetIds.add(d.getConceptSetId());
+			}
+			
+			if(this.getMatchingConceptSetConcepts(newConcept)!=null){
+				for(ConceptSet ds : this.getMatchingConceptSetConcepts(newConcept)){
+					newConceptSetIds.add(ds.getConceptSetId());
+				}
+			}
+		}
+			
+		model.addAttribute("oldConceptSets", oldConceptSetIds);
+		model.addAttribute("newConceptSets", newConceptSetIds);
+		
+		if(this.getMatchingPersonAttributeTypes(oldConcept)!=null)
+			model.addAttribute("oldPersonAttributeTypes", this.getMatchingPersonAttributeTypes(oldConcept));
+		
+		if(this.getMatchingPersonAttributeTypes(newConcept)!=null)
+			model.addAttribute("newPersonAttributeTypes", this.getMatchingPersonAttributeTypes(newConcept));
+		
 		int newObsCount = service.getObsCount(newConceptId);
 		int oldObsCount = service.getObsCount(oldConceptId);
 		
 		model.addAttribute("newObsCount", newObsCount);
 		model.addAttribute("oldObsCount", oldObsCount);
-		model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
-		model.addAttribute("newForms", this.getMatchingForms(newConcept));
-		//repeat for drugs (ConceptService.getCountOfDrugs) & orders :D
+	}
+	
+	@Override
+	public Integer getId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setId(Integer arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
