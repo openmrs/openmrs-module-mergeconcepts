@@ -26,18 +26,9 @@ import org.openmrs.ProgramWorkflowState;
 /**
  *  Database methods for {@link MergeConceptsService}.
  */
+
 public interface MergeConceptsDAO {
-	
-	/*
-	 * Add DAO methods here
-	 */
-	
-    /**
-     * 
-     * @param conceptId
-     * @return
-     * @should return a count of the obs
-     */	
+
 	public Integer getObsCount(Integer conceptId);
 	
 	public void updateObs(Integer oldConceptId, Integer newConceptId);
@@ -50,11 +41,5 @@ public interface MergeConceptsDAO {
 
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept);
 	
-	//public List<Integer> getDrugRoutes(Integer conceptId);
-	
-	//public List<Integer> getDosageForms(Integer conceptId);
-	
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
-	
-	//public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId);
 }

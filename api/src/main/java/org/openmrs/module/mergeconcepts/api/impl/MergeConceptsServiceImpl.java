@@ -89,25 +89,6 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 		return programWorkflowStates;
 	}
 
-	/**
-	@Override
-	public List<Integer> getDrugRoutes(Integer conceptId) {
-		List<Integer> drugIds = dao.getDrugRoutes(conceptId);
-		return drugIds;
-	}
-
-	@Override
-	public List<Integer> getDosageForms(Integer conceptId) {
-		List<Integer> drugIds = dao.getDosageForms(conceptId);
-		return drugIds;
-	}
-	
-	@Override
-	public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId) {
-		dao.updateDrugRoutes(oldConceptId, newConceptId);
-		
-	}*/
-
 	@Override
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
 		List<Drug> drugsByIngredient = dao.getDrugsByIngredient(ingredient);

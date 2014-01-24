@@ -13,37 +13,22 @@
  */
 package org.openmrs.module.mergeconcepts.api.db.hibernate;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import org.hibernate.Criteria;
-import org.hibernate.JDBCException;
 import org.hibernate.Query;
-import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
-//import org.hibernate.jdbc.Work; cannot be resolved
-import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.Obs;
-import org.openmrs.Program;
-import org.openmrs.ProgramWorkflow;
-import org.openmrs.ProgramWorkflowState;
+import org.openmrs.*;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * It is a default implementation of  {@link MergeConceptsDAO}.
@@ -139,64 +124,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		return squery.list();
 	
 	}
-    
-    /**
-     * 
-     * @param conceptId
-     * @return
-     * @should return a count of the obs
-     
-    @Transactional
-    public Integer getAnswerObsCount(Integer conceptId){
-    	Long obsCount = null;
 
-    	Query query = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where concept_id = :conceptId and voided = 0")
-		        .setParameter("conceptId", conceptId);
-    	obsCount = (Long) query.uniqueResult();
-    	/**
-    	 * String select = "select count(*) from Patient";
-    	 * Query query = sessionFactory.getCurrentSession().createQuery(select);
-    	 * return ((Number) query.iterate().next()).intValue();
-    	 
-    	return obsCount.intValue();
-    }*/
-    
-    /**
-     * 
-     * @param conceptId
-     * @return
-     * @throws APIException
-     
-	public List<Integer> getDrugRoutes(Integer conceptId) throws APIException {
-		List<Integer> drugIds = null;
-		
-		//TODO is this HQL correct? no.
-		Query query = sessionFactory.getCurrentSession().createQuery("from Drug where route = :conceptId")
-				.setParameter("conceptId", conceptId);
-		drugIds = (List<Integer>) query.list();
-    	
-    	return drugIds;
-		
-	}*/
-	
-    /**
-     * 
-     * @param conceptId
-     * @return
-     * @throws APIException
-     
-	public List<Integer> getDosageForms(Integer conceptId) throws APIException {
-		List<Integer> drugIds = null;
-		
-		//TODO is this HQL correct?
-		Query query = sessionFactory.getCurrentSession().createQuery("select concept_id from Drug where dosage_form = :conceptId")
-				.setParameter("conceptId", conceptId);
-		drugIds = (List<Integer>) query.list();
-    	
-    	return drugIds;
-		
-	}*/
-	
 	/**
 	 * @see org.openmrs.api.db.ConceptDAO#getDrugsByIngredient(org.openmrs.Concept)
 	 */
@@ -210,31 +138,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
 		return (List<Drug>) searchDrugCriteria.list();
 	}
-	
-	/**
-	 * 
-	 * @param oldConceptId
-	 * @param newConceptId
-	 
-	public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId) throws APIException {
-		
-		if(this.getDrugRoutes(oldConceptId)!=null){
-			ConceptService conceptService = Context.getConceptService();
-			
-			List<Drug> drugRoutesToUpdate = new ArrayList<Drug>();
-		
-			if(this.getDrugRoutes(oldConceptId)!=null){
-				for (Integer d : this.getDrugRoutes(oldConceptId)){
-					drugRoutesToUpdate.addAll(conceptService.getDrugsByConcept(conceptService.getConcept(d)));
-				}
-			}
-			
-			for (Drug r : drugRoutesToUpdate){
-				r.setRoute(conceptService.getConcept(newConceptId));
-			}
-		}
-	}*/
-	
+
     /**
      * 
      * @param conceptId
@@ -272,7 +176,6 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     	
     }
 
-    
     /**
      * 
      * @param conceptId
@@ -288,9 +191,6 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
 		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
 
-		//Query query = sessionFactory.getCurrentSession().createQuery("select obs_id from Obs where concept_id = :conceptId")
-		  //      .setParameter("conceptId", oldConceptId);
-		
 		List<Integer> QuestionObsToConvert = this.getObsIds(oldConceptId);
 		List<Integer> AnswerObsToConvert = this.getObsIds2(oldConceptId);
 		
@@ -307,42 +207,5 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 			o.setValueCoded(newConcept);
 			obsService.saveObs(o, msg);
 		}
-		
-		
     }
 }
-
-
-/**
- * 
- * 
- * //sessionFactory.getCurrentSession().doWork( new Work() { void execute(Connection connection) { } } );
- * 
- * else{
-    		List<Integer> obsIds = new ArrayList<Integer>();//mysql query to make List obsIds
-    		
-    		ObsService obsService = Context.getObsService();
-    		//String msg = "Converted question concept from " + oldConcept + " to " + newConcept; <-- use SessionFactory
-    		
-    		int i = 0;
-    		for(Integer obsId : obsIds){
-    			//update obs
-    			Obs o = obsService.getObs(obsId);
-    			//o.setConcept(newConcept);
-    			//obsService.saveObs(o, msg);
-    			
-    			i++;
-    			if(i==200){
-    				Context.flushSession();
-    				Context.clearSession();
-    				i = 0;
-    			}
-    		}
-    	}
-    	
-    	
-    	
-    	
-    	
-    	
- */

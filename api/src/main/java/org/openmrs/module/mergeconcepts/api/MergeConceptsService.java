@@ -36,16 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 public interface MergeConceptsService extends OpenmrsService {
-     
-	/*
-	 * Add service methods here
-	 * 
-	 */
-	
-    /**
-     * @return the dao
-     * @should return a count of question concept obs
-     */
+
 	public int getObsCount(Integer conceptId);
 	
 	public List<Integer> getObsIds(Integer conceptId);
@@ -57,12 +48,6 @@ public interface MergeConceptsService extends OpenmrsService {
 	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept);
 
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept);
-	
-	//public List<Integer> getDrugRoutes(Integer conceptId);
-	
-	//public List<Integer> getDosageForms(Integer conceptId);
-	
+
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
-	
-	//public void updateDrugRoutes(Integer oldConceptId, Integer newConceptId);
 }

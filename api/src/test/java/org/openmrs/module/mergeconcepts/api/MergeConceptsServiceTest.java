@@ -48,8 +48,6 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(Context.getService(MergeConceptsService.class));
 	}
 
-	
-	
 	/**
 	 * @see MergeConceptsService#getQuestionConceptObsCount(Integer)
 	 * @verifies return a count of question concept obs
@@ -67,7 +65,5 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 		Integer myServiceObsCount = service.getObsCount(knownQuestionConceptId);
 		
 		Assert.assertEquals(obsServiceCount, myServiceObsCount);
-		//TODO auto-generated
-		//Assert.fail("Not yet implemented");
 	}
 }
