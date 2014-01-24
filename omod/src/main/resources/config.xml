@@ -25,13 +25,6 @@
 		<point>org.openmrs.admin.list</point>
 		<class>${project.parent.groupId}.${project.parent.artifactId}.extension.html.AdminList</class>
 	</extension>
-	
-	<!-- Maps hibernate file's, if present -->
-	<mappingFiles>
-				
-		MergeConcepts.hbm.xml
-				
-	</mappingFiles>
 
 	<!-- Internationalization -->
 	<!-- All message codes should start with ${project.parent.artifactId}. -->
