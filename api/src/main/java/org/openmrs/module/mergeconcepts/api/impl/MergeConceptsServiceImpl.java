@@ -17,13 +17,9 @@ import java.util.List;
 
 import org.openmrs.Concept;
 import org.openmrs.Drug;
-import org.openmrs.Obs;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.ObsService;
-import org.openmrs.api.context.Context;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,14 +51,11 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
     
     public int getObsCount(Integer conceptId){
-    	int obsCount = dao.getObsCount(conceptId);
-    	return obsCount;
+    	return dao.getObsCount(conceptId);
     }
     
     public List<Integer> getObsIds(Integer conceptId){
-    	List<Integer> obsIds = dao.getObsIds(conceptId);
-    	return obsIds;
-    	
+    	return dao.getObsIds(conceptId);
     }
     
     @Transactional
@@ -72,27 +65,23 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 
 	@Override
 	public List<Program> getProgramsByConcept(Concept concept) {
-		List<Program> programs = dao.getProgramsByConcept(concept);
-		return programs;
+		return dao.getProgramsByConcept(concept);
 	}
 
 	@Override
 	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept) {
-		List<ProgramWorkflow> programWorkFlows = dao.getProgramWorkflowsByConcept(concept);
-		return programWorkFlows;
+		return dao.getProgramWorkflowsByConcept(concept);
 	}
 
 	@Override
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(
 			Concept concept) {
-		List<ProgramWorkflowState> programWorkflowStates = dao.getProgramWorkflowStatesByConcept(concept);
-		return programWorkflowStates;
+        return dao.getProgramWorkflowStatesByConcept(concept);
 	}
 
 	@Override
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
-		List<Drug> drugsByIngredient = dao.getDrugsByIngredient(ingredient);
-		return drugsByIngredient;
+        return dao.getDrugsByIngredient(ingredient);
 	}
     
 }
