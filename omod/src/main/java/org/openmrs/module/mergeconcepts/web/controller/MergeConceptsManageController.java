@@ -62,11 +62,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	@ModelAttribute("newConcept")
 	public Concept getNewConcept(@RequestParam(required=false, value="newConceptId") String newConceptId){
 		//going to make this use ConceptEditor instead
-		Concept newConcept = Context.getConceptService().getConcept(newConceptId);
-		return newConcept;
+        return getConceptService().getConcept(newConceptId);
 	}
-	
-	/**
+
+    /**
 	 * Called when any page is requested, does not respond to concept search widgets
 	 * @should set model attribute "oldConcept" to concept user wants to retire
 	 * @param oldConceptId
@@ -75,8 +74,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	@ModelAttribute("oldConcept")
 	public Concept getOldConcept(@RequestParam(required=false, value="oldConceptId") String oldConceptId){
 		//going to make this use ConceptEditor instead
-		Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
-		return oldConcept;
+        return getConceptService().getConcept(oldConceptId);
 	}
 	
 	/**
@@ -192,7 +190,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	 */
 	protected List<Drug> getMatchingDrugs(Concept concept){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		List<Drug> drugsToUpdate = conceptService.getDrugsByConcept(concept);
 		
@@ -218,7 +216,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	public void updateDrugs(Concept oldConcept, Concept newConcept){
 		
 		MergeConceptsService service = Context.getService(MergeConceptsService.class);
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		List<Drug> drugsToUpdate = this.getMatchingDrugs(oldConcept);
 		
@@ -350,7 +348,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	 */
 	protected List<ConceptSet> getMatchingConceptSetConcepts(Concept concept){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		List<ConceptSet> conceptSetsToUpdate = conceptService.getSetsContainingConcept(concept);
 		
@@ -365,7 +363,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	 */
 	protected List<ConceptSet> getMatchingConceptSets(Concept concept){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		List<ConceptSet> conceptSetsToUpdate = conceptService.getConceptSetsByConcept(concept);
 		
@@ -420,7 +418,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	 */
 	protected List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
 		
 		//Concepts that are questions answered by this concept, and possibly others
@@ -562,7 +560,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 			return "redirect:chooseConcepts.form";
 		}
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 
 		Concept oldConcept = conceptService.getConcept(oldConceptId); 
 		Concept newConcept = conceptService.getConcept(newConceptId);
@@ -761,7 +759,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	 * @return
 	 */
 	private boolean hasCorrectAbsoluteHi(Integer oldConceptId, Integer newConceptId){
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		if(conceptService.getConceptNumeric(newConceptId).getHiAbsolute() == null){
 			return true;
@@ -776,7 +774,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	
 	private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		if(conceptService.getConceptNumeric(newConceptId).getLowAbsolute() == null){
 			return true;
@@ -793,7 +791,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	//if both concepts' types are numeric, make sure units are the same
 	private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		if(conceptService.getConceptNumeric(oldConceptId).getUnits()==null)
 			return true;
 		return conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits());
@@ -802,7 +800,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	//if both concepts' types are numeric, make sure both precision (y/n)s are the same
 	private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		return conceptService.getConceptNumeric(oldConceptId).getPrecise().equals(conceptService.getConceptNumeric(newConceptId).getPrecise());
 	}	
 	
@@ -810,7 +808,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	//if both concepts' types are complex, make sure handlers are the same
 	private boolean hasMatchingComplexHandler(Integer oldConceptId, Integer newConceptId){
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		return conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler());
 	}
 	
@@ -827,7 +825,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 		
 		MergeConceptsService service = Context.getService(MergeConceptsService.class);
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		Concept oldConcept = conceptService.getConcept(oldConceptId); 
 		Concept newConcept = conceptService.getConcept(newConceptId);
@@ -886,7 +884,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 		
 		//redirect if something went wrong
 		
-		ConceptService conceptService = Context.getConceptService();
+		ConceptService conceptService = getConceptService();
 		
 		Concept oldConcept = conceptService.getConcept(oldConceptId); 
 		Concept newConcept = conceptService.getConcept(newConceptId);
@@ -1001,5 +999,9 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
+    protected ConceptService getConceptService() {
+        return Context.getConceptService();
+    }
+
 }

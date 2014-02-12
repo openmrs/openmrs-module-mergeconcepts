@@ -7,20 +7,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.Ignore;
 import org.openmrs.Concept;
 import org.openmrs.Obs;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.api.context.Context;
-
-import org.openmrs.test.BaseModuleContextSensitiveTest;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.ui.ModelMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static org.junit.Assert.assertEquals;
 
 
 public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiveTest{
@@ -29,10 +22,7 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 	Concept knownQuestionConcept = null;
 	Concept knownAnswerConcept = null;
 
-	Obs knownQuestionObs = null;
-	Obs knownAnswerObs = null;
-
-	Integer knownConceptId = 3;// a concept we can change things to. 3 = COUGH SYRUP in the standard test dataset
+	Integer knownConceptId = 3;// 3 = COUGH SYRUP in the standard test dataset
 
 	@Before
 	public void setUp(){
@@ -62,87 +52,57 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 	}
 
 	/**
-	 * @see MergeConceptsManageController#chooseConcepts()
-	 * @verifies (eventually) prepopulate concept widgets
-	 */
-	@Ignore
-	@Test
-	public void chooseConcepts_shouldEventuallyPrepopulateConceptWidgets()
-			throws Exception {
-		//TODO auto-generated
-		Assert.fail("Not yet implemented");
-	}
-
-	/**
-	 * @see MergeConceptsManageController#executeMerge(ModelMap)
-	 * @verifies merge concepts
-	 */
-	@Ignore
-	@Test
-	public void executeMerge_shouldMergeConcepts() throws Exception {
-		//TODO auto-generated
-		Assert.fail("Not yet implemented");
-	}
-
-	/**
-	 * @see MergeConceptsManageController#generateNewReferenceLists(String)
-	 * @verifies generate fresh lists of references to new concept
-	 */
-	@Ignore
-	@Test
-	public void generateNewReferenceLists_shouldGenerateFreshListsOfReferencesToNewConcept()
-			throws Exception {
-		//TODO auto-generated
-		Assert.fail("Not yet implemented");
-	}
-
-	/**
-	 * @see MergeConceptsManageController#generateReferenceLists(String)
-	 * @verifies generate fresh lists of references to old concept
-	 */
-	@Ignore
-	@Test
-	public void generateReferenceLists_shouldGenerateFreshListsOfReferencesToOldConcept()
-			throws Exception {
-		//TODO auto-generated
-		Assert.fail("Not yet implemented");
-	}
-
-	/**
-	 * @see MergeConceptsManageController#getNewConcept(String)
-	 * @verifies set model attribute "newConcept" to concept user wants to keep
-	 */
-	@Ignore
-	@Test
-	public void getNewConcept_shouldSetModelAttributeNewConceptToConceptUserWantsToKeep()
-			throws Exception {
-		//TODO auto-generated
-		Assert.fail("Not yet implemented");
-	}
-
-	/**
 	 * @see MergeConceptsManageController#getOldConcept(String)
 	 * @verifies set model attribute "oldConcept" to concept user wants to retire
 	 */
 	@Test
-	public void getOldConcept_shouldSetModelAttributeOldConceptToConceptUserWantsToRetire()
+	public void getOldConcept_shouldSetModelAttributeOldConcept_ToConceptUserWantsToRetire()
 			throws Exception {
-	    Concept c = controller.getOldConcept(knownConceptId.toString());
-	    Assert.assertNotNull(c);
-	    Assert.assertEquals("it instantiated the concept we requested",knownConceptId, c.getConceptId());
+	    Concept oldConcept = controller.getOldConcept(knownConceptId.toString());
+	    Assert.assertNotNull(oldConcept);
+	    assertEquals("it instantiated the concept we requested", knownConceptId, oldConcept.getConceptId());
 	}
 
-	/**
-	 * @see MergeConceptsManageController#preview(ModelMap,String,String)
-	 * @verifies display references to oldConcept and newConcept
-	 */
-	@Ignore
-	@Test
-	public void preview_shouldDisplayReferencesToOldConceptAndNewConcept()
-			throws Exception {
-		//TODO auto-generated
-		Assert.fail("Not yet implemented");
-	}
+    @Test
+    public void getNewConcept_ShouldSetModelAttributNewConcept_ToConceptUserWantsToKeep(){
+        assertEquals(knownConceptId, controller.getNewConcept(knownConceptId.toString()).getConceptId());
+    }
+
+    /**
+     * @see MergeConceptsManageController#getMatchingObs(Concept)
+     * @verifies return a list of Obs that use the concept as a question or answer
+     */
+    @Test
+    public void getMatchingObs_shouldReturnAListOfObsThatUseTheConceptAsAQuestionOrAnswer()
+            throws Exception {
+        List<Obs> questionResults = controller.getMatchingObs(knownQuestionConcept);
+        List<Obs> answerResults = controller.getMatchingObs(knownAnswerConcept);
+
+        Assert.assertTrue(questionResults.size() > 0);
+        Assert.assertTrue(answerResults.size() > 0);
+    }
+
+    /**
+     * @see MergeConceptsManageController#getMatchingObs(Concept)
+     * @verifies return an empty List if no matches
+     */
+    @Test
+    public void getMatchingObs_shouldReturnAnEmptyListIfNoMatches()
+            throws Exception {
+        int noMatches = controller.getMatchingObs(new Concept(-1)).size();
+        assertEquals(noMatches, 0);
+    }
+
+    /**
+     * @see MergeConceptsManageController#getMatchingObs(Concept)
+     * @verifies return an empty list if Concept is null
+     */
+    @Test
+    public void getMatchingObs_shouldReturnAnEmptyListIfConceptIsNull()
+            throws Exception {
+        List<Obs> test = controller.getMatchingObs(null);
+        assertEquals(test.size(), 0);
+    }
 
 	/**
 	 * @see MergeConceptsManageController#results(ModelMap)
@@ -166,65 +126,15 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 		Assert.assertNotNull("It set the attribute equal to something",modelMap.get("newObsCount"));
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count
-		Assert.assertEquals("New count value matches count",
-			((Integer)modelMap.get("newObsCount")).intValue(),numObsWithNewConceptId);
+		assertEquals("New count value matches count",
+                ((Integer) modelMap.get("newObsCount")).intValue(), numObsWithNewConceptId);
 		Assert.assertTrue(modelMap.containsKey("oldObsCount"));
 		Assert.assertNotNull("It set the attribute equal to something",modelMap.get("oldObsCount"));
 
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count
-		Assert.assertEquals("Old obs value matches count", ((Integer)modelMap.get("oldObsCount")).intValue(),
-			numObsWithOldConceptId);
+		assertEquals("Old obs value matches count", ((Integer) modelMap.get("oldObsCount")).intValue(),
+                numObsWithOldConceptId);
 
 	}
-
-	/**
-	 * @see MergeConceptsManageController#showPage(ModelMap)
-	 * @verifies do nothing
-	 */
-	@Ignore
-	@Test
-	public void showPage_shouldDoNothing() throws Exception {
-		//String goToPage = controller.showPage(new ModelMap());
-		//Assert.assertEquals(goToPage,"chooseConcepts.form");
-	}
-
-	/**
-	 * @see MergeConceptsManageController#getMatchingObs(Concept)
-	 * @verifies return a list of Obs that use the concept as a question or answer
-	 */
-	@Test
-	public void getMatchingObs_shouldReturnAListOfObsThatUseTheConceptAsAQuestionOrAnswer()
-			throws Exception {
-		List<Obs> questionResults = controller.getMatchingObs(knownQuestionConcept);
-		List<Obs> answerResults = controller.getMatchingObs(knownAnswerConcept);
-
-		Assert.assertTrue(questionResults.size() > 0);
-		Assert.assertTrue(answerResults.size() > 0);
-	}
-
-	/**
-	 * @see MergeConceptsManageController#getMatchingObs(Concept)
-	 * @verifies return an empty List if no matches
-	 */
-	@Test
-	public void getMatchingObs_shouldReturnAnEmptyListIfNoMatches()
-			throws Exception {
-		int noMatches = controller.getMatchingObs(new Concept(-1)).size();
-		Assert.assertEquals(noMatches, 0);
-	}
-
-	/**
-	 * @see MergeConceptsManageController#getMatchingObs(Concept)
-	 * @verifies return an empty list if Concept is null
-	 */
-	@Test
-	public void getMatchingObs_shouldReturnAnEmptyListIfConceptIsNull()
-			throws Exception {
-		List<Obs> test = controller.getMatchingObs(null);
-		Assert.assertEquals(test.size(), 0);
-	}
-
-
-
 }
