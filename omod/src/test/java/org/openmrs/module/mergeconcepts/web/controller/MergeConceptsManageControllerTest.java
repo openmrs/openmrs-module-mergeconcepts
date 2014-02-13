@@ -14,6 +14,7 @@ import org.openmrs.api.context.Context;
 import org.springframework.ui.ModelMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiveTest{
@@ -51,10 +52,6 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 		Assert.assertTrue(knownQuestionObs.getObsId() > 0);*/
 	}
 
-	/**
-	 * @see MergeConceptsManageController#getOldConcept(String)
-	 * @verifies set model attribute "oldConcept" to concept user wants to retire
-	 */
 	@Test
 	public void getOldConcept_shouldSetModelAttributeOldConcept_ToConceptUserWantsToRetire()
 			throws Exception {
@@ -68,46 +65,28 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertEquals(knownConceptId, controller.getNewConcept(knownConceptId.toString()).getConceptId());
     }
 
-    /**
-     * @see MergeConceptsManageController#getMatchingObs(Concept)
-     * @verifies return a list of Obs that use the concept as a question or answer
-     */
     @Test
     public void getMatchingObs_shouldReturnAListOfObsThatUseTheConceptAsAQuestionOrAnswer()
             throws Exception {
         List<Obs> questionResults = controller.getMatchingObs(knownQuestionConcept);
         List<Obs> answerResults = controller.getMatchingObs(knownAnswerConcept);
 
-        Assert.assertTrue(questionResults.size() > 0);
-        Assert.assertTrue(answerResults.size() > 0);
+        assertTrue(questionResults.size() > 0);
+        assertTrue(answerResults.size() > 0);
     }
 
-    /**
-     * @see MergeConceptsManageController#getMatchingObs(Concept)
-     * @verifies return an empty List if no matches
-     */
     @Test
     public void getMatchingObs_shouldReturnAnEmptyListIfNoMatches()
             throws Exception {
-        int noMatches = controller.getMatchingObs(new Concept(-1)).size();
-        assertEquals(noMatches, 0);
+        assertEquals(controller.getMatchingObs(new Concept(-1)).size(), 0);
     }
 
-    /**
-     * @see MergeConceptsManageController#getMatchingObs(Concept)
-     * @verifies return an empty list if Concept is null
-     */
     @Test
     public void getMatchingObs_shouldReturnAnEmptyListIfConceptIsNull()
             throws Exception {
-        List<Obs> test = controller.getMatchingObs(null);
-        assertEquals(test.size(), 0);
+        assertEquals(controller.getMatchingObs(null).size(), 0);
     }
 
-	/**
-	 * @see MergeConceptsManageController#results(ModelMap)
-	 * @verifies display updated references to oldConcept and newConcept
-	 */
 	@Ignore
 	@Test
 	public void results_shouldDisplayUpdatedReferencesToOldConceptAndNewConcept()
@@ -122,13 +101,13 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 		controller.results(modelMap, knownQuestionConcept.getConceptId(),
 			 knownConceptId);//showPage(request, response);
 
-		Assert.assertTrue("The controller set the attribute",modelMap.containsKey("newObsCount"));
+		assertTrue("The controller set the attribute", modelMap.containsKey("newObsCount"));
 		Assert.assertNotNull("It set the attribute equal to something",modelMap.get("newObsCount"));
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count
 		assertEquals("New count value matches count",
                 ((Integer) modelMap.get("newObsCount")).intValue(), numObsWithNewConceptId);
-		Assert.assertTrue(modelMap.containsKey("oldObsCount"));
+		assertTrue(modelMap.containsKey("oldObsCount"));
 		Assert.assertNotNull("It set the attribute equal to something",modelMap.get("oldObsCount"));
 
 		//results doesn't call the method that updates the obs

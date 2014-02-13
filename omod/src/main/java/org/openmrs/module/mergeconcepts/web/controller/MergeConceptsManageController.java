@@ -1,10 +1,7 @@
 package org.openmrs.module.mergeconcepts.web.controller;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -78,7 +75,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	}
 	
 	/**
-	 * getMatchingObs - not used...
+	 * Get matching observations
 	 * @param concept - the concept to look up
 	 * @return a list of Obs using the concept as a question or answer, an empty List if none found
 	 * @should return a list of Obs that use the concept as a question or answer
@@ -87,36 +84,38 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 	 */
 	protected List<Obs> getMatchingObs(Concept concept){
 		ObsService obsService = Context.getObsService();
+        List<Obs> result = new ArrayList<Obs>();
 
-		List<Concept> conceptList = new ArrayList<Concept>();
-		conceptList.add(concept);
-		
-		List<Obs> result = new ArrayList<Obs>();
-		
 		if( concept == null )
 			return result; //TODO reconsider error handling strategy here
-		
-		//answer concept
-		List<Obs> obsFound = obsService.getObservations(null, null, conceptList, conceptList, null, null, null, null, null, null, null,
-				false);
-		if(obsFound!=null){
-			result.addAll(obsFound);
-			log.info("Found " + obsFound.size() + " obs with answers concept Id " + concept.getConceptId());
-		}
-		
-		//question concept
-		obsFound = obsService.getObservations(null, null,  conceptList, null, null, null, null, null, null, null, null,
-				false);
-		if(obsFound!=null){
-			result.addAll(obsFound);
-			log.info("Found " + obsFound.size() + " obs with questions concept Id " + concept.getConceptId());
 
-		}
-		
-		return result;
+        List<Obs> obsWithAnswerConcept = getObsWithAnswerConcept(concept, obsService);
+        if(obsWithAnswerConcept!=null){
+            result.addAll(obsWithAnswerConcept);
+            log.info("Found " + obsWithAnswerConcept.size() + " obs with answers concept Id " + concept.getConceptId());
+        }
+
+
+        List<Obs> obsWithQuestionConcept = getObsWithQuestionConcept(concept, obsService);
+        if(obsWithQuestionConcept!=null){
+            result.addAll(obsWithQuestionConcept);
+            log.info("Found " + obsWithQuestionConcept.size() + " obs with questions concept Id " + concept.getConceptId());
+        }
+
+        return result;
 	}
 
-	/**
+    protected List<Obs> getObsWithAnswerConcept(Concept concept, ObsService obsService) {
+        return obsService.getObservations(null, null, Collections.singletonList(concept), Collections.singletonList(concept), null, null, null, null, null, null, null,
+                false);
+    }
+
+    protected List<Obs> getObsWithQuestionConcept(Concept concept, ObsService obsService) {
+        return obsService.getObservations(null, null, Collections.singletonList(concept), null, null, null, null, null, null, null, null,
+                false);
+    }
+
+    /**
 	 * getMatchingForms
 	 * @param concept - the concept to look up
 	 * @return a list of Forms using the concept as a question or answer, an empty List if none found
