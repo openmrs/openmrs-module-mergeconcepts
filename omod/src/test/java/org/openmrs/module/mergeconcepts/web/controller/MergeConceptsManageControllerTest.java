@@ -62,7 +62,9 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 
     @Test
     public void getNewConcept_ShouldSetModelAttributNewConcept_ToConceptUserWantsToKeep(){
-        assertEquals(knownConceptId, controller.getNewConcept(knownConceptId.toString()).getConceptId());
+        Concept newConcept = controller.getNewConcept(knownConceptId.toString());
+        Assert.assertNotNull(newConcept);
+        assertEquals(knownConceptId, newConcept.getConceptId());
     }
 
     @Test
