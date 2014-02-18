@@ -21,9 +21,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
 
 import org.openmrs.Concept;
+import org.openmrs.Obs;
 import org.openmrs.api.ObsService;
 import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -33,14 +33,14 @@ import org.openmrs.test.BaseModuleContextSensitiveTest;
  */
 public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 	
-	int knownQuestionConceptId = 18;
+	int knownConceptId = 18; // name="FOOD ASSISTANCE"
 	int knownAnswerConceptId = 5089;
 	
-	MergeConceptsService service = null;
-	
+	MergeConceptsService mergeConceptsService = null;
+
 	@Before
-	public void setUp(){
-		service = Context.getService(MergeConceptsService.class);
+	public void setUp()  {
+        mergeConceptsService = Context.getService(MergeConceptsService.class);
 	}
 	
 	@Test
@@ -53,17 +53,24 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 	 * @verifies return a count of question concept obs
 	 */
 	@Test
-	public void getQuestionConceptObsCount_shouldReturnACountOfQuestionConceptObs()
+	public void getObsCount_shouldReturnACountOfQuestionAndAnswerConceptObs()
 			throws Exception {
 		
-		ObsService obsService = Context.getObsService();
 		List<Concept> conceptList = new ArrayList<Concept>();
-		conceptList.add(Context.getConceptService().getConcept(knownQuestionConceptId));
-		Integer obsServiceCount = obsService.getObservations(null, null,  conceptList, null, null, null, null, null, null, null, null,
-				false).size();
-		
-		Integer myServiceObsCount = service.getObsCount(knownQuestionConceptId);
-		
-		Assert.assertEquals(obsServiceCount, myServiceObsCount);
+        conceptList.add(Context.getConceptService().getConcept(knownConceptId));
+        createObsWithConceptAnswer();
+        Integer expectedServiceObsCount = 2;
+
+        Integer actualServiceObsCount = mergeConceptsService.getObsCount(knownConceptId);
+
+		Assert.assertEquals(expectedServiceObsCount, actualServiceObsCount);
 	}
+
+    private void createObsWithConceptAnswer() {
+        ObsService obsService = Context.getObsService();
+        int knownObsId = 7;
+        Obs knownAnswerObs = obsService.getObs(knownObsId);
+        knownAnswerObs.setValueCoded(Context.getConceptService().getConcept(knownConceptId));
+        obsService.saveObs(knownAnswerObs,"");
+    }
 }

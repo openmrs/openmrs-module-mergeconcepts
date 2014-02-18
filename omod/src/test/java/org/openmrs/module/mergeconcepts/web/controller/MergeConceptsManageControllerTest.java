@@ -23,7 +23,7 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 	Concept knownQuestionConcept = null;
 	Concept knownAnswerConcept = null;
 
-	Integer knownConceptId = 3;// 3 = COUGH SYRUP in the standard test dataset
+	Integer knownConceptId = 3;// 3 = COUGH SYRUP in the standard test dataset (standardTestDataset.xml) in openmrs-core
 
 	@Before
 	public void setUp(){
@@ -67,27 +67,6 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertEquals(knownConceptId, newConcept.getConceptId());
     }
 
-    @Test
-    public void getMatchingObs_shouldReturnAListOfObsThatUseTheConceptAsAQuestionOrAnswer()
-            throws Exception {
-        List<Obs> questionResults = controller.getMatchingObs(knownQuestionConcept);
-        List<Obs> answerResults = controller.getMatchingObs(knownAnswerConcept);
-
-        assertTrue(questionResults.size() > 0);
-        assertTrue(answerResults.size() > 0);
-    }
-
-    @Test
-    public void getMatchingObs_shouldReturnAnEmptyListIfNoMatches()
-            throws Exception {
-        assertEquals(controller.getMatchingObs(new Concept(-1)).size(), 0);
-    }
-
-    @Test
-    public void getMatchingObs_shouldReturnAnEmptyListIfConceptIsNull()
-            throws Exception {
-        assertEquals(controller.getMatchingObs(null).size(), 0);
-    }
 
 	@Ignore
 	@Test
