@@ -60,25 +60,18 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      */
     @Transactional
     public Integer getObsCount(Integer conceptId){
-    	Long obsCount = null;
-    	Long obsCount2 = null;
+    	Long obsWithQuestionConceptCount = null;
+    	Long obsWithAnswerConceptCount = null;
     	
     	Query query = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where concept_id = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
-    	obsCount = (Long)query.uniqueResult();
+    	obsWithQuestionConceptCount = (Long)query.uniqueResult();
     	
     	Query query2 = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where value_coded = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
-    	obsCount2 = (Long)query2.uniqueResult();
+    	obsWithAnswerConceptCount = (Long)query2.uniqueResult();
     	
-    	return obsCount.intValue() + obsCount2.intValue();
-    	
-    	/**
-    	 * example:
-    	 * String select = "select count(*) from Patient";
-    	 * Query query = sessionFactory.getCurrentSession().createQuery(select);
-    	 * return ((Number) query.iterate().next()).intValue();
-    	 */
+    	return obsWithQuestionConceptCount.intValue() + obsWithAnswerConceptCount.intValue();
     }
     
 	/**
@@ -146,7 +139,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @should return a list of the obs
      */
     @Transactional
-    public List<Integer> getObsIds(Integer conceptId) throws APIException {
+    public List<Integer> getObsIdsWithQuestionConcept(Integer conceptId) throws APIException {
     	List<Integer> obsIds = null;
     	
     	Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where concept_id = :conceptId and voided = 0")
@@ -164,15 +157,15 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @should return a list of the obs
      */
     @Transactional
-    public List<Integer> getObsIds2(Integer conceptId) throws APIException {   
-    	List<Integer> obsIds2 = null; //for obs in value_coded column
+    public List<Integer> getObsIdsWithAnswerConcept(Integer conceptId) throws APIException {
+    	List<Integer> obsIds = null; //for obs in value_coded column
     	
-    	Query query2 = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where value_coded = :conceptId and voided = 0")
+    	Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where value_coded = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
     	
-    	obsIds2 = (List<Integer>) query2.list();
+    	obsIds = (List<Integer>) query.list();
     	
-    	return obsIds2;
+    	return obsIds;
     	
     }
 
@@ -191,8 +184,8 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
 		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
 
-		List<Integer> QuestionObsToConvert = this.getObsIds(oldConceptId);
-		List<Integer> AnswerObsToConvert = this.getObsIds2(oldConceptId);
+		List<Integer> QuestionObsToConvert = this.getObsIdsWithQuestionConcept(oldConceptId);
+		List<Integer> AnswerObsToConvert = this.getObsIdsWithAnswerConcept(oldConceptId);
 		
 		ObsService obsService = Context.getObsService();
 		

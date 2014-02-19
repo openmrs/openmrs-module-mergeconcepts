@@ -55,7 +55,7 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
     
     public List<Integer> getObsIds(Integer conceptId){
-    	return dao.getObsIds(conceptId);
+    	return dao.getObsIdsWithQuestionConcept(conceptId);
     }
     
     @Transactional

@@ -32,8 +32,10 @@ public interface MergeConceptsDAO {
 	public Integer getObsCount(Integer conceptId);
 	
 	public void updateObs(Integer oldConceptId, Integer newConceptId);
-	
-	public List<Integer> getObsIds(Integer conceptId);
+
+    public List<Integer> getObsIdsWithQuestionConcept(Integer conceptId);
+
+    public List<Integer> getObsIdsWithAnswerConcept(Integer conceptId);
 
 	public List<Program> getProgramsByConcept(Concept concept);
 

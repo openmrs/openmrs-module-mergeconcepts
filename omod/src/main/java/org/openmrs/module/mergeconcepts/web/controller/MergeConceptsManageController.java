@@ -77,48 +77,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     }
 
     /**
-     * Get matching observations
-     *
-     * @param concept - the concept to look up
-     * @return a list of Obs using the concept as a question or answer, an empty List if none found
-     * @should return a list of Obs that use the concept as a question or answer
-     * @should return an empty List if no matches
-     * @should return an empty list if Concept is null
-     */
-    protected List<Obs> getMatchingObs(Concept concept) {
-        ObsService obsService = Context.getObsService();
-        List<Obs> result = new ArrayList<Obs>();
-
-        if (concept == null)
-            return result; //TODO reconsider error handling strategy here
-
-        List<Obs> obsWithAnswerConcept = getObsWithAnswerConcept(concept, obsService);
-        if (obsWithAnswerConcept != null) {
-            result.addAll(obsWithAnswerConcept);
-            log.info("Found " + obsWithAnswerConcept.size() + " obs with answers concept Id " + concept.getConceptId());
-        }
-
-
-        List<Obs> obsWithQuestionConcept = getObsWithQuestionConcept(concept, obsService);
-        if (obsWithQuestionConcept != null) {
-            result.addAll(obsWithQuestionConcept);
-            log.info("Found " + obsWithQuestionConcept.size() + " obs with questions concept Id " + concept.getConceptId());
-        }
-
-        return result;
-    }
-
-    protected List<Obs> getObsWithAnswerConcept(Concept concept, ObsService obsService) {
-        return obsService.getObservations(null, null, Collections.singletonList(concept), Collections.singletonList(concept), null, null, null, null, null, null, null,
-                false);
-    }
-
-    protected List<Obs> getObsWithQuestionConcept(Concept concept, ObsService obsService) {
-        return obsService.getObservations(null, null, Collections.singletonList(concept), null, null, null, null, null, null, null, null,
-                false);
-    }
-
-    /**
      * getMatchingForms
      *
      * @param concept - the concept to look up
