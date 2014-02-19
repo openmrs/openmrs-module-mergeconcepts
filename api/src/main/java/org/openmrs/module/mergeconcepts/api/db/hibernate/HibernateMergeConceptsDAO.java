@@ -60,25 +60,18 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      */
     @Transactional
     public Integer getObsCount(Integer conceptId){
-    	Long obsCount = null;
-    	Long obsCount2 = null;
+    	Long obsWithQuestionConceptCount = null;
+    	Long obsWithAnswerConceptCount = null;
     	
     	Query query = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where concept_id = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
-    	obsCount = (Long)query.uniqueResult();
+    	obsWithQuestionConceptCount = (Long)query.uniqueResult();
     	
     	Query query2 = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where value_coded = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
-    	obsCount2 = (Long)query2.uniqueResult();
+    	obsWithAnswerConceptCount = (Long)query2.uniqueResult();
     	
-    	return obsCount.intValue() + obsCount2.intValue();
-    	
-    	/**
-    	 * example:
-    	 * String select = "select count(*) from Patient";
-    	 * Query query = sessionFactory.getCurrentSession().createQuery(select);
-    	 * return ((Number) query.iterate().next()).intValue();
-    	 */
+    	return obsWithQuestionConceptCount.intValue() + obsWithAnswerConceptCount.intValue();
     }
     
 	/**
