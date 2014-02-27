@@ -197,100 +197,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     }
 
 
-    /**
-     * @param concept
-     * @return
-     */
-    protected List<Order> getMatchingOrders(Concept concept) {
-
-        List<Concept> conceptList = new ArrayList<Concept>();
-        conceptList.add(concept);
-
-        OrderService orderService = Context.getOrderService();
-
-        List<Order> ordersToUpdate = orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
-
-        return ordersToUpdate;
-
-    }
-
-
-    /**
-     * @param oldConcept
-     * @param newConcept
-     */
-    public void updateOrders(Concept oldConcept, Concept newConcept) {
-        List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
-
-        for (Order o : ordersToUpdate) {
-            o.setConcept(newConcept);
-        }
-    }
-
-
-    /**
-     * @param concept
-     * @return
-     */
-    protected List<Program> getMatchingPrograms(Concept concept) {
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        List<Program> programsToUpdate = service.getProgramsByConcept(concept);
-
-        return programsToUpdate;
-    }
-
-
-    /**
-     * @param concept
-     * @return
-     */
-    protected List<ProgramWorkflow> getMatchingProgramWorkflows(Concept concept) {
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        List<ProgramWorkflow> programWorkflowsToUpdate = service.getProgramWorkflowsByConcept(concept);
-
-        return programWorkflowsToUpdate;
-    }
-
-    /**
-     * @param concept
-     * @return
-     */
-    protected List<ProgramWorkflowState> getMatchingProgramWorkflowStates(Concept concept) {
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        List<ProgramWorkflowState> programWorkflowStatesToUpdate = service.getProgramWorkflowStatesByConcept(concept);
-
-        return programWorkflowStatesToUpdate;
-
-    }
-
-    /**
-     * @param oldConcept
-     * @param newConcept
-     */
-    public void updatePrograms(Concept oldConcept, Concept newConcept) {
-        List<Program> programsToUpdate = this.getMatchingPrograms(oldConcept);
-        List<ProgramWorkflow> programWorkflowsToUpdate = this.getMatchingProgramWorkflows(oldConcept);
-        List<ProgramWorkflowState> programWorkflowStatesToUpdate = this.getMatchingProgramWorkflowStates(oldConcept);
-
-        for (Program p : programsToUpdate) {
-            p.setConcept(newConcept);
-        }
-
-        for (ProgramWorkflow pw : programWorkflowsToUpdate) {
-            pw.setConcept(newConcept);
-        }
-
-        for (ProgramWorkflowState pws : programWorkflowStatesToUpdate) {
-            pws.setConcept(newConcept);
-        }
-    }
-
 
     /**
      * get concept_set.concept_id concepts
@@ -596,11 +502,11 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         if (this.getMatchingForms(concept) != null)
             model.addAttribute(conceptType + "Forms", this.getMatchingForms(concept));
 
-        if (this.getMatchingOrders(concept) != null)
-            model.addAttribute(conceptType + "Orders", this.getMatchingOrders(concept));
+        if (service.getMatchingOrders(concept) != null)
+            model.addAttribute(conceptType + "Orders", service.getMatchingOrders(concept));
 
-        if (this.getMatchingPrograms(concept) != null)
-            model.addAttribute(conceptType + "Programs", this.getMatchingPrograms(concept));
+        if (service.getMatchingPrograms(concept) != null)
+            model.addAttribute(conceptType + "Programs", service.getMatchingPrograms(concept));
 
         //preview concept answers by id
         List<Integer> conceptAnswerIds = new ArrayList<Integer>();
@@ -751,10 +657,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             this.updateDrugs(oldConcept, newConcept);
 
             //ORDERS
-            this.updateOrders(oldConcept, newConcept);
+            service.updateOrders(oldConceptId, newConceptId);
 
             //PROGRAMS
-            this.updatePrograms(oldConcept, newConcept);
+            service.updatePrograms(oldConcept, newConcept);
 
             //CONCEPT SETS
             this.updateConceptSets(oldConcept, newConcept);
@@ -820,17 +726,17 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         if (this.getMatchingForms(newConcept) != null)
             model.addAttribute("newForms", this.getMatchingForms(newConcept));
 
-        if (this.getMatchingOrders(oldConcept) != null)
-            model.addAttribute("oldOrders", this.getMatchingOrders(oldConcept));
+        if (service.getMatchingOrders(oldConcept) != null)
+            model.addAttribute("oldOrders", service.getMatchingOrders(oldConcept));
 
-        if (this.getMatchingOrders(newConcept) != null)
-            model.addAttribute("newOrders", this.getMatchingOrders(newConcept));
+        if (service.getMatchingOrders(newConcept) != null)
+            model.addAttribute("newOrders", service.getMatchingOrders(newConcept));
 
-        if (this.getMatchingPrograms(oldConcept) != null)
-            model.addAttribute("oldPrograms", this.getMatchingPrograms(oldConcept));
+        if (service.getMatchingPrograms(oldConcept) != null)
+            model.addAttribute("oldPrograms", service.getMatchingPrograms(oldConcept));
 
-        if (this.getMatchingPrograms(newConcept) != null)
-            model.addAttribute("newPrograms", this.getMatchingPrograms(newConcept));
+        if (service.getMatchingPrograms(newConcept) != null)
+            model.addAttribute("newPrograms", service.getMatchingPrograms(newConcept));
 
         //preview concept answers by id
         List<Integer> oldConceptAnswerIds = new ArrayList<Integer>();

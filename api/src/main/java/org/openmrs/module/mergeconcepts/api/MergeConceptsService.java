@@ -20,9 +20,9 @@ import org.openmrs.Drug;
 import org.openmrs.Program;
 import org.openmrs.ProgramWorkflow;
 import org.openmrs.ProgramWorkflowState;
-import org.openmrs.api.APIException;
 import org.openmrs.api.OpenmrsService;
 import org.springframework.transaction.annotation.Transactional;
+import org.openmrs.Order;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
@@ -50,4 +50,12 @@ public interface MergeConceptsService extends OpenmrsService {
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept);
 
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
+
+    void updateOrders(int oldConceptId, int newConceptId);
+
+    public List<Order> getMatchingOrders(Concept concept);
+
+    public void updatePrograms(Concept oldConcept, Concept newConcept);
+
+    public List<Program> getMatchingPrograms(Concept concept);
 }
