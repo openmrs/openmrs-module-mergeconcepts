@@ -180,10 +180,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             this.updateDrugs(oldConcept, newConcept);
 
             //ORDERS
-            this.updateOrders(oldConcept, newConcept);
+            service.updateOrders(oldConceptId, newConceptId);
 
             //PROGRAMS
-            this.updatePrograms(oldConcept, newConcept);
+            service.updatePrograms(oldConcept, newConcept);
 
             //CONCEPT SETS
             this.updateConceptSets(oldConcept, newConcept);
@@ -248,17 +248,17 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         if (this.getMatchingForms(newConcept) != null)
             model.addAttribute("newForms", this.getMatchingForms(newConcept));
 
-        if (this.getMatchingOrders(oldConcept) != null)
-            model.addAttribute("oldOrders", this.getMatchingOrders(oldConcept));
+        if (service.getMatchingOrders(oldConcept) != null)
+            model.addAttribute("oldOrders", service.getMatchingOrders(oldConcept));
 
-        if (this.getMatchingOrders(newConcept) != null)
-            model.addAttribute("newOrders", this.getMatchingOrders(newConcept));
+        if (service.getMatchingOrders(newConcept) != null)
+            model.addAttribute("newOrders", service.getMatchingOrders(newConcept));
 
-        if (this.getMatchingPrograms(oldConcept) != null)
-            model.addAttribute("oldPrograms", this.getMatchingPrograms(oldConcept));
+        if (service.getMatchingPrograms(oldConcept) != null)
+            model.addAttribute("oldPrograms", service.getMatchingPrograms(oldConcept));
 
-        if (this.getMatchingPrograms(newConcept) != null)
-            model.addAttribute("newPrograms", this.getMatchingPrograms(newConcept));
+        if (service.getMatchingPrograms(newConcept) != null)
+            model.addAttribute("newPrograms", service.getMatchingPrograms(newConcept));
 
         //preview concept answers by id
         List<Integer> oldConceptAnswerIds = new ArrayList<Integer>();
@@ -360,11 +360,11 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         if (this.getMatchingForms(concept) != null)
             model.addAttribute(conceptType + "Forms", this.getMatchingForms(concept));
 
-        if (this.getMatchingOrders(concept) != null)
-            model.addAttribute(conceptType + "Orders", this.getMatchingOrders(concept));
+        if (service.getMatchingOrders(concept) != null)
+            model.addAttribute(conceptType + "Orders", service.getMatchingOrders(concept));
 
-        if (this.getMatchingPrograms(concept) != null)
-            model.addAttribute(conceptType + "Programs", this.getMatchingPrograms(concept));
+        if (service.getMatchingPrograms(concept) != null)
+            model.addAttribute(conceptType + "Programs", service.getMatchingPrograms(concept));
 
         //preview concept answers by id
         List<Integer> conceptAnswerIds = new ArrayList<Integer>();
@@ -434,33 +434,13 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
          dosageFormsToUpdate.addAll(conceptService.getDrugsByConcept(conceptService.getConcept(d)));
          }
          }*/
+
     }
 
-    public void updateOrders(Concept oldConcept, Concept newConcept) {
-        List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
-
-        for (Order o : ordersToUpdate) {
-            o.setConcept(newConcept);
-        }
-    }
-
-    public void updatePrograms(Concept oldConcept, Concept newConcept) {
-        List<Program> programsToUpdate = this.getMatchingPrograms(oldConcept);
-        List<ProgramWorkflow> programWorkflowsToUpdate = this.getMatchingProgramWorkflows(oldConcept);
-        List<ProgramWorkflowState> programWorkflowStatesToUpdate = this.getMatchingProgramWorkflowStates(oldConcept);
-
-        for (Program p : programsToUpdate) {
-            p.setConcept(newConcept);
-        }
-
-        for (ProgramWorkflow pw : programWorkflowsToUpdate) {
-            pw.setConcept(newConcept);
-        }
-
-        for (ProgramWorkflowState pws : programWorkflowStatesToUpdate) {
-            pws.setConcept(newConcept);
-        }
-    }
+    /**
+     * @param oldConcept
+     * @param newConcept
+     */
 
     public void updateConceptSets(Concept oldConcept, Concept newConcept) {
         //update concept_id
@@ -555,29 +535,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         return Context.getService(MergeConceptsService.class).getDrugsByIngredient(concept);
     }
 
-    protected List<Order> getMatchingOrders(Concept concept) {
-        List<Concept> conceptList = new ArrayList<Concept>();
-        conceptList.add(concept);
-        OrderService orderService = Context.getOrderService();
-        return orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
-    }
-
-    protected List<Program> getMatchingPrograms(Concept concept) {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        return service.getProgramsByConcept(concept);
-    }
-
-
-    protected List<ProgramWorkflow> getMatchingProgramWorkflows(Concept concept) {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        return service.getProgramWorkflowsByConcept(concept);
-    }
-
-    protected List<ProgramWorkflowState> getMatchingProgramWorkflowStates(Concept concept) {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        return service.getProgramWorkflowStatesByConcept(concept);
-    }
-
     protected List<ConceptSet> getMatchingConceptSetConcepts(Concept concept) {
         ConceptService conceptService = getConceptService();
         return conceptService.getSetsContainingConcept(concept);
@@ -603,7 +560,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
         //Concepts that are questions answered by this concept, and possibly others
         for (Concept c : conceptService.getConceptsByAnswer(concept)) {
-
             //ConceptAnswers of all possible answers to question concept above
             for (ConceptAnswer a : c.getAnswers()) {
 
@@ -639,20 +595,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
 
         return matchingPersonAttributeTypes;
-    }
-
-
-    @Override
-    public Integer getId() {
-        return null;
-    }
-
-    @Override
-    public void setId(Integer arg0) {
-    }
-
-    protected ConceptService getConceptService() {
-        return Context.getConceptService();
     }
 
 
@@ -721,4 +663,22 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         ConceptService conceptService = getConceptService();
         return conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler());
     }
+
+
+    @Override
+    public Integer getId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setId(Integer arg0) {
+        // TODO Auto-generated method stub
+
+    }
+
+    protected ConceptService getConceptService() {
+        return Context.getConceptService();
+    }
+
 }

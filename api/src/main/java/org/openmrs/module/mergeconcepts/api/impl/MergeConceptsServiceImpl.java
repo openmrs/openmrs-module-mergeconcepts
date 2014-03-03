@@ -15,11 +15,7 @@ package org.openmrs.module.mergeconcepts.api.impl;
 
 import java.util.List;
 
-import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.Program;
-import org.openmrs.ProgramWorkflow;
-import org.openmrs.ProgramWorkflowState;
+import org.openmrs.*;
 import org.openmrs.api.impl.BaseOpenmrsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,24 +60,28 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
 	@Override
-	public List<Program> getProgramsByConcept(Concept concept) {
-		return dao.getProgramsByConcept(concept);
-	}
-
-	@Override
-	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept) {
-		return dao.getProgramWorkflowsByConcept(concept);
-	}
-
-	@Override
-	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(
-			Concept concept) {
-        return dao.getProgramWorkflowStatesByConcept(concept);
-	}
-
-	@Override
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
         return dao.getDrugsByIngredient(ingredient);
 	}
-    
+
+    @Override
+    public void updateOrders(int oldConceptId, int newConceptId) {
+        dao.updateOrders(oldConceptId,newConceptId);
+    }
+
+    @Override
+    public List<Order> getMatchingOrders(Concept concept) {
+        return dao.getMatchingOrders(concept);
+    }
+
+    @Override
+    public void updatePrograms(Concept oldConcept, Concept newConcept) {
+        dao.updatePrograms( oldConcept,  newConcept);
+    }
+
+    @Override
+    public List<Program> getMatchingPrograms(Concept concept) {
+        return dao.getProgramsByConcept(concept);
+    }
+
 }

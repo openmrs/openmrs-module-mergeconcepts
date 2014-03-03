@@ -14,18 +14,21 @@
 package org.openmrs.module.mergeconcepts.api;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.openmrs.Concept;
 import org.openmrs.Obs;
+import org.openmrs.Order;
+import org.openmrs.Program;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.OrderService;
+import org.openmrs.api.ProgramWorkflowService;
 import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
@@ -39,8 +42,9 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 	MergeConceptsService mergeConceptsService = null;
 
 	@Before
-	public void setUp()  {
+	public void setUp() throws Exception {
         mergeConceptsService = Context.getService(MergeConceptsService.class);
+        executeDataSet(EXAMPLE_XML_DATASET_PACKAGE_PATH );
 	}
 
 	@Test
@@ -58,7 +62,7 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 		List<Concept> conceptList = new ArrayList<Concept>();
         conceptList.add(Context.getConceptService().getConcept(knownConceptId));
         int knownObsId = 7;
-        createObsWithConceptAnswer(knownObsId, knownConceptId );
+        updateObsWithConceptAnswer(knownObsId, knownConceptId);
 
         Integer actualServiceObsCount = mergeConceptsService.getObsCount(knownConceptId);
 
@@ -68,8 +72,8 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void updateObs_shouldUpdateObsWithNewConceptInQuestionsAndAnswerConcepts() {
-        Obs savedObsWithId10 = createObsWithConceptAnswer(10, knownConceptId);
-        Obs savedObsWithId12 = createObsWithConceptQuestion(12, knownConceptId);
+        Obs savedObsWithId10 = updateObsWithConceptAnswer(10, knownConceptId);
+        Obs savedObsWithId12 = updateObsWithConceptQuestion(12, knownConceptId);
 
         int newConceptId = 22;
         mergeConceptsService.updateObs(knownConceptId, newConceptId);
@@ -78,14 +82,35 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         assertEquals(new Integer(newConceptId), savedObsWithId12.getConcept().getId());
     }
 
-    private Obs createObsWithConceptAnswer(int obsId, int conceptId) {
+    @Test
+    public void updateOrders_shouldUpdateOrdersWithNewConcept() throws Exception {
+        int oldConceptId = 23;
+        Order orderWithId4 = updateOrderWithConcept(4, 23);
+        Order orderWithId5 = updateOrderWithConcept(5, 23);
+
+        int newConceptId = 18;
+        mergeConceptsService.updateOrders(oldConceptId,newConceptId);
+
+        assertEquals(new Integer(newConceptId), orderWithId4.getConcept().getId());
+        assertEquals(new Integer(newConceptId), orderWithId5.getConcept().getId());
+    }
+
+
+    private Order updateOrderWithConcept(int orderId, int conceptId) {
+        OrderService orderService = Context.getOrderService();
+        Order knownOrder = orderService.getOrder(orderId);
+        knownOrder.setConcept(Context.getConceptService().getConcept(conceptId));
+        return orderService.saveOrder(knownOrder);
+    }
+
+    private Obs updateObsWithConceptAnswer(int obsId, int conceptId) {
         ObsService obsService = Context.getObsService();
         Obs knownAnswerObs = obsService.getObs(obsId);
         knownAnswerObs.setValueCoded(Context.getConceptService().getConcept(conceptId));
         return obsService.saveObs(knownAnswerObs,"");
     }
 
-    private Obs createObsWithConceptQuestion(int obsId, int conceptId) {
+    private Obs updateObsWithConceptQuestion(int obsId, int conceptId) {
         ObsService obsService = Context.getObsService();
         Obs knownAnswerObs = obsService.getObs(obsId);
         knownAnswerObs.setConcept(Context.getConceptService().getConcept(conceptId));

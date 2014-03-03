@@ -24,10 +24,12 @@ import org.openmrs.*;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.ObsService;
+import org.openmrs.api.OrderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -73,35 +75,35 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     	
     	return obsWithQuestionConceptCount.intValue() + obsWithAnswerConceptCount.intValue();
     }
-    
+
 	/**
 	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramsByConcept(org.openmrs.Concept)
 	 */
 	@Override
 	public List<Program> getProgramsByConcept(Concept concept) {
-		
+
 		String pq = "select distinct p from Program p where p.concept = :concept";
 		Query pquery = sessionFactory.getCurrentSession().createQuery(pq);
 		pquery.setEntity("concept", concept);
-		
+
 		List<Program> matchingPrograms = pquery.list();
-		
+
 		return matchingPrograms;
-		
+
 	}
-	
+
 	/**
 	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramWorkflowsByConcept(org.openmrs.Concept)
 	 */
 	@Override
 	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept) {
-		
+
 		String wq = "select distinct w from ProgramWorkflow w where w.concept = :concept";
 		Query wquery = sessionFactory.getCurrentSession().createQuery(wq);
 		wquery.setEntity("concept", concept);
-		
+
 		return wquery.list();
-	
+
 	}
 
 	/**
@@ -109,13 +111,13 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	 */
 	@Override
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept) {
-	
+
 		String sq = "select distinct s from ProgramWorkflowState s where s.concept = :concept";
 		Query squery = sessionFactory.getCurrentSession().createQuery(sq);
 		squery.setEntity("concept", concept);
-		
+
 		return squery.list();
-	
+
 	}
 
 	/**
@@ -131,6 +133,27 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
 		return (List<Drug>) searchDrugCriteria.list();
 	}
+    /**
+     * @param concept
+     * @return
+     */
+    public List<Order> getMatchingOrders(Concept concept) {
+        List<Concept> conceptList = new ArrayList<Concept>();
+        conceptList.add(concept);
+        OrderService orderService = Context.getOrderService();
+        List<Order> ordersToUpdate = orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
+        return ordersToUpdate;
+    }
+
+    @Override
+    public void updateOrders(int oldConceptId, int newConceptId) {
+        Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
+        Concept newConcept = Context.getConceptService().getConcept(newConceptId);
+        List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
+        for (Order o : ordersToUpdate) {
+            o.setConcept(newConcept);
+        }
+    }
 
     /**
      * 
@@ -200,5 +223,28 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 			o.setValueCoded(newConcept);
 			obsService.saveObs(o, msg);
 		}
+    }
+
+
+    /**
+     * @param oldConcept
+     * @param newConcept
+     */
+    public void updatePrograms(Concept oldConcept, Concept newConcept) {
+        List<Program> programsToUpdate = this.getProgramsByConcept(oldConcept);
+        List<ProgramWorkflow> programWorkflowsToUpdate = this.getProgramWorkflowsByConcept(oldConcept);
+        List<ProgramWorkflowState> programWorkflowStatesToUpdate = this.getProgramWorkflowStatesByConcept(oldConcept);
+
+        for (Program p : programsToUpdate) {
+            p.setConcept(newConcept);
+        }
+
+        for (ProgramWorkflow pw : programWorkflowsToUpdate) {
+            pw.setConcept(newConcept);
+        }
+
+        for (ProgramWorkflowState pws : programWorkflowStatesToUpdate) {
+            pws.setConcept(newConcept);
+        }
     }
 }

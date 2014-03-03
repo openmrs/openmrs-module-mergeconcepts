@@ -15,12 +15,8 @@ package org.openmrs.module.mergeconcepts.api.db;
 
 import java.util.List;
 
-import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.Program;
-import org.openmrs.ProgramWorkflow;
+import org.openmrs.*;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
-import org.openmrs.ProgramWorkflowState;
 
 
 /**
@@ -44,4 +40,12 @@ public interface MergeConceptsDAO {
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept);
 	
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
+
+    public void updateOrders(int oldConceptId, int newConceptId);
+
+    public List<Order> getMatchingOrders(Concept concept);
+
+    public void updatePrograms(Concept oldConcept, Concept newConcept);
+
+
 }
