@@ -60,22 +60,6 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
 	@Override
-	public List<Program> getProgramsByConcept(Concept concept) {
-		return dao.getProgramsByConcept(concept);
-	}
-
-	@Override
-	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept) {
-		return dao.getProgramWorkflowsByConcept(concept);
-	}
-
-	@Override
-	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(
-			Concept concept) {
-        return dao.getProgramWorkflowStatesByConcept(concept);
-	}
-
-	@Override
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
         return dao.getDrugsByIngredient(ingredient);
 	}
