@@ -21,16 +21,15 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.*;
-import org.openmrs.api.APIException;
-import org.openmrs.api.ConceptService;
-import org.openmrs.api.ObsService;
-import org.openmrs.api.OrderService;
+import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * It is a default implementation of  {@link MergeConceptsDAO}.
@@ -246,5 +245,39 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         for (ProgramWorkflowState pws : programWorkflowStatesToUpdate) {
             pws.setConcept(newConcept);
         }
+    }
+
+    @Override
+    public void updateFields(int oldConceptId, int newConceptId) {
+        Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
+        Concept newConcept = Context.getConceptService().getConcept(newConceptId);
+
+        String newConceptName = newConcept.getName().toString();
+        String newDescription = newConcept.getDescription().toString();
+
+        Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);
+        FormService formService = Context.getFormService();
+        for (FormField formField : formFieldsToUpdate) {
+            Field field = formField.getField();
+            field.setConcept(newConcept);
+            field.setName(newConceptName);
+            field.setDescription(newDescription);
+
+            formService.saveField(field);
+            formField.setField(field);
+            formService.saveFormField(formField);
+            formService.saveForm(formField.getForm());
+        }
+    }
+
+    @Override
+    public Set<FormField> getMatchingFormFields(Concept concept) {
+        Set<FormField> formFields = new HashSet<FormField>();
+        List<Form> allForms = Context.getFormService().getFormsContainingConcept(concept); //instead of Context.getFormService().getAllForms();
+        //FormFields with old concept (might be a better way to do this)
+        for (Form f : allForms) {
+            formFields.add(Context.getFormService().getFormField(f, concept));
+        }
+        return formFields;
     }
 }

@@ -14,6 +14,7 @@
 package org.openmrs.module.mergeconcepts.api.db;
 
 import java.util.List;
+import java.util.Set;
 
 import org.openmrs.*;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
@@ -47,5 +48,9 @@ public interface MergeConceptsDAO {
 
     public void updatePrograms(Concept oldConcept, Concept newConcept);
 
+    void updateFields(int oldConceptId, int newConceptId);
+
+    public Set<FormField> getMatchingFormFields(Concept concept);
 
 }
+

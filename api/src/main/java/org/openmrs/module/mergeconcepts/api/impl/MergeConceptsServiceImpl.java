@@ -14,6 +14,7 @@
 package org.openmrs.module.mergeconcepts.api.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import org.openmrs.*;
 import org.openmrs.api.impl.BaseOpenmrsService;
@@ -59,7 +60,12 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     	dao.updateObs(oldConceptId, newConceptId);
     }
 
-	@Override
+    @Override
+    public void updateFields(int oldConceptId, int newConceptId) {
+        dao.updateFields(oldConceptId, newConceptId);
+    }
+
+    @Override
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
         return dao.getDrugsByIngredient(ingredient);
 	}
@@ -83,5 +89,11 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     public List<Program> getMatchingPrograms(Concept concept) {
         return dao.getProgramsByConcept(concept);
     }
+
+    @Override
+    public Set<FormField> getMatchingFormFields(Concept concept) {
+        return dao.getMatchingFormFields(concept);
+    }
+
 
 }

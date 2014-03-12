@@ -174,7 +174,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             service.updateObs(oldConceptId, newConceptId);
 
             //FORMS
-            this.updateFormFields(oldConcept, newConcept);
+            service.updateFields(oldConceptId, newConceptId);
 
             //DRUGS
             this.updateDrugs(oldConcept, newConcept);
@@ -396,22 +396,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     }
 
 
-    public void updateFormFields(Concept oldConcept, Concept newConcept) {
-        Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);
-        FormService formService = Context.getFormService();
-        for (FormField f : formFieldsToUpdate) {
-            //update
-            Field field = f.getField();
-            field.setConcept(newConcept);
-
-            //save
-            formService.saveField(field);
-            f.setField(field);
-            formService.saveFormField(f);
-            formService.saveForm(f.getForm());
-        }
-    }
-
     public void updateDrugs(Concept oldConcept, Concept newConcept) {
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
         ConceptService conceptService = getConceptService();
@@ -502,7 +486,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
      */
     protected Set<Form> getMatchingForms(Concept concept) {
 
-        Set<FormField> formFields = this.getMatchingFormFields(concept);
+        Set<FormField> formFields = Context.getService(MergeConceptsService.class).getMatchingFormFields(concept);
         Set<Form> conceptForms = new HashSet<Form>();
 
         for (FormField f : formFields) {
@@ -517,15 +501,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         return conceptForms;
     }
 
-    protected Set<FormField> getMatchingFormFields(Concept concept) {
-        Set<FormField> formFields = new HashSet<FormField>();
-        List<Form> allForms = Context.getFormService().getFormsContainingConcept(concept); //instead of Context.getFormService().getAllForms();
-        //FormFields with old concept (might be a better way to do this)
-        for (Form f : allForms) {
-            formFields.add(Context.getFormService().getFormField(f, concept));
-        }
-        return formFields;
-    }
+
 
     protected List<Drug> getMatchingDrugs(Concept concept) {
         return getConceptService().getDrugsByConcept(concept);

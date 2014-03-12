@@ -22,13 +22,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.openmrs.Concept;
-import org.openmrs.Obs;
-import org.openmrs.Order;
-import org.openmrs.Program;
-import org.openmrs.api.ObsService;
-import org.openmrs.api.OrderService;
-import org.openmrs.api.ProgramWorkflowService;
+import org.openmrs.*;
+import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
@@ -93,6 +88,30 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 
         assertEquals(new Integer(newConceptId), orderWithId4.getConcept().getId());
         assertEquals(new Integer(newConceptId), orderWithId5.getConcept().getId());
+    }
+
+    @Test
+    public void updateFormFields_shouldUpdateFormFieldAttributes() throws Exception {
+        int newConceptId = 88;
+        int oldConceptId = 3;
+
+        ConceptService conceptService = Context.getConceptService();
+        String newName = conceptService.getConcept(newConceptId).getName().toString();
+        String newDescription = conceptService.getConcept(newConceptId).getDescription().toString();
+
+        mergeConceptsService.updateFields(oldConceptId, newConceptId);
+
+        int fieldId = 1;
+        FormService formService = Context.getFormService();
+        Field field = formService.getField(fieldId);
+
+        String updatedName = field.getName();
+        String updatedDescription = field.getDescription();
+        int updatedConceptId = field.getConcept().getId();
+
+        assertEquals(newConceptId, updatedConceptId);
+        assertEquals(newName, updatedName);
+        assertEquals(newDescription, updatedDescription);
     }
 
 

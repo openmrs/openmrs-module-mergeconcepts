@@ -14,15 +14,11 @@
 package org.openmrs.module.mergeconcepts.api;
 
 import java.util.List;
+import java.util.Set;
 
-import org.openmrs.Concept;
-import org.openmrs.Drug;
-import org.openmrs.Program;
-import org.openmrs.ProgramWorkflow;
-import org.openmrs.ProgramWorkflowState;
+import org.openmrs.*;
 import org.openmrs.api.OpenmrsService;
 import org.springframework.transaction.annotation.Transactional;
-import org.openmrs.Order;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
@@ -43,6 +39,8 @@ public interface MergeConceptsService extends OpenmrsService {
 
 	public void updateObs(Integer oldConceptId, Integer newConceptId);
 
+    public void updateFields(int oldConceptId, int newConceptId);
+
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
 
     void updateOrders(int oldConceptId, int newConceptId);
@@ -52,4 +50,6 @@ public interface MergeConceptsService extends OpenmrsService {
     public void updatePrograms(Concept oldConcept, Concept newConcept);
 
     public List<Program> getMatchingPrograms(Concept concept);
+
+    public Set<FormField> getMatchingFormFields(Concept concept);
 }
