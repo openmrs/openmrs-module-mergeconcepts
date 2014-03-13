@@ -52,4 +52,7 @@ public interface MergeConceptsService extends OpenmrsService {
     public List<Program> getMatchingPrograms(Concept concept);
 
     public Set<FormField> getMatchingFormFields(Concept concept);
+
+    public Set<Form> getMatchingForms(Concept concept);
+
 }

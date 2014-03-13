@@ -23,6 +23,7 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.*;
 import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -279,5 +280,23 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
             formFields.add(Context.getFormService().getFormField(f, concept));
         }
         return formFields;
+    }
+
+    @Override
+    public Set<Form> getMatchingForms(Concept concept) {
+
+        Set<FormField> formFields = Context.getService(MergeConceptsService.class).getMatchingFormFields(concept);
+        Set<Form> conceptForms = new HashSet<Form>();
+
+        for (FormField f : formFields) {
+
+            //forms that ref oldConcept
+            if (!f.getForm().equals(null)) {
+                conceptForms.add(f.getForm());
+            }
+
+        }
+
+        return conceptForms;
     }
 }

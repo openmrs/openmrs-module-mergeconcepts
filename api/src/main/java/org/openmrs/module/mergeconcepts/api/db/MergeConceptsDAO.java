@@ -52,5 +52,7 @@ public interface MergeConceptsDAO {
 
     public Set<FormField> getMatchingFormFields(Concept concept);
 
+    public Set<Form> getMatchingForms(Concept concept);
+
 }
 

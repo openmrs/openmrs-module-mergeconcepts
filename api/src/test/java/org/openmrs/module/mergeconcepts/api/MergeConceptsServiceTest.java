@@ -114,7 +114,6 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         assertEquals(newDescription, updatedDescription);
     }
 
-
     private Order updateOrderWithConcept(int orderId, int conceptId) {
         OrderService orderService = Context.getOrderService();
         Order knownOrder = orderService.getOrder(orderId);

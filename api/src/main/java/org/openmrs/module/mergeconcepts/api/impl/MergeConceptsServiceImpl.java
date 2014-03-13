@@ -95,5 +95,9 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         return dao.getMatchingFormFields(concept);
     }
 
+    @Override
+    public Set<Form> getMatchingForms(Concept concept) {
+        return dao.getMatchingForms(concept);
+    }
 
 }
