@@ -81,8 +81,8 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     @Override
-    public void updatePrograms(Concept oldConcept, Concept newConcept) {
-        dao.updatePrograms( oldConcept,  newConcept);
+    public void updatePrograms(int oldConceptId, int newConceptId) {
+        dao.updatePrograms(oldConceptId, newConceptId);
     }
 
     @Override

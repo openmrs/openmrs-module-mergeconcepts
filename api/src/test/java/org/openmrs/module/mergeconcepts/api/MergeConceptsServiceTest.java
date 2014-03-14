@@ -114,6 +114,33 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         assertEquals(newDescription, updatedDescription);
     }
 
+    @Test
+    public void updateProgram_shouldUpdateProgramNameDescriptionAndId() throws Exception {
+        //program 2 references concept 10
+        //retire concept 10 in favor of concept 9
+
+        int newConceptId = 9;
+        int oldConceptId = 10;
+
+        ConceptService conceptService = Context.getConceptService();
+        String newName = conceptService.getConcept(newConceptId).getName().toString();
+        String newDescription = conceptService.getConcept(newConceptId).getDescription().toString();
+
+        mergeConceptsService.updatePrograms(oldConceptId, newConceptId);
+
+        int programId = 2;
+        ProgramWorkflowService programService = Context.getProgramWorkflowService();
+        Program program = programService.getProgram(programId);
+
+        String updatedName = program.getName();
+        String updatedDescription = program.getDescription();
+        int updatedConceptId = program.getConcept().getId();
+
+        assertEquals(newConceptId, updatedConceptId);
+        assertEquals(newName, updatedName);
+        assertEquals(newDescription, updatedDescription);
+    }
+
     private Order updateOrderWithConcept(int orderId, int conceptId) {
         OrderService orderService = Context.getOrderService();
         Order knownOrder = orderService.getOrder(orderId);

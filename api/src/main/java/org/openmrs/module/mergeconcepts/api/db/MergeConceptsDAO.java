@@ -46,7 +46,7 @@ public interface MergeConceptsDAO {
 
     public List<Order> getMatchingOrders(Concept concept);
 
-    public void updatePrograms(Concept oldConcept, Concept newConcept);
+    public void updatePrograms(int oldConceptId, int newConceptId);
 
     void updateFields(int oldConceptId, int newConceptId);
 
