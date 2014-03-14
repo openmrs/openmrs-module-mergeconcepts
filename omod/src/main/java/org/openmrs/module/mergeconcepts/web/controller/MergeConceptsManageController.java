@@ -142,8 +142,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
 
         // TODO: Make conceptType Enum
-        addConceptDetails(model, oldConceptId, oldConcept, "old");
-        addConceptDetails(model, newConceptId, newConcept, "new");
+        addConceptDetails(model, oldConceptId, "old");
+        addConceptDetails(model, newConceptId, "new");
 
         return "/module/mergeconcepts/preview";
     }
@@ -166,15 +166,15 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
         model.addAttribute("oldConceptId", oldConceptId);
         model.addAttribute("newConceptId", newConceptId);
-        model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
-        model.addAttribute("newForms", this.getMatchingForms(newConcept));
+        model.addAttribute("oldForms", service.getMatchingForms(oldConcept));
+        model.addAttribute("newForms", service.getMatchingForms(newConcept));
 
         try {
             //OBS
             service.updateObs(oldConceptId, newConceptId);
 
             //FORMS
-            this.updateFormFields(oldConcept, newConcept);
+            service.updateFields(oldConceptId, newConceptId);
 
             //DRUGS
             this.updateDrugs(oldConcept, newConcept);
@@ -214,110 +214,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @RequestMapping("/module/mergeconcepts/results")
     public void results(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
                         @RequestParam("newConceptId") Integer newConceptId) {
-
-        //redirect if something went wrong
-        ConceptService conceptService = getConceptService();
-
-        Concept oldConcept = conceptService.getConcept(oldConceptId);
-        Concept newConcept = conceptService.getConcept(newConceptId);
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        //preview drugs by name
-        List<String> oldDrugNames = new ArrayList<String>();
-        if (this.getMatchingDrugs(oldConcept) != null) {
-            for (Drug od : this.getMatchingDrugs(oldConcept)) {
-                oldDrugNames.add(od.getFullName(null));
-            }
-        }
-        List<String> newDrugNames = new ArrayList<String>();
-        if (this.getMatchingDrugs(newConcept) != null) {
-            for (Drug nd : this.getMatchingDrugs(newConcept)) {
-                newDrugNames.add(nd.getFullName(null));
-            }
-        }
-        model.addAttribute("oldDrugs", oldDrugNames);
-        model.addAttribute("newDrugs", newDrugNames);
-
-        model.addAttribute("oldConceptId", oldConceptId);
-        model.addAttribute("newConceptId", newConceptId);
-
-        if (this.getMatchingForms(oldConcept) != null)
-            model.addAttribute("oldForms", this.getMatchingForms(oldConcept));
-
-        if (this.getMatchingForms(newConcept) != null)
-            model.addAttribute("newForms", this.getMatchingForms(newConcept));
-
-        if (service.getMatchingOrders(oldConcept) != null)
-            model.addAttribute("oldOrders", service.getMatchingOrders(oldConcept));
-
-        if (service.getMatchingOrders(newConcept) != null)
-            model.addAttribute("newOrders", service.getMatchingOrders(newConcept));
-
-        if (service.getMatchingPrograms(oldConcept) != null)
-            model.addAttribute("oldPrograms", service.getMatchingPrograms(oldConcept));
-
-        if (service.getMatchingPrograms(newConcept) != null)
-            model.addAttribute("newPrograms", service.getMatchingPrograms(newConcept));
-
-        //preview concept answers by id
-        List<Integer> oldConceptAnswerIds = new ArrayList<Integer>();
-        if (this.getMatchingConceptAnswers(oldConcept) != null) {
-            for (ConceptAnswer a : this.getMatchingConceptAnswers(oldConcept)) {
-                oldConceptAnswerIds.add(a.getConceptAnswerId());
-            }
-        }
-
-        List<Integer> newConceptAnswerIds = new ArrayList<Integer>();
-        if (this.getMatchingConceptAnswers(newConcept) != null) {
-            for (ConceptAnswer b : this.getMatchingConceptAnswers(newConcept)) {
-
-            }
-        }
-
-        model.addAttribute("oldConceptAnswers", oldConceptAnswerIds);
-        model.addAttribute("newConceptAnswers", this.getMatchingConceptAnswers(newConcept));
-
-        List<Integer> oldConceptSetIds = new ArrayList<Integer>();
-        if (this.getMatchingConceptSets(oldConcept) != null) {
-            for (ConceptSet c : this.getMatchingConceptSets(oldConcept)) {
-                oldConceptSetIds.add(c.getConceptSetId());
-            }
-
-            if (this.getMatchingConceptSetConcepts(oldConcept) != null) {
-                for (ConceptSet cs : this.getMatchingConceptSetConcepts(oldConcept)) {
-                    oldConceptSetIds.add(cs.getConceptSetId());
-                }
-            }
-        }
-
-        List<Integer> newConceptSetIds = new ArrayList<Integer>();
-        if (this.getMatchingConceptSets(newConcept) != null) {
-            for (ConceptSet d : this.getMatchingConceptSets(newConcept)) {
-                newConceptSetIds.add(d.getConceptSetId());
-            }
-
-            if (this.getMatchingConceptSetConcepts(newConcept) != null) {
-                for (ConceptSet ds : this.getMatchingConceptSetConcepts(newConcept)) {
-                    newConceptSetIds.add(ds.getConceptSetId());
-                }
-            }
-        }
-
-        model.addAttribute("oldConceptSets", oldConceptSetIds);
-        model.addAttribute("newConceptSets", newConceptSetIds);
-
-        if (this.getMatchingPersonAttributeTypes(oldConcept) != null)
-            model.addAttribute("oldPersonAttributeTypes", this.getMatchingPersonAttributeTypes(oldConcept));
-
-        if (this.getMatchingPersonAttributeTypes(newConcept) != null)
-            model.addAttribute("newPersonAttributeTypes", this.getMatchingPersonAttributeTypes(newConcept));
-
-        int newObsCount = service.getObsCount(newConceptId);
-        int oldObsCount = service.getObsCount(oldConceptId);
-
-        model.addAttribute("newObsCount", newObsCount);
-        model.addAttribute("oldObsCount", oldObsCount);
+        addConceptDetails(model, newConceptId, "new");
+        addConceptDetails(model, oldConceptId, "old");
     }
 
     /**
@@ -346,7 +244,11 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         return getConceptService().getConcept(oldConceptId);
     }
 
-    protected void addConceptDetails(ModelMap model, Integer conceptId, Concept concept, String conceptType) {
+    protected void addConceptDetails(ModelMap model, Integer conceptId, String conceptType) {
+        ConceptService conceptService = getConceptService();
+
+        Concept concept = conceptService.getConcept(conceptId);
+
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
 
         List<String> drugNames = new ArrayList<String>();
@@ -357,8 +259,9 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
         model.addAttribute(conceptType + "Drugs", drugNames);
         model.addAttribute(conceptType + "ConceptId", conceptId);
-        if (this.getMatchingForms(concept) != null)
-            model.addAttribute(conceptType + "Forms", this.getMatchingForms(concept));
+
+        if (service.getMatchingForms(concept) != null)
+            model.addAttribute(conceptType + "Forms", service.getMatchingForms(concept));
 
         if (service.getMatchingOrders(concept) != null)
             model.addAttribute(conceptType + "Orders", service.getMatchingOrders(concept));
@@ -395,22 +298,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         model.addAttribute(conceptType + "ObsCount", obsCount);
     }
 
-
-    public void updateFormFields(Concept oldConcept, Concept newConcept) {
-        Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);
-        FormService formService = Context.getFormService();
-        for (FormField f : formFieldsToUpdate) {
-            //update
-            Field field = f.getField();
-            field.setConcept(newConcept);
-
-            //save
-            formService.saveField(field);
-            f.setField(field);
-            formService.saveFormField(f);
-            formService.saveForm(f.getForm());
-        }
-    }
 
     public void updateDrugs(Concept oldConcept, Concept newConcept) {
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
@@ -500,32 +387,9 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
      * @should return an empty List if no matches
      * @should return an empty list if Concept is null
      */
-    protected Set<Form> getMatchingForms(Concept concept) {
 
-        Set<FormField> formFields = this.getMatchingFormFields(concept);
-        Set<Form> conceptForms = new HashSet<Form>();
 
-        for (FormField f : formFields) {
 
-            //forms that ref oldConcept
-            if (!f.getForm().equals(null)) {
-                conceptForms.add(f.getForm());
-            }
-
-        }
-
-        return conceptForms;
-    }
-
-    protected Set<FormField> getMatchingFormFields(Concept concept) {
-        Set<FormField> formFields = new HashSet<FormField>();
-        List<Form> allForms = Context.getFormService().getFormsContainingConcept(concept); //instead of Context.getFormService().getAllForms();
-        //FormFields with old concept (might be a better way to do this)
-        for (Form f : allForms) {
-            formFields.add(Context.getFormService().getFormField(f, concept));
-        }
-        return formFields;
-    }
 
     protected List<Drug> getMatchingDrugs(Concept concept) {
         return getConceptService().getDrugsByConcept(concept);
