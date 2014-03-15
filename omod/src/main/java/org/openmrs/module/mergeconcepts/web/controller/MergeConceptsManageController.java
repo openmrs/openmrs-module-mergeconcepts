@@ -183,7 +183,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             service.updateOrders(oldConceptId, newConceptId);
 
             //PROGRAMS
-            service.updatePrograms(oldConcept, newConcept);
+            service.updatePrograms(oldConceptId, newConceptId);
 
             //CONCEPT SETS
             this.updateConceptSets(oldConcept, newConcept);
@@ -207,7 +207,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     /**
      * Method is called after executeMerge() is finished
      *
-     * @param map
+     * @param oldConceptId
      * @should display updated references to oldConcept and newConcept
      */
     @Authorized({PrivilegeConstants.VIEW_CONCEPTS, PrivilegeConstants.VIEW_FORMS})

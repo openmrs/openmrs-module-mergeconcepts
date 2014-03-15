@@ -47,7 +47,7 @@ public interface MergeConceptsService extends OpenmrsService {
 
     public List<Order> getMatchingOrders(Concept concept);
 
-    public void updatePrograms(Concept oldConcept, Concept newConcept);
+    public void updatePrograms(int oldConceptId, int newConceptId);
 
     public List<Program> getMatchingPrograms(Concept concept);
 

@@ -194,7 +194,8 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
     /**
      * 
-     * @param conceptId
+     * @param oldConceptId
+     * @param newConceptId
      * @return
      */
     @Transactional
@@ -227,16 +228,20 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
 
     /**
-     * @param oldConcept
-     * @param newConcept
+     * @param oldConceptId
+     * @param newConceptId
      */
-    public void updatePrograms(Concept oldConcept, Concept newConcept) {
+    public void updatePrograms(int oldConceptId, int newConceptId) {
+        Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
+        Concept newConcept = Context.getConceptService().getConcept(newConceptId);
         List<Program> programsToUpdate = this.getProgramsByConcept(oldConcept);
         List<ProgramWorkflow> programWorkflowsToUpdate = this.getProgramWorkflowsByConcept(oldConcept);
         List<ProgramWorkflowState> programWorkflowStatesToUpdate = this.getProgramWorkflowStatesByConcept(oldConcept);
 
         for (Program p : programsToUpdate) {
             p.setConcept(newConcept);
+            p.setName(newConcept.getName().toString());
+            p.setDescription(newConcept.getDescription().toString());
         }
 
         for (ProgramWorkflow pw : programWorkflowsToUpdate) {
