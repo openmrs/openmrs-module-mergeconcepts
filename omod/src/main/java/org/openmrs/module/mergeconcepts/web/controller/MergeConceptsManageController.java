@@ -300,8 +300,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
 
     public void updateDrugs(Concept oldConcept, Concept newConcept) {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        ConceptService conceptService = getConceptService();
 
         List<Drug> drugsToUpdate = this.getMatchingDrugs(oldConcept);
 
