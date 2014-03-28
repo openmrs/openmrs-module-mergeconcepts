@@ -8,12 +8,15 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.Concept;
+import org.openmrs.Drug;
 import org.openmrs.Obs;
+import org.openmrs.api.ConceptService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.api.context.Context;
 import org.springframework.ui.ModelMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
@@ -67,8 +70,27 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertEquals(knownConceptId, newConcept.getConceptId());
     }
 
+    @Test
+    public void updateDrugs_ShouldUpdateConceptIdInDrug(){
+        int newConceptId = 88;
+        int oldConceptId = 792;
+        int drugId = 2;
 
-	@Ignore
+        ConceptService conceptService = Context.getConceptService();
+        Concept oldConcept = conceptService.getConcept(oldConceptId);
+        Concept newConcept = conceptService.getConcept(newConceptId);
+        Drug drug = conceptService.getDrug(drugId);
+
+        assertFalse(newConceptId == drug.getConcept().getConceptId());
+
+        controller.updateDrugs(oldConcept, newConcept);
+
+        Drug updatedDrug = conceptService.getDrug(drugId);
+
+        assertTrue(newConceptId == updatedDrug.getConcept().getConceptId());
+    }
+
+    @Ignore
 	@Test
 	public void results_shouldDisplayUpdatedReferencesToOldConceptAndNewConcept()
 			throws Exception {

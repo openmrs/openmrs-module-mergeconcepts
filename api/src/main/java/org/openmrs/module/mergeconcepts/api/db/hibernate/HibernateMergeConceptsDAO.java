@@ -259,15 +259,20 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         Concept newConcept = Context.getConceptService().getConcept(newConceptId);
 
         String newConceptName = newConcept.getName().toString();
-        String newDescription = newConcept.getDescription().toString();
 
         Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);
         FormService formService = Context.getFormService();
+
         for (FormField formField : formFieldsToUpdate) {
             Field field = formField.getField();
             field.setConcept(newConcept);
             field.setName(newConceptName);
-            field.setDescription(newDescription);
+
+            ConceptDescription newDescription = newConcept.getDescription();
+
+            if (newDescription != null) {
+                field.setDescription(newDescription.toString());
+            }
 
             formService.saveField(field);
             formField.setField(field);
