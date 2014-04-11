@@ -141,6 +141,23 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         assertEquals(newDescription, updatedDescription);
     }
 
+
+    @Test
+    public void getDrugsByRouteConcept() throws Exception {
+
+        Concept route = Context.getConceptService().getConcept(22);
+        Drug drugToWhichWeAddRoute = Context.getConceptService().getDrug(11);
+        drugToWhichWeAddRoute.setRoute(route);
+
+        Context.getConceptService().saveDrug(drugToWhichWeAddRoute);
+
+        List<Drug> drugs = mergeConceptsService.getDrugsByRouteConcept(route);
+
+        assertEquals(1, drugs.size());
+        assertEquals( route.getConceptId(), drugs.get(0).getRoute().getConceptId());
+    }
+
+
     private Order updateOrderWithConcept(int orderId, int conceptId) {
         OrderService orderService = Context.getOrderService();
         Order knownOrder = orderService.getOrder(orderId);

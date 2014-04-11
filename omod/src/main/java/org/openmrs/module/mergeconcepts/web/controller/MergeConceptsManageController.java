@@ -9,19 +9,10 @@ import org.openmrs.Concept;
 import org.openmrs.ConceptAnswer;
 import org.openmrs.ConceptSet;
 import org.openmrs.Drug;
-import org.openmrs.Field;
-import org.openmrs.Form;
-import org.openmrs.FormField;
-import org.openmrs.Order;
 import org.openmrs.PersonAttributeType;
-import org.openmrs.Program;
-import org.openmrs.ProgramWorkflow;
-import org.openmrs.ProgramWorkflowState;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.FormService;
-import org.openmrs.api.OrderService;
 import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
@@ -35,9 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Controller
 public class MergeConceptsManageController extends BaseOpenmrsObject {
@@ -252,8 +241,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
 
         List<String> drugNames = new ArrayList<String>();
-        if (this.getMatchingDrugs(concept) != null) {
-            for (Drug od : this.getMatchingDrugs(concept)) {
+        if (this.getMatchingDrugsByConcept(concept) != null) {
+            for (Drug od : this.getMatchingDrugsByConcept(concept)) {
                 drugNames.add(od.getFullName(null));
             }
         }
@@ -300,8 +289,9 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
 
     public void updateDrugs(Concept oldConcept, Concept newConcept) {
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
 
-        List<Drug> drugsToUpdate = this.getMatchingDrugs(oldConcept);
+        List<Drug> drugsToUpdate = this.getMatchingDrugsByConcept(oldConcept);
 
         if (drugsToUpdate != null) {
             for (Drug d : drugsToUpdate) {
@@ -309,16 +299,13 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             }
         }
 
-        //service.updateDrugRoutes(oldConcept.getConceptId(), newConcept.getConceptId());
-        /**
-         * TODO need to fix hql in service before this will work
-         List<Drug> dosageFormsToUpdate = new ArrayList<Drug>();
+        List<Drug> drugsByRouteConcept =  service.getDrugsByRouteConcept(oldConcept);
 
-         if(service.getDosageForms(oldConcept.getConceptId())!=null){
-         for (Integer d : service.getDosageForms(oldConcept.getConceptId())){
-         dosageFormsToUpdate.addAll(conceptService.getDrugsByConcept(conceptService.getConcept(d)));
-         }
-         }*/
+        if (drugsByRouteConcept != null) {
+            for (Drug d : drugsByRouteConcept) {
+                d.setRoute(newConcept);
+            }
+        }
 
     }
 
@@ -389,7 +376,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
 
 
-    protected List<Drug> getMatchingDrugs(Concept concept) {
+    protected List<Drug> getMatchingDrugsByConcept(Concept concept) {
         return getConceptService().getDrugsByConcept(concept);
     }
 
