@@ -90,7 +90,29 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertTrue(newConceptId == updatedDrug.getConcept().getConceptId());
     }
 
-    @Ignore
+    @Test
+    public void updateDrugs_ShouldUpdateRouteConceptIdInDrug(){
+        int oldRouteConceptId = 22;
+        int newRouteConceptId = 23;
+        int drugId = 11;
+
+        Concept newRoute = Context.getConceptService().getConcept(newRouteConceptId);
+        Concept oldRoute = Context.getConceptService().getConcept(oldRouteConceptId);
+
+        Drug drugToWhichWeAddRoute = Context.getConceptService().getDrug(drugId);
+        drugToWhichWeAddRoute.setRoute(oldRoute);
+
+        Context.getConceptService().saveDrug(drugToWhichWeAddRoute);
+
+        assertTrue(oldRouteConceptId == drugToWhichWeAddRoute.getRoute().getConceptId());
+
+        controller.updateDrugs(oldRoute, newRoute);
+
+        Drug updatedDrug = Context.getConceptService().getDrug(drugId);
+
+        assertEquals(new Integer(newRouteConceptId),  updatedDrug.getRoute().getConceptId() );
+    }
+
 	@Test
 	public void results_shouldDisplayUpdatedReferencesToOldConceptAndNewConcept()
 			throws Exception {
@@ -119,4 +141,5 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
                 numObsWithOldConceptId);
 
 	}
+
 }

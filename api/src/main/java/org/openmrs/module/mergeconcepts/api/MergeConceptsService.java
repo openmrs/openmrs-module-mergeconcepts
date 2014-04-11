@@ -55,4 +55,6 @@ public interface MergeConceptsService extends OpenmrsService {
 
     public Set<Form> getMatchingForms(Concept concept);
 
+    public List<Drug> getDrugsByRouteConcept(Concept concept);
+
 }
