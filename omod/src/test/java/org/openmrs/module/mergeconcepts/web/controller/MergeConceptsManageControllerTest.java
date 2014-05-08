@@ -1,23 +1,18 @@
 package org.openmrs.module.mergeconcepts.web.controller;
 
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
-import org.openmrs.Obs;
 import org.openmrs.api.ConceptService;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.ui.ModelMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiveTest{
@@ -82,8 +77,8 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         Drug drug = conceptService.getDrug(drugId);
 
         assertFalse(newConceptId == drug.getConcept().getConceptId());
-
-        controller.updateDrugs(oldConcept, newConcept);
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(oldConcept, newConcept);
 
         Drug updatedDrug = conceptService.getDrug(drugId);
 
@@ -106,7 +101,9 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 
         assertTrue(oldRouteConceptId == drugToWhichWeAddRoute.getRoute().getConceptId());
 
-        controller.updateDrugs(oldRoute, newRoute);
+
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(oldRoute, newRoute);
 
         Drug updatedDrug = Context.getConceptService().getDrug(drugId);
 

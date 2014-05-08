@@ -13,27 +13,171 @@
  */
 package org.openmrs.module.mergeconcepts.api.impl;
 
-import java.util.List;
-import java.util.Set;
-
-import org.openmrs.*;
-import org.openmrs.api.impl.BaseOpenmrsService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.*;
+import org.openmrs.api.ConceptService;
+import org.openmrs.api.PersonService;
+import org.openmrs.api.context.Context;
+import org.openmrs.api.impl.BaseOpenmrsService;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 /**
  * It is a default implementation of {@link MergeConceptsService}.
  */
+
 public class MergeConceptsServiceImpl extends BaseOpenmrsService implements MergeConceptsService {
 	
 	protected final Log log = LogFactory.getLog(this.getClass());
 	
 	private MergeConceptsDAO dao;
-	
-	/**
+
+    public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {
+        List<ConceptAnswer> conceptAnswers = getMatchingConceptAnswerAnswers(concept);
+        for (ConceptAnswer c : getMatchingConceptAnswerQuestions(concept)) {
+            conceptAnswers.add(c);
+        }
+        return conceptAnswers;
+    }
+
+    public List<ConceptSet> getMatchingConceptSetConcepts(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getSetsContainingConcept(concept);
+    }
+
+    public List<ConceptSet> getMatchingConceptSets(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getConceptSetsByConcept(concept);
+    }
+
+    public List<ConceptAnswer> getMatchingConceptAnswerQuestions(Concept concept) {
+        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
+        for (ConceptAnswer ca : concept.getAnswers()) {
+            matchingConceptAnswers.add(ca);
+        }
+        return matchingConceptAnswers;
+    }
+
+    public List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
+
+        //Concepts that are questions answered by this concept, and possibly others
+        for (Concept c : conceptService.getConceptsByAnswer(concept)) {
+            //ConceptAnswers of all possible answers to question concept above
+            for (ConceptAnswer a : c.getAnswers()) {
+
+                //only add ConceptAnswers with an answer matching this concept
+                if (a.getAnswerConcept().equals(concept)) {
+                    matchingConceptAnswers.add(a);
+                }
+            }
+        }
+
+        return matchingConceptAnswers;
+    }
+
+    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept) {
+        List<PersonAttributeType> matchingPersonAttributeTypes = getMatchingPersonAttributeTypes(oldConcept);
+
+        for (PersonAttributeType m : matchingPersonAttributeTypes) {
+            m.setForeignKey(newConcept.getConceptId());
+        }
+    }
+
+    public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept) {
+        PersonService personService = Context.getPersonService();
+        List<PersonAttributeType> allPersonAttributeTypes = personService.getAllPersonAttributeTypes();
+        List<PersonAttributeType> matchingPersonAttributeTypes = new ArrayList<PersonAttributeType>();
+
+        for (PersonAttributeType p : allPersonAttributeTypes) {
+            if (p.getFormat().toLowerCase().contains("concept")) {
+                if (p.getForeignKey() != null && p.getForeignKey().equals(concept.getConceptId())) {
+                    matchingPersonAttributeTypes.add(p);
+                }
+            }
+        }
+
+        return matchingPersonAttributeTypes;
+    }
+
+    /**
+     * ConceptAnswers contain references to concepts
+     *  @param oldConcept
+     * @param newConcept
+     */
+    public void updateConceptAnswers(Concept oldConcept, Concept newConcept) {
+        List<ConceptAnswer> conceptAnswerQuestionsToUpdate = getMatchingConceptAnswerQuestions(oldConcept);
+
+        //update concept_id
+        for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate) {
+            caq.setConcept(newConcept);
+        }
+
+        List<ConceptAnswer> conceptAnswerAnswersToUpdate = getMatchingConceptAnswerAnswers(oldConcept);
+
+        //update answer_concepts
+        for (ConceptAnswer caa : conceptAnswerAnswersToUpdate) {
+            caa.setAnswerConcept(newConcept);
+        }
+    }
+
+    public void updateConceptSets(Concept oldConcept, Concept newConcept) {
+        //update concept_id
+        List<ConceptSet> conceptSetConceptsToUpdate = getMatchingConceptSetConcepts(oldConcept);
+        if (getMatchingConceptSetConcepts(oldConcept) != null) {
+            for (ConceptSet csc : conceptSetConceptsToUpdate) {
+                csc.setConcept(newConcept);
+            }
+        }
+
+        //concept_set
+        List<ConceptSet> conceptSetsToUpdate = getMatchingConceptSets(oldConcept);
+        if (getMatchingConceptSets(oldConcept) != null) {
+            for (ConceptSet cs : conceptSetsToUpdate) {
+                cs.setConceptSet(newConcept);
+            }
+        }
+    }
+
+    public List<Drug> getMatchingDrugsByConcept(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getDrugsByConcept(concept);
+    }
+
+    public void updateDrugs(Concept oldConcept, Concept newConcept) {
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+
+        List<Drug> drugsToUpdate = this.getMatchingDrugsByConcept(oldConcept);
+        List<Drug> drugsByRouteConcept =  service.getDrugsByRouteConcept(oldConcept);
+
+        service.setConceptsAndRoutes(newConcept, drugsToUpdate, drugsByRouteConcept);
+
+    }
+
+    @Override
+    public void setConceptsAndRoutes(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept) {
+        if (drugsToUpdate != null) {
+            for (Drug d : drugsToUpdate) {
+                d.setConcept(newConcept);
+            }
+        }
+
+
+        if (drugsByRouteConcept != null) {
+            for (Drug d : drugsByRouteConcept) {
+                d.setRoute(newConcept);
+            }
+        }
+    }
+
+    /**
      * @param dao the dao to set
      */
     public void setDao(MergeConceptsDAO dao) {
@@ -103,5 +247,32 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     @Override
     public List<Drug> getDrugsByRouteConcept(Concept concept) {
         return dao.getDrugsByRouteConcept(concept);
+    }
+
+    @Override
+    public void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept) {
+        //OBS
+        updateObs(oldConceptId, newConceptId);
+
+        //FORMS
+        updateFields(oldConceptId, newConceptId);
+
+        //DRUGS
+        updateDrugs(oldConcept, newConcept);
+
+        //ORDERS
+        updateOrders(oldConceptId, newConceptId);
+
+        //PROGRAMS
+        updatePrograms(oldConceptId, newConceptId);
+
+        //CONCEPT SETS
+        updateConceptSets(oldConcept, newConcept);
+
+        //CONCEPT ANSWERS
+        updateConceptAnswers(oldConcept, newConcept);
+
+        //PERSON ATTRIBUTE TYPES
+        updatePersonAttributeTypes(oldConcept, newConcept);
     }
 }
