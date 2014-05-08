@@ -33,17 +33,104 @@ import java.util.Set;
  */
 
 public class MergeConceptsServiceImpl extends BaseOpenmrsService implements MergeConceptsService {
-	
+
 	protected final Log log = LogFactory.getLog(this.getClass());
-	
+
 	private MergeConceptsDAO dao;
 
-    public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {
-        List<ConceptAnswer> conceptAnswers = getMatchingConceptAnswerAnswers(concept);
-        for (ConceptAnswer c : getMatchingConceptAnswerQuestions(concept)) {
-            conceptAnswers.add(c);
+    @Override
+    public void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept) {
+        //OBS
+        updateObs(oldConceptId, newConceptId);
+
+        //FORMS
+        updateFields(oldConceptId, newConceptId);
+
+        //DRUGS
+        updateDrugs(oldConcept, newConcept);
+
+        //ORDERS
+        updateOrders(oldConceptId, newConceptId);
+
+        //PROGRAMS
+        updatePrograms(oldConceptId, newConceptId);
+
+        //CONCEPT SETS
+        updateConceptSets(oldConcept, newConcept);
+
+        //CONCEPT ANSWERS
+        updateConceptAnswers(oldConcept, newConcept);
+
+        //PERSON ATTRIBUTE TYPES
+        updatePersonAttributeTypes(oldConcept, newConcept);
+    }
+
+    @Transactional
+    public void updateObs(Integer oldConceptId, Integer newConceptId){
+        dao.updateObs(oldConceptId, newConceptId);
+    }
+
+    @Override
+    public void updateFields(int oldConceptId, int newConceptId) {
+        dao.updateFields(oldConceptId, newConceptId);
+    }
+
+    public void updateDrugs(Concept oldConcept, Concept newConcept) {
+        List<Drug> drugsToUpdate = getMatchingDrugsByConcept(oldConcept);
+        List<Drug> drugsByRouteConcept = getDrugsByRouteConcept(oldConcept);
+
+        setConceptsAndRoutes(newConcept, drugsToUpdate, drugsByRouteConcept);
+
+    }
+
+    public List<Drug> getMatchingDrugsByConcept(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getDrugsByConcept(concept);
+    }
+
+
+    @Override
+    public List<Drug> getDrugsByRouteConcept(Concept concept) {
+        return dao.getDrugsByRouteConcept(concept);
+    }
+
+    @Override
+    public void setConceptsAndRoutes(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept) {
+        if (drugsToUpdate != null) {
+            for (Drug d : drugsToUpdate) {
+                d.setConcept(newConcept);
+            }
         }
-        return conceptAnswers;
+
+
+        if (drugsByRouteConcept != null) {
+            for (Drug d : drugsByRouteConcept) {
+                d.setRoute(newConcept);
+            }
+        }
+    }
+
+    @Override
+    public void updatePrograms(int oldConceptId, int newConceptId) {
+        dao.updatePrograms(oldConceptId, newConceptId);
+    }
+
+    public void updateConceptSets(Concept oldConcept, Concept newConcept) {
+        //update concept_id
+        List<ConceptSet> conceptSetConceptsToUpdate = getMatchingConceptSetConcepts(oldConcept);
+        if (conceptSetConceptsToUpdate != null) {
+            for (ConceptSet csc : conceptSetConceptsToUpdate) {
+                csc.setConcept(newConcept);
+            }
+        }
+
+        //concept_set
+        List<ConceptSet> conceptSetsToUpdate = getMatchingConceptSets(oldConcept);
+        if (conceptSetConceptsToUpdate != null) {
+            for (ConceptSet cs : conceptSetsToUpdate) {
+                cs.setConceptSet(newConcept);
+            }
+        }
     }
 
     public List<ConceptSet> getMatchingConceptSetConcepts(Concept concept) {
@@ -54,6 +141,27 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     public List<ConceptSet> getMatchingConceptSets(Concept concept) {
         ConceptService conceptService = Context.getConceptService();
         return conceptService.getConceptSetsByConcept(concept);
+    }
+
+    /**
+     * ConceptAnswers contain references to concepts
+     *  @param oldConcept
+     * @param newConcept
+     */
+    public void updateConceptAnswers(Concept oldConcept, Concept newConcept) {
+        List<ConceptAnswer> conceptAnswerQuestionsToUpdate = getMatchingConceptAnswerQuestions(oldConcept);
+
+        //update concept_id
+        for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate) {
+            caq.setConcept(newConcept);
+        }
+
+        List<ConceptAnswer> conceptAnswerAnswersToUpdate = getMatchingConceptAnswerAnswers(oldConcept);
+
+        //update answer_concepts
+        for (ConceptAnswer caa : conceptAnswerAnswersToUpdate) {
+            caa.setAnswerConcept(newConcept);
+        }
     }
 
     public List<ConceptAnswer> getMatchingConceptAnswerQuestions(Concept concept) {
@@ -107,74 +215,12 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         return matchingPersonAttributeTypes;
     }
 
-    /**
-     * ConceptAnswers contain references to concepts
-     *  @param oldConcept
-     * @param newConcept
-     */
-    public void updateConceptAnswers(Concept oldConcept, Concept newConcept) {
-        List<ConceptAnswer> conceptAnswerQuestionsToUpdate = getMatchingConceptAnswerQuestions(oldConcept);
-
-        //update concept_id
-        for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate) {
-            caq.setConcept(newConcept);
+    public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {
+        List<ConceptAnswer> conceptAnswers = getMatchingConceptAnswerAnswers(concept);
+        for (ConceptAnswer c : getMatchingConceptAnswerQuestions(concept)) {
+            conceptAnswers.add(c);
         }
-
-        List<ConceptAnswer> conceptAnswerAnswersToUpdate = getMatchingConceptAnswerAnswers(oldConcept);
-
-        //update answer_concepts
-        for (ConceptAnswer caa : conceptAnswerAnswersToUpdate) {
-            caa.setAnswerConcept(newConcept);
-        }
-    }
-
-    public void updateConceptSets(Concept oldConcept, Concept newConcept) {
-        //update concept_id
-        List<ConceptSet> conceptSetConceptsToUpdate = getMatchingConceptSetConcepts(oldConcept);
-        if (getMatchingConceptSetConcepts(oldConcept) != null) {
-            for (ConceptSet csc : conceptSetConceptsToUpdate) {
-                csc.setConcept(newConcept);
-            }
-        }
-
-        //concept_set
-        List<ConceptSet> conceptSetsToUpdate = getMatchingConceptSets(oldConcept);
-        if (getMatchingConceptSets(oldConcept) != null) {
-            for (ConceptSet cs : conceptSetsToUpdate) {
-                cs.setConceptSet(newConcept);
-            }
-        }
-    }
-
-    public List<Drug> getMatchingDrugsByConcept(Concept concept) {
-        ConceptService conceptService = Context.getConceptService();
-        return conceptService.getDrugsByConcept(concept);
-    }
-
-    public void updateDrugs(Concept oldConcept, Concept newConcept) {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        List<Drug> drugsToUpdate = this.getMatchingDrugsByConcept(oldConcept);
-        List<Drug> drugsByRouteConcept =  service.getDrugsByRouteConcept(oldConcept);
-
-        service.setConceptsAndRoutes(newConcept, drugsToUpdate, drugsByRouteConcept);
-
-    }
-
-    @Override
-    public void setConceptsAndRoutes(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept) {
-        if (drugsToUpdate != null) {
-            for (Drug d : drugsToUpdate) {
-                d.setConcept(newConcept);
-            }
-        }
-
-
-        if (drugsByRouteConcept != null) {
-            for (Drug d : drugsByRouteConcept) {
-                d.setRoute(newConcept);
-            }
-        }
+        return conceptAnswers;
     }
 
     /**
@@ -183,30 +229,20 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     public void setDao(MergeConceptsDAO dao) {
 	    this.dao = dao;
     }
-    
+
     /**
      * @return the dao
      */
     public MergeConceptsDAO getDao() {
 	    return dao;
     }
-    
+
     public int getObsCount(Integer conceptId){
     	return dao.getObsCount(conceptId);
     }
-    
+
     public List<Integer> getObsIds(Integer conceptId){
     	return dao.getObsIdsWithQuestionConcept(conceptId);
-    }
-    
-    @Transactional
-    public void updateObs(Integer oldConceptId, Integer newConceptId){
-    	dao.updateObs(oldConceptId, newConceptId);
-    }
-
-    @Override
-    public void updateFields(int oldConceptId, int newConceptId) {
-        dao.updateFields(oldConceptId, newConceptId);
     }
 
     @Override
@@ -225,11 +261,6 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     @Override
-    public void updatePrograms(int oldConceptId, int newConceptId) {
-        dao.updatePrograms(oldConceptId, newConceptId);
-    }
-
-    @Override
     public List<Program> getMatchingPrograms(Concept concept) {
         return dao.getProgramsByConcept(concept);
     }
@@ -242,37 +273,5 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     @Override
     public Set<Form> getMatchingForms(Concept concept) {
         return dao.getMatchingForms(concept);
-    }
-
-    @Override
-    public List<Drug> getDrugsByRouteConcept(Concept concept) {
-        return dao.getDrugsByRouteConcept(concept);
-    }
-
-    @Override
-    public void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept) {
-        //OBS
-        updateObs(oldConceptId, newConceptId);
-
-        //FORMS
-        updateFields(oldConceptId, newConceptId);
-
-        //DRUGS
-        updateDrugs(oldConcept, newConcept);
-
-        //ORDERS
-        updateOrders(oldConceptId, newConceptId);
-
-        //PROGRAMS
-        updatePrograms(oldConceptId, newConceptId);
-
-        //CONCEPT SETS
-        updateConceptSets(oldConcept, newConcept);
-
-        //CONCEPT ANSWERS
-        updateConceptAnswers(oldConcept, newConcept);
-
-        //PERSON ATTRIBUTE TYPES
-        updatePersonAttributeTypes(oldConcept, newConcept);
     }
 }

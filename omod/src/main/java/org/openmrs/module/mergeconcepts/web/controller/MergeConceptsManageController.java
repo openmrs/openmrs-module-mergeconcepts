@@ -24,6 +24,12 @@ import java.util.List;
 @Controller
 public class MergeConceptsManageController extends BaseOpenmrsObject {
 
+    private ConceptService conceptService;
+
+    public MergeConceptsManageController() {
+        conceptService = Context.getConceptService();
+    }
+
     /**
      * Default page from admin link or results page
      *
@@ -63,8 +69,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             return "redirect:chooseConcepts.form";
         }
 
-        ConceptService conceptService = getConceptService();
-
         Concept oldConcept = conceptService.getConcept(oldConceptId);
         Concept newConcept = conceptService.getConcept(newConceptId);
 
@@ -89,28 +93,28 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
 
         //if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
-        if (oldConcept.getDatatype().isNumeric() && !this.hasCorrectAbsoluteHi(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasCorrectAbsoluteHi(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
             return "redirect:chooseConcepts.form";
         }
 
         //if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
-        if (oldConcept.getDatatype().isNumeric() && !this.hasCorrectAbsoluteLow(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasCorrectAbsoluteLow(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
             return "redirect:chooseConcepts.form";
         }
 
         //if both concepts' types are numeric, make sure units are the same
-        if (oldConcept.getDatatype().isNumeric() && !this.hasMatchingUnits(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasMatchingUnits(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Concepts you chose have different units - please try again");
             return "redirect:chooseConcepts.form";
         }
 
         //if both concepts' types are numeric, make sure both precision (y/n)s are the same
-        if (oldConcept.getDatatype().isNumeric() && !this.hasMatchingPrecise(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasMatchingPrecise(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Concepts do not agree on precise (y/n) - please try again");
             return "redirect:chooseConcepts.form";
@@ -130,6 +134,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         return "/module/mergeconcepts/preview";
     }
 
+    private boolean isNumeric(Concept oldConcept) {
+        return oldConcept.getDatatype().isNumeric();
+    }
+
     /**
      * Method is called after user confirms preview page
      *
@@ -141,7 +149,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
                                @RequestParam("newConceptId") Integer newConceptId,
                                HttpSession httpSession) throws APIException {
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        ConceptService conceptService = getConceptService();
 
         Concept oldConcept = conceptService.getConcept(oldConceptId);
         Concept newConcept = conceptService.getConcept(newConceptId);
@@ -189,7 +196,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @ModelAttribute("newConcept")
     public Concept getNewConcept(@RequestParam(required = false, value = "newConceptId") String newConceptId) {
         //going to make this use ConceptEditor instead
-        return getConceptService().getConcept(newConceptId);
+        return conceptService.getConcept(newConceptId);
     }
 
     /**
@@ -202,12 +209,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @ModelAttribute("oldConcept")
     public Concept getOldConcept(@RequestParam(required = false, value = "oldConceptId") String oldConceptId) {
         //going to make this use ConceptEditor instead
-        return getConceptService().getConcept(oldConceptId);
+        return conceptService.getConcept(oldConceptId);
     }
 
     protected void addConceptDetails(ModelMap model, Integer conceptId, String conceptType) {
-        ConceptService conceptService = getConceptService();
-
         Concept concept = conceptService.getConcept(conceptId);
 
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
@@ -259,12 +264,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         model.addAttribute(conceptType + "ObsCount", obsCount);
     }
 
-
-    protected List<Drug> getMatchingDrugIngredientDrugs(Concept concept) {
-        return Context.getService(MergeConceptsService.class).getDrugsByIngredient(concept);
-    }
-
-
     /**
      * check if concepts have matching datatypes
      * TO DO - unless oldConcept is N/A (what if it's the other way around?)
@@ -287,8 +286,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     }
 
     private boolean hasCorrectAbsoluteHi(Integer oldConceptId, Integer newConceptId) {
-        ConceptService conceptService = getConceptService();
-
         if (conceptService.getConceptNumeric(newConceptId).getHiAbsolute() == null) {
             return true;
         } else if (conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() == null) {
@@ -299,7 +296,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     }
 
     private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId) {
-        ConceptService conceptService = getConceptService();
         if (conceptService.getConceptNumeric(newConceptId).getLowAbsolute() == null) {
             return true;
         } else if (conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() == null) {
@@ -312,7 +308,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
     //if both concepts' types are numeric, make sure units are the same
     private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId) {
-        ConceptService conceptService = getConceptService();
         if (conceptService.getConceptNumeric(oldConceptId).getUnits() == null)
             return true;
         return conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits());
@@ -321,13 +316,11 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
     //if both concepts' types are numeric, make sure both precision (y/n)s are the same
     private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId) {
-        ConceptService conceptService = getConceptService();
         return conceptService.getConceptNumeric(oldConceptId).getPrecise().equals(conceptService.getConceptNumeric(newConceptId).getPrecise());
     }
 
     //if both concepts' types are complex, make sure handlers are the same
     private boolean hasMatchingComplexHandler(Integer oldConceptId, Integer newConceptId) {
-        ConceptService conceptService = getConceptService();
         return conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler());
     }
 
@@ -342,10 +335,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     public void setId(Integer arg0) {
         // TODO Auto-generated method stub
 
-    }
-
-    protected ConceptService getConceptService() {
-        return Context.getConceptService();
     }
 
 }
