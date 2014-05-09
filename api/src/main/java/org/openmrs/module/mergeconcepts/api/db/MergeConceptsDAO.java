@@ -42,7 +42,7 @@ public interface MergeConceptsDAO {
 	
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
 
-    public void updateOrders(int oldConceptId, int newConceptId);
+    public void updateOrders(Concept oldConcept, Concept newConcept);
 
     public List<Order> getMatchingOrders(Concept concept);
 

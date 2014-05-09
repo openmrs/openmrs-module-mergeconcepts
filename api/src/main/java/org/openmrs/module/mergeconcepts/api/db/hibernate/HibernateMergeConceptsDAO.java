@@ -155,9 +155,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     }
 
     @Override
-    public void updateOrders(int oldConceptId, int newConceptId) {
-        Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
-        Concept newConcept = Context.getConceptService().getConcept(newConceptId);
+    public void updateOrders(Concept oldConcept, Concept newConcept) {
         List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
         for (Order o : ordersToUpdate) {
             o.setConcept(newConcept);

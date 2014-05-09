@@ -35,12 +35,14 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 	int knownConceptId = 18; // name="FOOD ASSISTANCE"
 
 	MergeConceptsService mergeConceptsService = null;
+    private ConceptService conceptService;
 
-	@Before
+    @Before
 	public void setUp() throws Exception {
         mergeConceptsService = Context.getService(MergeConceptsService.class);
         executeDataSet(EXAMPLE_XML_DATASET_PACKAGE_PATH );
-	}
+        conceptService = Context.getConceptService();
+    }
 
 	@Test
 	public void shouldSetupContext() {
@@ -82,9 +84,12 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         int oldConceptId = 23;
         Order orderWithId4 = updateOrderWithConcept(4, 23);
         Order orderWithId5 = updateOrderWithConcept(5, 23);
-
         int newConceptId = 18;
-        mergeConceptsService.updateOrders(oldConceptId,newConceptId);
+
+        Concept oldConcept = conceptService.getConcept(oldConceptId);
+        Concept newConcept = conceptService.getConcept(newConceptId);
+
+        mergeConceptsService.updateOrders(oldConcept,newConcept);
 
         assertEquals(new Integer(newConceptId), orderWithId4.getConcept().getId());
         assertEquals(new Integer(newConceptId), orderWithId5.getConcept().getId());
@@ -95,7 +100,6 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         int newConceptId = 88;
         int oldConceptId = 3;
 
-        ConceptService conceptService = Context.getConceptService();
         String newName = conceptService.getConcept(newConceptId).getName().toString();
         String newDescription = conceptService.getConcept(newConceptId).getDescription().toString();
 

@@ -148,18 +148,18 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     public String executeMerge(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
                                @RequestParam("newConceptId") Integer newConceptId,
                                HttpSession httpSession) throws APIException {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        MergeConceptsService mergeConceptsService = Context.getService(MergeConceptsService.class);
 
         Concept oldConcept = conceptService.getConcept(oldConceptId);
         Concept newConcept = conceptService.getConcept(newConceptId);
 
         model.addAttribute("oldConceptId", oldConceptId);
         model.addAttribute("newConceptId", newConceptId);
-        model.addAttribute("oldForms", service.getMatchingForms(oldConcept));
-        model.addAttribute("newForms", service.getMatchingForms(newConcept));
+        model.addAttribute("oldForms", mergeConceptsService.getMatchingForms(oldConcept));
+        model.addAttribute("newForms", mergeConceptsService.getMatchingForms(newConcept));
 
         try {
-            service.update(oldConceptId, newConceptId, oldConcept, newConcept);
+            mergeConceptsService.update(oldConceptId, newConceptId, oldConcept, newConcept);
 
         } catch (Exception e) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Something went wrong. Exception:" + e);

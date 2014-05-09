@@ -50,7 +50,7 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         updateDrugs(oldConcept, newConcept);
 
         //ORDERS
-        updateOrders(oldConceptId, newConceptId);
+        updateOrders(oldConcept, newConcept);
 
         //PROGRAMS
         updatePrograms(oldConceptId, newConceptId);
@@ -251,8 +251,8 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 	}
 
     @Override
-    public void updateOrders(int oldConceptId, int newConceptId) {
-        dao.updateOrders(oldConceptId,newConceptId);
+    public void updateOrders(Concept oldConcept, Concept newConcept) {
+        dao.updateOrders(oldConcept, newConcept);
     }
 
     @Override
