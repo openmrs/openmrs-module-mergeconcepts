@@ -1,122 +1,106 @@
 package org.openmrs.module.mergeconcepts.web.controller;
 
 
-import java.util.List;
-
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
-import org.openmrs.Obs;
-import org.openmrs.api.ConceptService;
-import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.openmrs.api.context.Context;
+import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.ui.ModelMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 
 
-public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiveTest{
-	MergeConceptsManageController controller = null;
+public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiveTest {
+    MergeConceptsManageController controller = new MergeConceptsManageController();
 
-	Concept knownQuestionConcept = null;
-	Concept knownAnswerConcept = null;
+    Concept knownQuestionConcept;
+    Concept knownAnswerConcept;
 
-	Integer knownConceptId = 3;// 3 = COUGH SYRUP in the standard test dataset (standardTestDataset.xml) in openmrs-core
+    Integer knownConceptId = 3;// 3 = COUGH SYRUP in the standard test dataset (standardTestDataset.xml) in openmrs-core
 
-	@Before
-	public void setUp(){
-		controller = new MergeConceptsManageController();
+    @Before
+    public void setUp() {
+        int knownQuestionConceptId = 18;
+        knownQuestionConcept = getConceptFromConceptId(knownQuestionConceptId);
 
-		int knownQuestionConceptId=18;
-		knownQuestionConcept = Context.getConceptService().getConcept(knownQuestionConceptId);
-
-		int knownAnswerConceptId=5089;
-		knownAnswerConcept = Context.getConceptService().getConcept(knownAnswerConceptId);
-
-		/**
-		 * int knownObsId = 13;
-		knownAnswerObs1 = Context.getObsService().getObs(knownObsId);
-		knownQuestionObs = new Obs();
-
-
-		knownQuestionObs.setEncounter( knownAnswerObs.getEncounter());
-		knownQuestionObs.setConcept(knownQuestionConcept);
-		knownQuestionObs.setPerson(knownAnswerObs.getPerson());
-		knownQuestionObs.setLocation(knownAnswerObs.getLocation());
-		knownQuestionObs.setObsDatetime(knownAnswerObs.getObsDatetime());
-		//Obs(Person person, Concept question, Date obsDatetime, Location location)
-		knownQuestionObs.setValueText("This obs has a value");
-		Context.getObsService().saveObs(knownQuestionObs, "");
-		Assert.assertTrue(knownQuestionObs.getObsId() > 0);*/
-	}
-
-	@Test
-	public void getOldConcept_shouldSetModelAttributeOldConcept_ToConceptUserWantsToRetire()
-			throws Exception {
-	    Concept oldConcept = controller.getOldConcept(knownConceptId.toString());
-	    Assert.assertNotNull(oldConcept);
-	    assertEquals("it instantiated the concept we requested", knownConceptId, oldConcept.getConceptId());
-	}
+        int knownAnswerConceptId = 5089;
+        knownAnswerConcept = getConceptFromConceptId(knownAnswerConceptId);
+    }
 
     @Test
-    public void getNewConcept_ShouldSetModelAttributNewConcept_ToConceptUserWantsToKeep(){
+    public void shouldSetModelAttributeOldConceptToConceptUserWantsToRetire() {
+        Concept oldConcept = controller.getOldConcept(knownConceptId.toString());
+        assertThat("it instantiated the concept we requested", knownConceptId, is(oldConcept.getConceptId()));
+    }
+
+    @Test
+    public void shouldSetNewConceptModelAttributeToConceptUserWantsToKeep() {
         Concept newConcept = controller.getNewConcept(knownConceptId.toString());
-        Assert.assertNotNull(newConcept);
         assertEquals(knownConceptId, newConcept.getConceptId());
     }
 
     @Test
-    public void updateDrugs_ShouldUpdateConceptIdInDrug(){
+    public void shouldUpdateConceptIdInDrug() {
         int newConceptId = 88;
         int oldConceptId = 792;
-        int drugId = 2;
 
-        ConceptService conceptService = Context.getConceptService();
-        Concept oldConcept = conceptService.getConcept(oldConceptId);
-        Concept newConcept = conceptService.getConcept(newConceptId);
-        Drug drug = conceptService.getDrug(drugId);
+        assertThatCurrentDrugConceptIdEqualsOldConceptId(2, oldConceptId);
 
-        assertFalse(newConceptId == drug.getConcept().getConceptId());
+        controller.updateDrugs(getConceptFromConceptId(oldConceptId), getConceptFromConceptId(newConceptId));
 
-        controller.updateDrugs(oldConcept, newConcept);
+        assertThatUpdatedDrugConceptIdEqualsNewConceptId(2, newConceptId);
+    }
 
-        Drug updatedDrug = conceptService.getDrug(drugId);
+    private void assertThatCurrentDrugConceptIdEqualsOldConceptId(int drugId, int oldConceptId) {
+        Drug drug = getDrugById(drugId);
+        Integer drugConceptId = getConceptIdFromDrug(drug);
+        assertThat(drugConceptId, is(oldConceptId));
+    }
 
-        assertTrue(newConceptId == updatedDrug.getConcept().getConceptId());
+    private void assertThatUpdatedDrugConceptIdEqualsNewConceptId(int drugId, int newConceptId) {
+        Drug updatedDrug = getDrugById(drugId);
+        Integer updatedDrugConceptId = getConceptIdFromDrug(updatedDrug);
+        assertThat(updatedDrugConceptId, is(newConceptId));
+    }
+
+    private Integer getConceptIdFromDrug(Drug drug) {
+        return drug.getConcept().getConceptId();
+    }
+
+    private Concept getConceptFromConceptId(int conceptId) {
+        return Context.getConceptService().getConcept(conceptId);
     }
 
     @Test
-    public void updateDrugs_ShouldUpdateRouteConceptIdInDrug(){
-        int oldRouteConceptId = 22;
-        int newRouteConceptId = 23;
-        int drugId = 11;
+    public void shouldUpdateRouteConceptIdInDrug() {
+        Concept oldConceptWithRoute = getConceptFromConceptId(22);
+        Concept newConceptWithRoute = getConceptFromConceptId(23);
+        Drug drug = getDrugById(11);
+        drug.setRoute(oldConceptWithRoute);
+        saveDrugToConceptService(drug);
 
-        Concept newRoute = Context.getConceptService().getConcept(newRouteConceptId);
-        Concept oldRoute = Context.getConceptService().getConcept(oldRouteConceptId);
+        Integer oldRouteConceptIdInDrug = drug.getRoute().getConceptId();
+        assertThat(oldRouteConceptIdInDrug, is(22));
 
-        Drug drugToWhichWeAddRoute = Context.getConceptService().getDrug(drugId);
-        drugToWhichWeAddRoute.setRoute(oldRoute);
+        controller.updateDrugs(oldConceptWithRoute, newConceptWithRoute);
 
-        Context.getConceptService().saveDrug(drugToWhichWeAddRoute);
-
-        assertTrue(oldRouteConceptId == drugToWhichWeAddRoute.getRoute().getConceptId());
-
-        controller.updateDrugs(oldRoute, newRoute);
-
-        Drug updatedDrug = Context.getConceptService().getDrug(drugId);
-
-        assertEquals(new Integer(newRouteConceptId),  updatedDrug.getRoute().getConceptId() );
+        Integer updatedRouteConceptIdInDrug = drug.getRoute().getConceptId();
+        assertThat(updatedRouteConceptIdInDrug, is(23));
     }
 
-	@Test
-	public void results_shouldDisplayUpdatedReferencesToOldConceptAndNewConcept()
-			throws Exception {
+    private Drug saveDrugToConceptService(Drug drug) {
+        return Context.getConceptService().saveDrug(drug);
+    }
 
+    private Drug getDrugById(int drugId) {
+        return Context.getConceptService().getDrug(drugId);
+    }
+
+    @Test
+    public void shouldDisplayUpdatedReferencesToOldConceptAndNewConcept() {
 		ModelMap modelMap = new ModelMap();
 		//Check the counts before making the change
 		//TODO: Hardcoded counts are bad. Call MergeConceptsService method that returns a count for both counters
@@ -127,13 +111,13 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 			 knownConceptId);//showPage(request, response);
 
 		assertTrue("The controller set the attribute", modelMap.containsKey("newObsCount"));
-		Assert.assertNotNull("It set the attribute equal to something",modelMap.get("newObsCount"));
+		assertNotNull("It set the attribute equal to something",modelMap.get("newObsCount"));
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count
 		assertEquals("New count value matches count",
                 ((Integer) modelMap.get("newObsCount")).intValue(), numObsWithNewConceptId);
 		assertTrue(modelMap.containsKey("oldObsCount"));
-		Assert.assertNotNull("It set the attribute equal to something",modelMap.get("oldObsCount"));
+		assertNotNull("It set the attribute equal to something",modelMap.get("oldObsCount"));
 
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count
