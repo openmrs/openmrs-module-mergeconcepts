@@ -56,5 +56,6 @@ public interface MergeConceptsDAO {
 
     public List<Drug> getDrugsByRouteConcept(Concept concept);
 
+    public List<Drug> getDrugsByDosageFormConcept(Concept concept);
 }
 

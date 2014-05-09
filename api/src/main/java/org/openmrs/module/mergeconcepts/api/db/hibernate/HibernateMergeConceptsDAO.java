@@ -142,10 +142,14 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         return (List<Drug>) searchDrugCriteria.list();
     }
 
-    /**
-     * @param concept
-     * @return
-     */
+    public List<Drug> getDrugsByDosageFormConcept(Concept route) {
+        Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
+        Criterion rhs = Restrictions.eq("drug.dosageForm", route);
+        searchDrugCriteria.add(rhs);
+
+        return (List<Drug>) searchDrugCriteria.list();
+    }
+
     public List<Order> getMatchingOrders(Concept concept) {
         List<Concept> conceptList = new ArrayList<Concept>();
         conceptList.add(concept);
