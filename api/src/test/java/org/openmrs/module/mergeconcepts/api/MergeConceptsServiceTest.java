@@ -13,23 +13,19 @@
  */
 package org.openmrs.module.mergeconcepts.api;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.openmrs.*;
 import org.openmrs.api.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 
-/**
- * Tests {@link ${MergeConceptsService}}.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 	
 	int knownConceptId = 18; // name="FOOD ASSISTANCE"
@@ -49,10 +45,6 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 		assertNotNull(Context.getService(MergeConceptsService.class));
 	}
 
-	/**
-	 * @see MergeConceptsService#getQuestionConceptObsCount(Integer)
-	 * @verifies return a count of question concept obs
-	 */
 	@Test
 	public void getObsCount_shouldReturnACountOfQuestionAndAnswerConceptObs()
 			throws Exception {
@@ -71,9 +63,12 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
     public void updateObs_shouldUpdateObsWithNewConceptInQuestionsAndAnswerConcepts() {
         Obs savedObsWithId10 = updateObsWithConceptAnswer(10, knownConceptId);
         Obs savedObsWithId12 = updateObsWithConceptQuestion(12, knownConceptId);
-
         int newConceptId = 22;
-        mergeConceptsService.updateObs(knownConceptId, newConceptId);
+
+        Concept knownConcept = conceptService.getConcept(knownConceptId);
+        Concept newConcept = conceptService.getConcept(newConceptId);
+
+        mergeConceptsService.updateObs(knownConcept, newConcept);
 
         assertEquals(new Integer(newConceptId), savedObsWithId10.getValueCoded().getId());
         assertEquals(new Integer(newConceptId), savedObsWithId12.getConcept().getId());
@@ -103,7 +98,10 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         String newName = conceptService.getConcept(newConceptId).getName().toString();
         String newDescription = conceptService.getConcept(newConceptId).getDescription().toString();
 
-        mergeConceptsService.updateFields(oldConceptId, newConceptId);
+        Concept oldConcept = conceptService.getConcept(oldConceptId);
+        Concept newConcept = conceptService.getConcept(newConceptId);
+
+        mergeConceptsService.updateFields(oldConcept, newConcept);
 
         int fieldId = 1;
         FormService formService = Context.getFormService();

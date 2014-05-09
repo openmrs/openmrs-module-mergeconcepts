@@ -201,32 +201,29 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
     /**
      * 
-     * @param oldConceptId
-     * @param newConceptId
+     * @param oldConcept
+     * @param newConcept
      * @return
      */
     @Transactional
-    public void updateObs(Integer oldConceptId, Integer newConceptId){
-    	
-    	ConceptService conceptService = Context.getConceptService();
-		
-		Concept oldConcept = conceptService.getConcept(oldConceptId); 
-		Concept newConcept = conceptService.getConcept(newConceptId);
+    public void updateObs(Concept oldConcept, Concept newConcept){
 
 		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
 
-		List<Integer> QuestionObsToConvert = this.getObsIdsWithQuestionConcept(oldConceptId);
-		List<Integer> AnswerObsToConvert = this.getObsIdsWithAnswerConcept(oldConceptId);
+        Integer oldConceptId = oldConcept.getId();
+
+        List<Integer> questionObsToConvert = getObsIdsWithQuestionConcept(oldConceptId);
+		List<Integer> answerObsToConvert = getObsIdsWithAnswerConcept(oldConceptId);
 		
 		ObsService obsService = Context.getObsService();
 		
-		for(Integer obsId: QuestionObsToConvert){
+		for(Integer obsId: questionObsToConvert){
 			Obs o = obsService.getObs(obsId);
 			o.setConcept(newConcept);
 			obsService.saveObs(o, msg);
 		}
 		
-		for(Integer obsId: AnswerObsToConvert){
+		for(Integer obsId: answerObsToConvert){
 			Obs o = obsService.getObs(obsId);
 			o.setValueCoded(newConcept);
 			obsService.saveObs(o, msg);
@@ -261,10 +258,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     }
 
     @Override
-    public void updateFields(int oldConceptId, int newConceptId) {
-        Concept oldConcept = Context.getConceptService().getConcept(oldConceptId);
-        Concept newConcept = Context.getConceptService().getConcept(newConceptId);
-
+    public void updateFields(Concept oldConcept, Concept newConcept) {
         String newConceptName = newConcept.getName().toString();
 
         Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);

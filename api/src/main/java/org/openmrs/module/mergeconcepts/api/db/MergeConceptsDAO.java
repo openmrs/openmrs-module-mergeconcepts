@@ -13,11 +13,11 @@
  */
 package org.openmrs.module.mergeconcepts.api.db;
 
-import java.util.List;
-import java.util.Set;
-
 import org.openmrs.*;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
+
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -28,7 +28,7 @@ public interface MergeConceptsDAO {
 
 	public Integer getObsCount(Integer conceptId);
 	
-	public void updateObs(Integer oldConceptId, Integer newConceptId);
+	public void updateObs(Concept oldConcept, Concept newConcept);
 
     public List<Integer> getObsIdsWithQuestionConcept(Integer conceptId);
 
@@ -48,7 +48,7 @@ public interface MergeConceptsDAO {
 
     public void updatePrograms(int oldConceptId, int newConceptId);
 
-    void updateFields(int oldConceptId, int newConceptId);
+    void updateFields(Concept oldConcept, Concept newConcept);
 
     public Set<FormField> getMatchingFormFields(Concept concept);
 

@@ -39,9 +39,9 @@ public interface MergeConceptsService extends OpenmrsService {
 	
 	public List<Integer> getObsIds(Integer conceptId);
 
-	public void updateObs(Integer oldConceptId, Integer newConceptId);
+	public void updateObs(Concept oldConcept, Concept newConcept);
 
-    public void updateFields(int oldConceptId, int newConceptId);
+    public void updateFields(Concept oldConcept, Concept newConcept);
 
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
 

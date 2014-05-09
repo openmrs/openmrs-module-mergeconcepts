@@ -41,10 +41,10 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     @Override
     public void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept) {
         //OBS
-        updateObs(oldConceptId, newConceptId);
+        updateObs(oldConcept, newConcept);
 
         //FORMS
-        updateFields(oldConceptId, newConceptId);
+        updateFields(oldConcept,newConcept);
 
         //DRUGS
         updateDrugs(oldConcept, newConcept);
@@ -66,13 +66,13 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     @Transactional
-    public void updateObs(Integer oldConceptId, Integer newConceptId){
-        dao.updateObs(oldConceptId, newConceptId);
+    public void updateObs(Concept oldConcept, Concept newConcept){
+        dao.updateObs(oldConcept, newConcept);
     }
 
     @Override
-    public void updateFields(int oldConceptId, int newConceptId) {
-        dao.updateFields(oldConceptId, newConceptId);
+    public void updateFields(Concept oldConcept, Concept newConcept) {
+        dao.updateFields(oldConcept, newConcept);
     }
 
     public void updateDrugs(Concept oldConcept, Concept newConcept) {
