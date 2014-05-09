@@ -91,6 +91,24 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertThat(updatedRouteConceptIdInDrug, is(23));
     }
 
+
+    @Test
+    public void shouldUpdateDoseFormConceptIdInDrug() {
+        Concept oldConceptWithDosageForm = getConceptFromConceptId(7);
+        Concept newConceptWithDosageForm = getConceptFromConceptId(8);
+        Drug drug = getDrugById(11);
+        drug.setDosageForm(oldConceptWithDosageForm);
+        saveDrugToConceptService(drug);
+
+        Integer oldDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
+        assertThat(oldDosageFormConceptIdInDrug, is(7));
+
+        controller.updateDrugs(oldConceptWithDosageForm, newConceptWithDosageForm);
+
+        Integer updatedDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
+        assertThat(updatedDosageFormConceptIdInDrug, is(8));
+    }
+
     private Drug saveDrugToConceptService(Drug drug) {
         return Context.getConceptService().saveDrug(drug);
     }
@@ -111,13 +129,13 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 			 knownConceptId);//showPage(request, response);
 
 		assertTrue("The controller set the attribute", modelMap.containsKey("newObsCount"));
-		assertNotNull("It set the attribute equal to something",modelMap.get("newObsCount"));
+		assertNotNull("It set the attribute equal to something", modelMap.get("newObsCount"));
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count
 		assertEquals("New count value matches count",
                 ((Integer) modelMap.get("newObsCount")).intValue(), numObsWithNewConceptId);
 		assertTrue(modelMap.containsKey("oldObsCount"));
-		assertNotNull("It set the attribute equal to something",modelMap.get("oldObsCount"));
+		assertNotNull("It set the attribute equal to something", modelMap.get("oldObsCount"));
 
 		//results doesn't call the method that updates the obs
 		//so it will still match the original count

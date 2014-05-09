@@ -307,6 +307,14 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             }
         }
 
+        List<Drug> drugsByDosageFormConcept =  service.getDrugsByDosageFormConcept(oldConcept);
+
+        if (drugsByDosageFormConcept != null) {
+            for (Drug d : drugsByDosageFormConcept) {
+                d.setDosageForm(newConcept);
+            }
+        }
+
     }
 
     /**

@@ -104,4 +104,9 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     public List<Drug> getDrugsByRouteConcept(Concept concept) {
         return dao.getDrugsByRouteConcept(concept);
     }
+
+    @Override
+    public List<Drug> getDrugsByDosageFormConcept(Concept concept) {
+        return dao.getDrugsByDosageFormConcept(concept);
+    }
 }

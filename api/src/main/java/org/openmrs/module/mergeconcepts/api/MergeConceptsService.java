@@ -57,4 +57,5 @@ public interface MergeConceptsService extends OpenmrsService {
 
     public List<Drug> getDrugsByRouteConcept(Concept concept);
 
+    public List<Drug> getDrugsByDosageFormConcept(Concept concept);
 }
