@@ -5,7 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.Drug;
+
 import org.openmrs.api.context.Context;
+import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
 import org.springframework.ui.ModelMap;
 
@@ -49,10 +51,12 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 
         assertThatCurrentDrugConceptIdEqualsOldConceptId(2, oldConceptId);
 
-        controller.updateDrugs(getConceptFromConceptId(oldConceptId), getConceptFromConceptId(newConceptId));
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(getConceptFromConceptId(oldConceptId), getConceptFromConceptId(newConceptId));
 
         assertThatUpdatedDrugConceptIdEqualsNewConceptId(2, newConceptId);
     }
+
 
     private void assertThatCurrentDrugConceptIdEqualsOldConceptId(int drugId, int oldConceptId) {
         Drug drug = getDrugById(drugId);
@@ -85,7 +89,8 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         Integer oldRouteConceptIdInDrug = drug.getRoute().getConceptId();
         assertThat(oldRouteConceptIdInDrug, is(22));
 
-        controller.updateDrugs(oldConceptWithRoute, newConceptWithRoute);
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(oldConceptWithRoute, newConceptWithRoute);
 
         Integer updatedRouteConceptIdInDrug = drug.getRoute().getConceptId();
         assertThat(updatedRouteConceptIdInDrug, is(23));
@@ -103,7 +108,8 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         Integer oldDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
         assertThat(oldDosageFormConceptIdInDrug, is(7));
 
-        controller.updateDrugs(oldConceptWithDosageForm, newConceptWithDosageForm);
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(oldConceptWithDosageForm, newConceptWithDosageForm);
 
         Integer updatedDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
         assertThat(updatedDosageFormConceptIdInDrug, is(8));
