@@ -13,12 +13,12 @@
  */
 package org.openmrs.module.mergeconcepts.api;
 
-import java.util.List;
-import java.util.Set;
-
 import org.openmrs.*;
 import org.openmrs.api.OpenmrsService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * This service exposes module's core functionality. It is a Spring managed bean which is configured in moduleApplicationContext.xml.
@@ -33,17 +33,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface MergeConceptsService extends OpenmrsService {
 
-	public int getObsCount(Integer conceptId);
+    public void setRelatedConceptsForDrugs(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept, List<Drug> drugsByDosageFormConcept);
+
+    public int getObsCount(Integer conceptId);
 	
 	public List<Integer> getObsIds(Integer conceptId);
 
-	public void updateObs(Integer oldConceptId, Integer newConceptId);
+	public void updateObs(Concept oldConcept, Concept newConcept);
 
-    public void updateFields(int oldConceptId, int newConceptId);
+    public void updateFields(Concept oldConcept, Concept newConcept);
 
 	public List<Drug> getDrugsByIngredient(Concept ingredient);
 
-    void updateOrders(int oldConceptId, int newConceptId);
+    void updateOrders(Concept oldConceptId, Concept newConceptId);
 
     public List<Order> getMatchingOrders(Concept concept);
 
@@ -58,4 +60,24 @@ public interface MergeConceptsService extends OpenmrsService {
     public List<Drug> getDrugsByRouteConcept(Concept concept);
 
     public List<Drug> getDrugsByDosageFormConcept(Concept concept);
+
+    public void updateDrugs(Concept oldConcept, Concept newConcept);
+
+    public List<Drug> getMatchingDrugsByConcept(Concept concept);
+
+    public void updateConceptSets(Concept oldConcept, Concept newConcept);
+
+    public void updateConceptAnswers(Concept oldConcept, Concept newConcept);
+
+    public List<ConceptSet> getMatchingConceptSetConcepts(Concept concept);
+
+    public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept);
+
+    public List<ConceptSet> getMatchingConceptSets(Concept concept);
+
+    public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept);
+
+    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept);
+
+    void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept);
 }

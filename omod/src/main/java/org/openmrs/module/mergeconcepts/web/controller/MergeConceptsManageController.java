@@ -2,18 +2,11 @@ package org.openmrs.module.mergeconcepts.web.controller;
 
 
 
-import javax.servlet.http.HttpSession;
-
-import org.openmrs.BaseOpenmrsObject;
-import org.openmrs.Concept;
-import org.openmrs.ConceptAnswer;
-import org.openmrs.ConceptSet;
-import org.openmrs.Drug;
-import org.openmrs.PersonAttributeType;
+import org.openmrs.*;
 import org.openmrs.annotation.Authorized;
+
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
-import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.util.PrivilegeConstants;
@@ -25,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,28 +90,28 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
 
         //if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
-        if (oldConcept.getDatatype().isNumeric() && !this.hasCorrectAbsoluteHi(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasCorrectAbsoluteHi(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
             return "redirect:chooseConcepts.form";
         }
 
         //if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
-        if (oldConcept.getDatatype().isNumeric() && !this.hasCorrectAbsoluteLow(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasCorrectAbsoluteLow(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
             return "redirect:chooseConcepts.form";
         }
 
         //if both concepts' types are numeric, make sure units are the same
-        if (oldConcept.getDatatype().isNumeric() && !this.hasMatchingUnits(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasMatchingUnits(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Concepts you chose have different units - please try again");
             return "redirect:chooseConcepts.form";
         }
 
         //if both concepts' types are numeric, make sure both precision (y/n)s are the same
-        if (oldConcept.getDatatype().isNumeric() && !this.hasMatchingPrecise(oldConceptId, newConceptId)) {
+        if (isNumeric(oldConcept) && !hasMatchingPrecise(oldConceptId, newConceptId)) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                     "Concepts do not agree on precise (y/n) - please try again");
             return "redirect:chooseConcepts.form";
@@ -137,6 +131,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         return "/module/mergeconcepts/preview";
     }
 
+    private boolean isNumeric(Concept oldConcept) {
+        return oldConcept.getDatatype().isNumeric();
+    }
+
     /**
      * Method is called after user confirms preview page
      *
@@ -147,7 +145,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     public String executeMerge(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
                                @RequestParam("newConceptId") Integer newConceptId,
                                HttpSession httpSession) throws APIException {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        MergeConceptsService mergeConceptsService = Context.getService(MergeConceptsService.class);
         ConceptService conceptService = getConceptService();
 
         Concept oldConcept = conceptService.getConcept(oldConceptId);
@@ -155,33 +153,12 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
         model.addAttribute("oldConceptId", oldConceptId);
         model.addAttribute("newConceptId", newConceptId);
-        model.addAttribute("oldForms", service.getMatchingForms(oldConcept));
-        model.addAttribute("newForms", service.getMatchingForms(newConcept));
+        model.addAttribute("oldForms", mergeConceptsService.getMatchingForms(oldConcept));
+        model.addAttribute("newForms", mergeConceptsService.getMatchingForms(newConcept));
 
         try {
-            //OBS
-            service.updateObs(oldConceptId, newConceptId);
+            mergeConceptsService.update(oldConceptId, newConceptId, oldConcept, newConcept);
 
-            //FORMS
-            service.updateFields(oldConceptId, newConceptId);
-
-            //DRUGS
-            this.updateDrugs(oldConcept, newConcept);
-
-            //ORDERS
-            service.updateOrders(oldConceptId, newConceptId);
-
-            //PROGRAMS
-            service.updatePrograms(oldConceptId, newConceptId);
-
-            //CONCEPT SETS
-            this.updateConceptSets(oldConcept, newConcept);
-
-            //CONCEPT ANSWERS
-            this.updateConceptAnswers(oldConcept, newConcept);
-
-            //PERSON ATTRIBUTE TYPES
-            this.updatePersonAttributeTypes(oldConcept, newConcept);
         } catch (Exception e) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Something went wrong. Exception:" + e);
             return "redirect: chooseConcepts.form";
@@ -241,8 +218,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
 
         List<String> drugNames = new ArrayList<String>();
-        if (this.getMatchingDrugsByConcept(concept) != null) {
-            for (Drug od : this.getMatchingDrugsByConcept(concept)) {
+        if (service.getMatchingDrugsByConcept(concept) != null) {
+            for (Drug od : service.getMatchingDrugsByConcept(concept)) {
                 drugNames.add(od.getFullName(null));
             }
         }
@@ -260,200 +237,32 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
         //preview concept answers by id
         List<Integer> conceptAnswerIds = new ArrayList<Integer>();
-        if (this.getMatchingConceptAnswers(concept) != null) {
-            for (ConceptAnswer a : this.getMatchingConceptAnswers(concept)) {
+        if (service.getMatchingConceptAnswers(concept) != null) {
+            for (ConceptAnswer a : service.getMatchingConceptAnswers(concept)) {
                 conceptAnswerIds.add(a.getConceptAnswerId());
             }
         }
         model.addAttribute(conceptType + "ConceptAnswers", conceptAnswerIds);
 
         List<Integer> conceptSetIds = new ArrayList<Integer>();
-        if (this.getMatchingConceptSets(concept) != null) {
-            for (ConceptSet c : this.getMatchingConceptSets(concept)) {
+        if (service.getMatchingConceptSets(concept) != null) {
+            for (ConceptSet c : service.getMatchingConceptSets(concept)) {
                 conceptSetIds.add(c.getConceptSetId());
             }
-            if (this.getMatchingConceptSetConcepts(concept) != null) {
-                for (ConceptSet cs : this.getMatchingConceptSetConcepts(concept)) {
+            if (service.getMatchingConceptSetConcepts(concept) != null) {
+                for (ConceptSet cs : service.getMatchingConceptSetConcepts(concept)) {
                     conceptSetIds.add(cs.getConceptSetId());
                 }
             }
         }
         model.addAttribute(conceptType + "ConceptSets", conceptSetIds);
 
-        if (this.getMatchingPersonAttributeTypes(concept) != null)
-            model.addAttribute(conceptType + "PersonAttributeTypes", this.getMatchingPersonAttributeTypes(concept));
+        if (service.getMatchingPersonAttributeTypes(concept) != null)
+            model.addAttribute(conceptType + "PersonAttributeTypes", service.getMatchingPersonAttributeTypes(concept));
 
         int obsCount = service.getObsCount(conceptId);
         model.addAttribute(conceptType + "ObsCount", obsCount);
     }
-
-
-    public void updateDrugs(Concept oldConcept, Concept newConcept) {
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        List<Drug> drugsToUpdate = this.getMatchingDrugsByConcept(oldConcept);
-
-        if (drugsToUpdate != null) {
-            for (Drug d : drugsToUpdate) {
-                d.setConcept(newConcept);
-            }
-        }
-
-        List<Drug> drugsByRouteConcept =  service.getDrugsByRouteConcept(oldConcept);
-
-        if (drugsByRouteConcept != null) {
-            for (Drug d : drugsByRouteConcept) {
-                d.setRoute(newConcept);
-            }
-        }
-
-        List<Drug> drugsByDosageFormConcept =  service.getDrugsByDosageFormConcept(oldConcept);
-
-        if (drugsByDosageFormConcept != null) {
-            for (Drug d : drugsByDosageFormConcept) {
-                d.setDosageForm(newConcept);
-            }
-        }
-
-    }
-
-    /**
-     * @param oldConcept
-     * @param newConcept
-     */
-
-    public void updateConceptSets(Concept oldConcept, Concept newConcept) {
-        //update concept_id
-        List<ConceptSet> conceptSetConceptsToUpdate = this.getMatchingConceptSetConcepts(oldConcept);
-        if (this.getMatchingConceptSetConcepts(oldConcept) != null) {
-            for (ConceptSet csc : conceptSetConceptsToUpdate) {
-                csc.setConcept(newConcept);
-            }
-        }
-
-        //concept_set
-        List<ConceptSet> conceptSetsToUpdate = this.getMatchingConceptSets(oldConcept);
-        if (this.getMatchingConceptSets(oldConcept) != null) {
-            for (ConceptSet cs : conceptSetsToUpdate) {
-                cs.setConceptSet(newConcept);
-            }
-        }
-    }
-
-    /**
-     * ConceptAnswers contain references to concepts
-     *
-     * @param oldConcept
-     * @param newConcept
-     */
-    public void updateConceptAnswers(Concept oldConcept, Concept newConcept) {
-        List<ConceptAnswer> conceptAnswerQuestionsToUpdate = this.getMatchingConceptAnswerQuestions(oldConcept);
-
-        //update concept_id
-        for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate) {
-            caq.setConcept(newConcept);
-        }
-
-        List<ConceptAnswer> conceptAnswerAnswersToUpdate = this.getMatchingConceptAnswerAnswers(oldConcept);
-
-        //update answer_concepts
-        for (ConceptAnswer caa : conceptAnswerAnswersToUpdate) {
-            caa.setAnswerConcept(newConcept);
-        }
-    }
-
-
-    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept) {
-        List<PersonAttributeType> matchingPersonAttributeTypes = this.getMatchingPersonAttributeTypes(oldConcept);
-
-        for (PersonAttributeType m : matchingPersonAttributeTypes) {
-            m.setForeignKey(newConcept.getConceptId());
-        }
-    }
-
-    /**
-     * getMatchingForms
-     *
-     * @param concept - the concept to look up
-     * @return a list of Forms using the concept as a question or answer, an empty List if none found
-     * @should return a list of Forms that use the concept as a question or answer
-     * @should return an empty List if no matches
-     * @should return an empty list if Concept is null
-     */
-
-
-
-
-    protected List<Drug> getMatchingDrugsByConcept(Concept concept) {
-        return getConceptService().getDrugsByConcept(concept);
-    }
-
-    protected List<Drug> getMatchingDrugIngredientDrugs(Concept concept) {
-        return Context.getService(MergeConceptsService.class).getDrugsByIngredient(concept);
-    }
-
-    protected List<ConceptSet> getMatchingConceptSetConcepts(Concept concept) {
-        ConceptService conceptService = getConceptService();
-        return conceptService.getSetsContainingConcept(concept);
-    }
-
-    protected List<ConceptSet> getMatchingConceptSets(Concept concept) {
-        ConceptService conceptService = getConceptService();
-        return conceptService.getConceptSetsByConcept(concept);
-
-    }
-
-    protected List<ConceptAnswer> getMatchingConceptAnswerQuestions(Concept concept) {
-        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
-        for (ConceptAnswer ca : concept.getAnswers()) {
-            matchingConceptAnswers.add(ca);
-        }
-        return matchingConceptAnswers;
-    }
-
-    protected List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept) {
-        ConceptService conceptService = getConceptService();
-        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
-
-        //Concepts that are questions answered by this concept, and possibly others
-        for (Concept c : conceptService.getConceptsByAnswer(concept)) {
-            //ConceptAnswers of all possible answers to question concept above
-            for (ConceptAnswer a : c.getAnswers()) {
-
-                //only add ConceptAnswers with an answer matching this concept
-                if (a.getAnswerConcept().equals(concept)) {
-                    matchingConceptAnswers.add(a);
-                }
-            }
-        }
-
-        return matchingConceptAnswers;
-    }
-
-    protected List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {
-        List<ConceptAnswer> conceptAnswers = this.getMatchingConceptAnswerAnswers(concept);
-        for (ConceptAnswer c : this.getMatchingConceptAnswerQuestions(concept)) {
-            conceptAnswers.add(c);
-        }
-        return conceptAnswers;
-    }
-
-    protected List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept) {
-        PersonService personService = Context.getPersonService();
-        List<PersonAttributeType> allPersonAttributeTypes = personService.getAllPersonAttributeTypes();
-        List<PersonAttributeType> matchingPersonAttributeTypes = new ArrayList<PersonAttributeType>();
-
-        for (PersonAttributeType p : allPersonAttributeTypes) {
-            if (p.getFormat().toLowerCase().contains("concept")) {
-                if (p.getForeignKey() != null && p.getForeignKey().equals(concept.getConceptId())) {
-                    matchingPersonAttributeTypes.add(p);
-                }
-            }
-        }
-
-        return matchingPersonAttributeTypes;
-    }
-
 
     /**
      * check if concepts have matching datatypes
