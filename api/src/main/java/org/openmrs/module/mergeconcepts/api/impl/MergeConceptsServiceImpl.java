@@ -39,7 +39,7 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 	private MergeConceptsDAO dao;
 
     @Override
-    public void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept) {
+    public void update(Concept oldConcept, Concept newConcept) {
         //OBS
         updateObs(oldConcept, newConcept);
 
@@ -53,7 +53,7 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         updateOrders(oldConcept, newConcept);
 
         //PROGRAMS
-        updatePrograms(oldConceptId, newConceptId);
+        updatePrograms(oldConcept, newConcept);
 
         //CONCEPT SETS
         updateConceptSets(oldConcept, newConcept);
@@ -111,8 +111,8 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     @Override
-    public void updatePrograms(int oldConceptId, int newConceptId) {
-        dao.updatePrograms(oldConceptId, newConceptId);
+    public void updatePrograms(Concept oldConcept, Concept newConcept) {
+        dao.updatePrograms(oldConcept, newConcept);
     }
 
     public void updateConceptSets(Concept oldConcept, Concept newConcept) {
