@@ -49,7 +49,7 @@ public interface MergeConceptsService extends OpenmrsService {
 
     public List<Order> getMatchingOrders(Concept concept);
 
-    public void updatePrograms(int oldConceptId, int newConceptId);
+    public void updatePrograms(Concept oldConcept, Concept newConcept);
 
     public List<Program> getMatchingPrograms(Concept concept);
 
@@ -79,5 +79,5 @@ public interface MergeConceptsService extends OpenmrsService {
 
     public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept);
 
-    void update(Integer oldConceptId, Integer newConceptId, Concept oldConcept, Concept newConcept);
+    public void update(Concept oldConcept, Concept newConcept);
 }

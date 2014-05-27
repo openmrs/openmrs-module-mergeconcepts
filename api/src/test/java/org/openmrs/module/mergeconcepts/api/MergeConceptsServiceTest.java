@@ -128,7 +128,7 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         String newName = conceptService.getConcept(newConceptId).getName().toString();
         String newDescription = conceptService.getConcept(newConceptId).getDescription().toString();
 
-        mergeConceptsService.updatePrograms(oldConceptId, newConceptId);
+        mergeConceptsService.updatePrograms(Context.getConceptService().getConcept(oldConceptId), Context.getConceptService().getConcept(newConceptId));
 
         int programId = 2;
         ProgramWorkflowService programService = Context.getProgramWorkflowService();
