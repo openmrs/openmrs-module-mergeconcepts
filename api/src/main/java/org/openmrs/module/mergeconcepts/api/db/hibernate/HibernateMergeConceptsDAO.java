@@ -247,7 +247,10 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         for (Program p : programsToUpdate) {
             p.setConcept(newConcept);
             p.setName(newConcept.getName().toString());
-            p.setDescription(newConcept.getDescription().toString());
+
+            if(newConcept.getDescription() != null){
+                p.setDescription(newConcept.getDescription().toString());
+            }
         }
 
         for (ProgramWorkflow pw : programWorkflowsToUpdate) {

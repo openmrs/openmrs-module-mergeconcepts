@@ -30,7 +30,7 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 
         int knownAnswerConceptId = 5089;
         knownAnswerConcept = getConceptFromConceptId(knownAnswerConceptId);
-        controller.init();
+
     }
 
     @Test

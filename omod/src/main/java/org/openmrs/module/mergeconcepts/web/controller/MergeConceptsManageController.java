@@ -21,10 +21,8 @@ import java.util.*;
 @Controller
 public class MergeConceptsManageController extends BaseOpenmrsObject {
 
-    private ConceptService conceptService;
-
-    public void init() {
-        conceptService = Context.getConceptService();
+    public ConceptService getConceptService() {
+        return Context.getConceptService();
     }
 
     /**
@@ -66,8 +64,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             return "redirect:chooseConcepts.form";
         }
 
-        Concept oldConcept = conceptService.getConcept(oldConceptId);
-        Concept newConcept = conceptService.getConcept(newConceptId);
+        Concept oldConcept = getConceptService().getConcept(oldConceptId);
+        Concept newConcept = getConceptService().getConcept(newConceptId);
 
         //handle conceptIds are the same
         if (oldConceptId.equals(newConceptId)) {
@@ -147,8 +145,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
                                HttpSession httpSession) throws APIException {
         MergeConceptsService mergeConceptsService = Context.getService(MergeConceptsService.class);
 
-        Concept oldConcept = conceptService.getConcept(oldConceptId);
-        Concept newConcept = conceptService.getConcept(newConceptId);
+        Concept oldConcept = getConceptService().getConcept(oldConceptId);
+        Concept newConcept = getConceptService().getConcept(newConceptId);
 
         model.addAttribute("oldConceptId", oldConceptId);
         model.addAttribute("newConceptId", newConceptId);
@@ -164,7 +162,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
 
         String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
-        conceptService.retireConcept(oldConcept, msg);
+        getConceptService().retireConcept(oldConcept, msg);
 
         return "redirect:results.form";
     }
@@ -193,7 +191,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @ModelAttribute("newConcept")
     public Concept getNewConcept(@RequestParam(required = false, value = "newConceptId") String newConceptId) {
         //going to make this use ConceptEditor instead
-        return conceptService.getConcept(newConceptId);
+        return getConceptService().getConcept(newConceptId);
     }
 
     /**
@@ -206,11 +204,11 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @ModelAttribute("oldConcept")
     public Concept getOldConcept(@RequestParam(required = false, value = "oldConceptId") String oldConceptId) {
         //going to make this use ConceptEditor instead
-        return conceptService.getConcept(oldConceptId);
+        return getConceptService().getConcept(oldConceptId);
     }
 
     protected void addConceptDetailsToModel(ModelMap model, Integer conceptId, String conceptType) {
-        Concept concept = conceptService.getConcept(conceptId);
+        Concept concept = getConceptService().getConcept(conceptId);
 
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
 
@@ -307,42 +305,42 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     }
 
     private boolean hasCorrectAbsoluteHi(Integer oldConceptId, Integer newConceptId) {
-        if (conceptService.getConceptNumeric(newConceptId).getHiAbsolute() == null) {
+        if (getConceptService().getConceptNumeric(newConceptId).getHiAbsolute() == null) {
             return true;
-        } else if (conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() == null) {
+        } else if (getConceptService().getConceptNumeric(oldConceptId).getHiAbsolute() == null) {
             return false;
         }
 
-        return (conceptService.getConceptNumeric(oldConceptId).getHiAbsolute() <= conceptService.getConceptNumeric(newConceptId).getHiAbsolute());
+        return (getConceptService().getConceptNumeric(oldConceptId).getHiAbsolute() <= getConceptService().getConceptNumeric(newConceptId).getHiAbsolute());
     }
 
     private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId) {
-        if (conceptService.getConceptNumeric(newConceptId).getLowAbsolute() == null) {
+        if (getConceptService().getConceptNumeric(newConceptId).getLowAbsolute() == null) {
             return true;
-        } else if (conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() == null) {
+        } else if (getConceptService().getConceptNumeric(oldConceptId).getLowAbsolute() == null) {
             return false;
         }
 
-        return (conceptService.getConceptNumeric(oldConceptId).getLowAbsolute() >= conceptService.getConceptNumeric(newConceptId).getLowAbsolute());
+        return (getConceptService().getConceptNumeric(oldConceptId).getLowAbsolute() >= getConceptService().getConceptNumeric(newConceptId).getLowAbsolute());
 
     }
 
     //if both concepts' types are numeric, make sure units are the same
     private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId) {
-        if (conceptService.getConceptNumeric(oldConceptId).getUnits() == null)
+        if (getConceptService().getConceptNumeric(oldConceptId).getUnits() == null)
             return true;
-        return conceptService.getConceptNumeric(oldConceptId).getUnits().equals(conceptService.getConceptNumeric(newConceptId).getUnits());
+        return getConceptService().getConceptNumeric(oldConceptId).getUnits().equals(getConceptService().getConceptNumeric(newConceptId).getUnits());
     }
 
 
     //if both concepts' types are numeric, make sure both precision (y/n)s are the same
     private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId) {
-        return conceptService.getConceptNumeric(oldConceptId).getPrecise().equals(conceptService.getConceptNumeric(newConceptId).getPrecise());
+        return getConceptService().getConceptNumeric(oldConceptId).getPrecise().equals(getConceptService().getConceptNumeric(newConceptId).getPrecise());
     }
 
     //if both concepts' types are complex, make sure handlers are the same
     private boolean hasMatchingComplexHandler(Integer oldConceptId, Integer newConceptId) {
-        return conceptService.getConceptComplex(oldConceptId).getHandler().equals(conceptService.getConceptComplex(newConceptId).getHandler());
+        return getConceptService().getConceptComplex(oldConceptId).getHandler().equals(getConceptService().getConceptComplex(newConceptId).getHandler());
     }
 
 
