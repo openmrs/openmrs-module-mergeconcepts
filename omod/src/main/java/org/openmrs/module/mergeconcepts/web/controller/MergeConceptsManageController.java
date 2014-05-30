@@ -58,67 +58,7 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
 
         httpSession.removeAttribute(WebConstants.OPENMRS_ERROR_ATTR);
 
-        //handle less than two concepts
-        if (oldConceptId == null || newConceptId == null) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose two concepts and try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        Concept oldConcept = getConceptService().getConcept(oldConceptId);
-        Concept newConcept = getConceptService().getConcept(newConceptId);
-
-        //handle conceptIds are the same
-        if (oldConceptId.equals(newConceptId)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "The same concept was chosen twice - please try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //handle concepts with different datatypes
-        //TODO - unless oldConcept is N/A (what if it's the other way around?) <-- is that right?
-        if (!this.hasMatchingDatatypes(oldConcept, newConcept)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with same datatypes and try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //if both concepts' types are coded, make sure both answer sets are the same
-        if (oldConcept.getDatatype().isCoded() && !this.hasCodedAnswers(oldConcept, newConcept)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
-                    "Concept chosen to be retired has answers that the concept to keep does not have - please try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
-        if (isNumeric(oldConcept) && !hasCorrectAbsoluteHi(oldConceptId, newConceptId)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
-                    "Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
-        if (isNumeric(oldConcept) && !hasCorrectAbsoluteLow(oldConceptId, newConceptId)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
-                    "Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //if both concepts' types are numeric, make sure units are the same
-        if (isNumeric(oldConcept) && !hasMatchingUnits(oldConceptId, newConceptId)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
-                    "Concepts you chose have different units - please try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //if both concepts' types are numeric, make sure both precision (y/n)s are the same
-        if (isNumeric(oldConcept) && !hasMatchingPrecise(oldConceptId, newConceptId)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
-                    "Concepts do not agree on precise (y/n) - please try again");
-            return "redirect:chooseConcepts.form";
-        }
-
-        //if both concepts' types are complex, make sure handlers are the same
-        if (oldConcept.getDatatype().isComplex() && !this.hasMatchingComplexHandler(oldConceptId, newConceptId)) {
-            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
-                    "Complex concepts do not have the same handler - please try again");
+        if (hasErrors(oldConceptId, newConceptId, httpSession)) {
             return "redirect:chooseConcepts.form";
         }
 
@@ -127,6 +67,73 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         addConceptDetailsToModel(model, newConceptId, "new");
 
         return "/module/mergeconcepts/preview";
+    }
+
+    private boolean hasErrors(Integer oldConceptId, Integer newConceptId, HttpSession httpSession) {
+
+        if (oldConceptId == null || newConceptId == null) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose two concepts and try again");
+            return true;
+        }
+
+        Concept oldConcept = getConceptService().getConcept(oldConceptId);
+        Concept newConcept = getConceptService().getConcept(newConceptId);
+
+        //handle conceptIds are the same
+        if (oldConceptId.equals(newConceptId)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "The same concept was chosen twice - please try again");
+            return true;
+        }
+
+        //handle concepts with different datatypes
+        //TODO - unless oldConcept is N/A (what if it's the other way around?) <-- is that right?
+        if (!this.hasMatchingDatatypes(oldConcept, newConcept)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Please choose concepts with same datatypes and try again");
+            return true;
+        }
+
+        //if both concepts' types are coded, make sure both answer sets are the same
+        if (oldConcept.getDatatype().isCoded() && !this.hasCodedAnswers(oldConcept, newConcept)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
+                    "Concept chosen to be retired has answers that the concept to keep does not have - please try again");
+            return true;
+        }
+
+        //if both concepts' types are numeric, make sure absolute high for concept to keep includes absolute high for concept to retire
+        if (isNumeric(oldConcept) && !hasCorrectAbsoluteHi(oldConceptId, newConceptId)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
+                    "Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again");
+            return true;
+        }
+
+        //if both concepts' types are numeric, make sure absolute low for concept to keep includes absolute low for concept to retire
+        if (isNumeric(oldConcept) && !hasCorrectAbsoluteLow(oldConceptId, newConceptId)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
+                    "Absolute low for concept to be retired is less than absolute low for concept to keep - please try again");
+            return true;
+        }
+
+        //if both concepts' types are numeric, make sure units are the same
+        if (isNumeric(oldConcept) && !hasMatchingUnits(oldConceptId, newConceptId)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
+                    "Concepts you chose have different units - please try again");
+            return true;
+        }
+
+        //if both concepts' types are numeric, make sure both precision (y/n)s are the same
+        if (isNumeric(oldConcept) && !hasMatchingPrecise(oldConceptId, newConceptId)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
+                    "Concepts do not agree on precise (y/n) - please try again");
+            return true;
+        }
+
+        //if both concepts' types are complex, make sure handlers are the same
+        if (oldConcept.getDatatype().isComplex() && !this.hasMatchingComplexHandler(oldConceptId, newConceptId)) {
+            httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
+                    "Complex concepts do not have the same handler - please try again");
+            return true;
+        }
+        return false;
     }
 
     private boolean isNumeric(Concept oldConcept) {
