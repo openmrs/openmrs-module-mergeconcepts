@@ -153,18 +153,23 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         model.addAttribute("oldForms", mergeConceptsService.getMatchingForms(oldConcept));
         model.addAttribute("newForms", mergeConceptsService.getMatchingForms(newConcept));
 
+        return mergeConcepts(httpSession, mergeConceptsService, oldConcept, newConcept);
+    }
+
+    private String mergeConcepts(HttpSession httpSession, MergeConceptsService mergeConceptsService, Concept oldConcept, Concept newConcept) {
+        String view;
         try {
             mergeConceptsService.update(oldConcept, newConcept);
+            String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
+            getConceptService().retireConcept(oldConcept, msg);
+
+            view = "redirect:results.form";
 
         } catch (Exception e) {
             httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR, "Something went wrong. Exception:" + e);
-            return "redirect: chooseConcepts.form";
+            view = "redirect: chooseConcepts.form";
         }
-
-        String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
-        getConceptService().retireConcept(oldConcept, msg);
-
-        return "redirect:results.form";
+        return view;
     }
 
     /**
