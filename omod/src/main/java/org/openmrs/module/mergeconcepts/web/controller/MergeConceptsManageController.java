@@ -6,7 +6,8 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
-import org.openmrs.module.mergeconcepts.api.impl.PreviewErrorValidation;
+import org.openmrs.module.mergeconcepts.api.PreviewErrorValidator;
+import org.openmrs.module.mergeconcepts.api.impl.PreviewErrorValidatorImpl;
 import org.openmrs.util.PrivilegeConstants;
 import org.openmrs.web.WebConstants;
 import org.springframework.stereotype.Controller;
@@ -57,10 +58,10 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
                           @RequestParam(required = false, value = "newConceptId") Integer newConceptId,
                           HttpSession httpSession) {
 
-        PreviewErrorValidation previewErrorValidation = Context.getService(PreviewErrorValidation.class);
+        PreviewErrorValidator previewErrorValidator = new PreviewErrorValidatorImpl();
         httpSession.removeAttribute(WebConstants.OPENMRS_ERROR_ATTR);
 
-        if (previewErrorValidation.hasErrors(oldConceptId, newConceptId, httpSession)) {
+        if (previewErrorValidator.hasErrors(oldConceptId, newConceptId, httpSession)) {
             return "redirect:chooseConcepts.form";
         }
 

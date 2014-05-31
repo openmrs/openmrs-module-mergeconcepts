@@ -3,11 +3,12 @@ package org.openmrs.module.mergeconcepts.api.impl;
 import org.openmrs.Concept;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.mergeconcepts.api.PreviewErrorValidator;
 import org.openmrs.web.WebConstants;
 
 import javax.servlet.http.HttpSession;
 
-public class PreviewErrorValidation {
+public class PreviewErrorValidatorImpl implements PreviewErrorValidator {
     //if both concepts' types are numeric, make sure both precision (y/n)s are the same
     private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId) {
         return getConceptService().getConceptNumeric(oldConceptId).getPrecise().equals(getConceptService().getConceptNumeric(newConceptId).getPrecise());
@@ -133,7 +134,8 @@ public class PreviewErrorValidation {
         }
         return false;
     }
-    public ConceptService getConceptService() {
+
+    private ConceptService getConceptService() {
         return Context.getConceptService();
     }
 
