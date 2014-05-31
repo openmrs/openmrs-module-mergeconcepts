@@ -24,9 +24,7 @@ import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.module.mergeconcepts.api.db.MergeConceptsDAO;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * It is a default implementation of {@link MergeConceptsService}.
@@ -283,5 +281,71 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     @Override
     public List<Drug> getDrugsByDosageFormConcept(Concept concept) {
         return dao.getDrugsByDosageFormConcept(concept);
+    }
+
+    @Override
+    public Map<String, Object> getAttributes(String conceptType, Concept concept) {
+        Map<String, Object> attributes = new HashMap<String, Object>();
+
+        attributes.put(conceptType + "ConceptId", concept.getId());
+
+        List<String> drugNames = new ArrayList<String>();
+        addDrugNames(concept, drugNames);
+        attributes.put(conceptType + "Drugs", drugNames);
+
+        //preview concept answers by id
+        List<Integer> conceptAnswerIds = new ArrayList<Integer>();
+
+        int obsCount = getObsCount(concept.getId());
+        attributes.put(conceptType + "ObsCount", obsCount);
+
+        if (getMatchingConceptAnswers(concept) != null) {
+            for (ConceptAnswer a : getMatchingConceptAnswers(concept)) {
+                conceptAnswerIds.add(a.getConceptAnswerId());
+            }
+        }
+
+        List<Integer> conceptSetIds = new ArrayList<Integer>();
+        if (getMatchingConceptSets(concept) != null) {
+            for (ConceptSet c : getMatchingConceptSets(concept)) {
+                conceptSetIds.add(c.getConceptSetId());
+            }
+            if (getMatchingConceptSetConcepts(concept) != null) {
+                for (ConceptSet cs : getMatchingConceptSetConcepts(concept)) {
+                    conceptSetIds.add(cs.getConceptSetId());
+                }
+            }
+        }
+
+        attributes.put(conceptType + "ConceptSets", conceptSetIds);
+        attributes.put(conceptType + "ConceptAnswers", conceptAnswerIds);
+
+        if (getMatchingForms(concept) != null) {
+            attributes.put(conceptType + "Forms", getMatchingForms(concept));
+        }
+
+        if (getMatchingOrders(concept) != null){
+            attributes.put(conceptType + "Orders", getMatchingOrders(concept));
+        }
+
+        if (getMatchingPrograms(concept) != null){
+            attributes.put(conceptType + "Programs", getMatchingPrograms(concept));
+        }
+
+        if (getMatchingPersonAttributeTypes(concept) != null) {
+            attributes.put(conceptType + "PersonAttributeTypes", getMatchingPersonAttributeTypes(concept));
+        }
+
+
+        return attributes;
+    }
+
+    @Override
+    public void addDrugNames(Concept concept, List<String> drugNames) {
+        if (getMatchingDrugsByConcept(concept) != null) {
+            for (Drug od : getMatchingDrugsByConcept(concept)) {
+                drugNames.add(od.getFullName(null));
+            }
+        }
     }
 }

@@ -18,6 +18,7 @@ import org.openmrs.api.OpenmrsService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -80,4 +81,8 @@ public interface MergeConceptsService extends OpenmrsService {
     public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept);
 
     public void update(Concept oldConcept, Concept newConcept);
+
+    Map<String, Object> getAttributes(String conceptType, Concept concept);
+
+    void addDrugNames(Concept concept, List<String> drugNames);
 }
