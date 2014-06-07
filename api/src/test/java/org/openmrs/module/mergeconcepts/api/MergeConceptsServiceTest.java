@@ -25,6 +25,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 
 public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
 	
@@ -160,6 +162,70 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
     }
 
 
+    @Test
+    public void shouldUpdateRouteConceptIdInDrug() {
+        Concept oldConceptWithRoute = getConceptFromConceptId(22);
+        Concept newConceptWithRoute = getConceptFromConceptId(23);
+        Drug drug = getDrugById(11);
+        drug.setRoute(oldConceptWithRoute);
+        saveDrugToConceptService(drug);
+
+        Integer oldRouteConceptIdInDrug = drug.getRoute().getConceptId();
+        assertThat(oldRouteConceptIdInDrug, is(22));
+
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(oldConceptWithRoute, newConceptWithRoute);
+
+        Integer updatedRouteConceptIdInDrug = drug.getRoute().getConceptId();
+        assertThat(updatedRouteConceptIdInDrug, is(23));
+    }
+
+    @Test
+    public void shouldUpdateDoseFormConceptIdInDrug() {
+        Concept oldConceptWithDosageForm = getConceptFromConceptId(7);
+        Concept newConceptWithDosageForm = getConceptFromConceptId(8);
+        Drug drug = getDrugById(11);
+        drug.setDosageForm(oldConceptWithDosageForm);
+        saveDrugToConceptService(drug);
+
+        Integer oldDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
+        assertThat(oldDosageFormConceptIdInDrug, is(7));
+
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+        service.updateDrugs(oldConceptWithDosageForm, newConceptWithDosageForm);
+
+        Integer updatedDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
+        assertThat(updatedDosageFormConceptIdInDrug, is(8));
+    }
+
+
+    private Concept getConceptFromConceptId(int conceptId) {
+        return Context.getConceptService().getConcept(conceptId);
+    }
+
+
+    private Drug saveDrugToConceptService(Drug drug) {
+        return Context.getConceptService().saveDrug(drug);
+    }
+
+
+    private Drug getDrugById(int drugId) {
+        return Context.getConceptService().getDrug(drugId);
+    }
+
+
+    private void assertThatCurrentDrugConceptIdEqualsOldConceptId(int drugId, int oldConceptId) {
+        Drug drug = getDrugById(drugId);
+        Integer drugConceptId = getConceptIdFromDrug(drug);
+        assertThat(drugConceptId, is(oldConceptId));
+    }
+
+
+    private Integer getConceptIdFromDrug(Drug drug) {
+        return drug.getConcept().getConceptId();
+    }
+
+
     private Order updateOrderWithConcept(int orderId, int conceptId) {
         OrderService orderService = Context.getOrderService();
         Order knownOrder = orderService.getOrder(orderId);
@@ -167,12 +233,14 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         return orderService.saveOrder(knownOrder);
     }
 
+
     private Obs updateObsWithConceptAnswer(int obsId, int conceptId) {
         ObsService obsService = Context.getObsService();
         Obs knownAnswerObs = obsService.getObs(obsId);
         knownAnswerObs.setValueCoded(Context.getConceptService().getConcept(conceptId));
         return obsService.saveObs(knownAnswerObs,"");
     }
+
 
     private Obs updateObsWithConceptQuestion(int obsId, int conceptId) {
         ObsService obsService = Context.getObsService();
