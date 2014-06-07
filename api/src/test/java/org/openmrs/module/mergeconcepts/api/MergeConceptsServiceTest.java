@@ -170,9 +170,6 @@ public class  MergeConceptsServiceTest extends BaseModuleContextSensitiveTest {
         drug.setRoute(oldConceptWithRoute);
         saveDrugToConceptService(drug);
 
-        Integer oldRouteConceptIdInDrug = drug.getRoute().getConceptId();
-        assertThat(oldRouteConceptIdInDrug, is(22));
-
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
         service.updateDrugs(oldConceptWithRoute, newConceptWithRoute);
 
