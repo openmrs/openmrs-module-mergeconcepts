@@ -115,7 +115,9 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 
     public void updateConceptSets(Concept oldConcept, Concept newConcept) {
         //update concept_id
-        List<ConceptSet> conceptSetConceptsToUpdate = getMatchingConceptSetConcepts(oldConcept);
+        // puts the new concept in the conceptSets that had the old concept
+        ConceptService conceptService = Context.getConceptService();
+        List<ConceptSet> conceptSetConceptsToUpdate = conceptService.getSetsContainingConcept(oldConcept);
         if (conceptSetConceptsToUpdate != null) {
             for (ConceptSet csc : conceptSetConceptsToUpdate) {
                 csc.setConcept(newConcept);
@@ -123,9 +125,11 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         }
 
         //concept_set
-        List<ConceptSet> conceptSetsToUpdate = getMatchingConceptSets(oldConcept);
+        // puts the new concept's conceptSet into the old concept's conceptSet???
+        List<ConceptSet> conceptSetsToUpdate = conceptService.getConceptSetsByConcept(oldConcept);
         if (conceptSetConceptsToUpdate != null) {
             for (ConceptSet cs : conceptSetsToUpdate) {
+                //is this line right?  should it be more like cs.setConcept?
                 cs.setConceptSet(newConcept);
             }
         }
