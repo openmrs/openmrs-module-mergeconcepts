@@ -114,19 +114,29 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     public void updateConceptSets(Concept oldConcept, Concept newConcept) {
-        //update concept_id
-        List<ConceptSet> conceptSetConceptsToUpdate = getMatchingConceptSetConcepts(oldConcept);
+        updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(oldConcept, newConcept);
+
+        updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(oldConcept, newConcept);
+    }
+
+    private void updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(Concept oldConcept, Concept newConcept) {
+        ConceptService conceptService = Context.getConceptService();
+
+        List<ConceptSet> conceptSetConceptsToUpdate = conceptService.getSetsContainingConcept(oldConcept);
         if (conceptSetConceptsToUpdate != null) {
-            for (ConceptSet csc : conceptSetConceptsToUpdate) {
-                csc.setConcept(newConcept);
+            for (ConceptSet conceptSet : conceptSetConceptsToUpdate) {
+                conceptSet.setConcept(newConcept);
             }
         }
+    }
 
-        //concept_set
-        List<ConceptSet> conceptSetsToUpdate = getMatchingConceptSets(oldConcept);
-        if (conceptSetConceptsToUpdate != null) {
-            for (ConceptSet cs : conceptSetsToUpdate) {
-                cs.setConceptSet(newConcept);
+    private void updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(Concept oldConcept, Concept newConcept) {
+        ConceptService conceptService = Context.getConceptService();
+
+        List<ConceptSet> conceptSetsToUpdate = conceptService.getConceptSetsByConcept(oldConcept);
+        if (conceptSetsToUpdate != null) {
+            for (ConceptSet conceptSet : conceptSetsToUpdate) {
+                conceptSet.setConceptSet(newConcept);
             }
         }
     }
