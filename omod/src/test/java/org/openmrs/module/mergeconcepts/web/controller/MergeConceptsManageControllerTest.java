@@ -45,84 +45,6 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertEquals(knownConceptId, newConcept.getConceptId());
     }
 
-    @Test
-    public void shouldUpdateConceptIdInDrug() {
-        int newConceptId = 88;
-        int oldConceptId = 792;
-
-        assertThatCurrentDrugConceptIdEqualsOldConceptId(2, oldConceptId);
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        service.updateDrugs(getConceptFromConceptId(oldConceptId), getConceptFromConceptId(newConceptId));
-
-        assertThatUpdatedDrugConceptIdEqualsNewConceptId(2, newConceptId);
-    }
-
-
-    private void assertThatCurrentDrugConceptIdEqualsOldConceptId(int drugId, int oldConceptId) {
-        Drug drug = getDrugById(drugId);
-        Integer drugConceptId = getConceptIdFromDrug(drug);
-        assertThat(drugConceptId, is(oldConceptId));
-    }
-
-    private void assertThatUpdatedDrugConceptIdEqualsNewConceptId(int drugId, int newConceptId) {
-        Drug updatedDrug = getDrugById(drugId);
-        Integer updatedDrugConceptId = getConceptIdFromDrug(updatedDrug);
-        assertThat(updatedDrugConceptId, is(newConceptId));
-    }
-
-    private Integer getConceptIdFromDrug(Drug drug) {
-        return drug.getConcept().getConceptId();
-    }
-
-    private Concept getConceptFromConceptId(int conceptId) {
-        return Context.getConceptService().getConcept(conceptId);
-    }
-
-    @Test
-    public void shouldUpdateRouteConceptIdInDrug() {
-        Concept oldConceptWithRoute = getConceptFromConceptId(22);
-        Concept newConceptWithRoute = getConceptFromConceptId(23);
-        Drug drug = getDrugById(11);
-        drug.setRoute(oldConceptWithRoute);
-        saveDrugToConceptService(drug);
-
-        Integer oldRouteConceptIdInDrug = drug.getRoute().getConceptId();
-        assertThat(oldRouteConceptIdInDrug, is(22));
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        service.updateDrugs(oldConceptWithRoute, newConceptWithRoute);
-
-        Integer updatedRouteConceptIdInDrug = drug.getRoute().getConceptId();
-        assertThat(updatedRouteConceptIdInDrug, is(23));
-    }
-
-
-    @Test
-    public void shouldUpdateDoseFormConceptIdInDrug() {
-        Concept oldConceptWithDosageForm = getConceptFromConceptId(7);
-        Concept newConceptWithDosageForm = getConceptFromConceptId(8);
-        Drug drug = getDrugById(11);
-        drug.setDosageForm(oldConceptWithDosageForm);
-        saveDrugToConceptService(drug);
-
-        Integer oldDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
-        assertThat(oldDosageFormConceptIdInDrug, is(7));
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-        service.updateDrugs(oldConceptWithDosageForm, newConceptWithDosageForm);
-
-        Integer updatedDosageFormConceptIdInDrug = drug.getDosageForm().getConceptId();
-        assertThat(updatedDosageFormConceptIdInDrug, is(8));
-    }
-
-    private Drug saveDrugToConceptService(Drug drug) {
-        return Context.getConceptService().saveDrug(drug);
-    }
-
-    private Drug getDrugById(int drugId) {
-        return Context.getConceptService().getDrug(drugId);
-    }
 
     @Test
     public void shouldDisplayUpdatedReferencesToOldConceptAndNewConcept() {
@@ -151,4 +73,8 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 
 	}
 
+
+    private Concept getConceptFromConceptId(int conceptId) {
+        return Context.getConceptService().getConcept(conceptId);
+    }
 }
