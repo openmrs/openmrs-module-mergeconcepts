@@ -79,6 +79,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	/**
 	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramsByConcept(org.openmrs.Concept)
 	 */
+    @Transactional
 	@Override
 	public List<Program> getProgramsByConcept(Concept concept) {
 
@@ -95,6 +96,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	/**
 	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramWorkflowsByConcept(org.openmrs.Concept)
 	 */
+    @Transactional
 	@Override
 	public List<ProgramWorkflow> getProgramWorkflowsByConcept(Concept concept) {
 
@@ -109,6 +111,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	/**
 	 * @see org.openmrs.api.db.ProgramWorkflowDAO#getProgramWorkflowStatesByConcept(org.openmrs.Concept)
 	 */
+    @Transactional
 	@Override
 	public List<ProgramWorkflowState> getProgramWorkflowStatesByConcept(Concept concept) {
 
@@ -124,6 +127,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	 * @see org.openmrs.api.db.ConceptDAO#getDrugsByIngredient(org.openmrs.Concept)
 	 */
 	@SuppressWarnings("unchecked")
+    @Transactional
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
 		Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
 		Criterion rhs = Restrictions.eq("drug.concept", ingredient);
@@ -134,6 +138,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		return (List<Drug>) searchDrugCriteria.list();
 	}
 
+    @Transactional
     public List<Drug> getDrugsByRouteConcept(Concept route) {
         Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
         Criterion rhs = Restrictions.eq("drug.route", route);
@@ -142,6 +147,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         return (List<Drug>) searchDrugCriteria.list();
     }
 
+    @Transactional
     public List<Drug> getDrugsByDosageFormConcept(Concept route) {
         Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
         Criterion rhs = Restrictions.eq("drug.dosageForm", route);
@@ -150,6 +156,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         return (List<Drug>) searchDrugCriteria.list();
     }
 
+    @Transactional
     public List<Order> getMatchingOrders(Concept concept) {
         List<Concept> conceptList = new ArrayList<Concept>();
         conceptList.add(concept);
@@ -158,6 +165,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         return ordersToUpdate;
     }
 
+    @Transactional
     @Override
     public void updateOrders(Concept oldConcept, Concept newConcept) {
         List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
@@ -239,6 +247,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @param oldConcept
      * @param newConcept
      */
+    @Transactional
     public void updatePrograms(Concept oldConcept, Concept newConcept) {
         List<Program> programsToUpdate = this.getProgramsByConcept(oldConcept);
         List<ProgramWorkflow> programWorkflowsToUpdate = this.getProgramWorkflowsByConcept(oldConcept);
@@ -262,6 +271,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         }
     }
 
+    @Transactional
     @Override
     public void updateFields(Concept oldConcept, Concept newConcept) {
         String newConceptName = newConcept.getName().toString();
@@ -287,6 +297,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         }
     }
 
+    @Transactional
     @Override
     public Set<FormField> getMatchingFormFields(Concept concept) {
         Set<FormField> formFields = new HashSet<FormField>();
@@ -298,6 +309,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         return formFields;
     }
 
+    @Transactional
     @Override
     public Set<Form> getMatchingForms(Concept concept) {
 
