@@ -3,6 +3,7 @@ package org.openmrs.module.mergeconcepts.api.impl;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
+import org.openmrs.ConceptSet;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
@@ -26,7 +27,7 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
     }
 
     @Test
-    public void shouldCopyOldConceptSetToNewConceptSet() {
+    public void shouldUpdateChildrenToHaveNewParent() {
         setUpConceptSetTest();
 
         Concept oldConcept = conceptService.getConcept(23);
@@ -38,6 +39,25 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
         assertThat(oldConceptSet.size(), is(0));
         List<Concept> newConceptSet = conceptService.getConceptsByConceptSet(newConcept);
         assertThat(newConceptSet.size(), is(4));
+    }
+
+    @Test
+    public void shouldReplaceOldConceptAsChildToNewConcept() {
+        setUpConceptSetTest();
+
+        Concept oldConcept = conceptService.getConcept(20);
+        Concept newConcept = conceptService.getConcept(4);
+
+        mergeConceptsService.updateConceptSets(oldConcept,  newConcept);
+
+        List<ConceptSet> conceptSets = conceptService.getSetsContainingConcept(newConcept);
+        ConceptSet conceptSet1 = conceptSets.get(0);
+        assertThat(conceptSet1.getConceptSet().getId(), is(23));
+
+        ConceptSet conceptSet2 = conceptSets.get(1);
+        assertThat(conceptSet2.getConceptSet().getId(), is(3));
+
+
     }
 
     private void setUpConceptSetTest() {

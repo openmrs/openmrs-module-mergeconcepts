@@ -114,23 +114,29 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     public void updateConceptSets(Concept oldConcept, Concept newConcept) {
-        //update concept_id
-        // puts the new concept in the conceptSets that had the old concept
+        updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(oldConcept, newConcept);
+
+        updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(oldConcept, newConcept);
+    }
+
+    private void updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(Concept oldConcept, Concept newConcept) {
         ConceptService conceptService = Context.getConceptService();
+
         List<ConceptSet> conceptSetConceptsToUpdate = conceptService.getSetsContainingConcept(oldConcept);
         if (conceptSetConceptsToUpdate != null) {
-            for (ConceptSet csc : conceptSetConceptsToUpdate) {
-                csc.setConcept(newConcept);
+            for (ConceptSet conceptSet : conceptSetConceptsToUpdate) {
+                conceptSet.setConcept(newConcept);
             }
         }
+    }
 
-        //concept_set
-        // puts the new concept's conceptSet into the old concept's conceptSet???
+    private void updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(Concept oldConcept, Concept newConcept) {
+        ConceptService conceptService = Context.getConceptService();
+
         List<ConceptSet> conceptSetsToUpdate = conceptService.getConceptSetsByConcept(oldConcept);
-        if (conceptSetConceptsToUpdate != null) {
-            for (ConceptSet cs : conceptSetsToUpdate) {
-                //is this line right?  should it be more like cs.setConcept?
-                cs.setConceptSet(newConcept);
+        if (conceptSetsToUpdate != null) {
+            for (ConceptSet conceptSet : conceptSetsToUpdate) {
+                conceptSet.setConceptSet(newConcept);
             }
         }
     }
