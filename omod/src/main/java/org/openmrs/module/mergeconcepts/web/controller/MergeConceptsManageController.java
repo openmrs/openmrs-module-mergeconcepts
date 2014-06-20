@@ -5,6 +5,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.mergeconcepts.ConceptType;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.module.mergeconcepts.api.PreviewErrorValidator;
 import org.openmrs.module.mergeconcepts.api.impl.PreviewErrorValidatorImpl;
@@ -66,8 +67,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         }
 
         // TODO: Make conceptType Enum
-        addConceptDetailsToModel(model, oldConceptId, "old");
-        addConceptDetailsToModel(model, newConceptId, "new");
+        addConceptDetailsToModel(model, oldConceptId, ConceptType.OLD);
+        addConceptDetailsToModel(model, newConceptId, ConceptType.NEW);
 
         return "/module/mergeconcepts/preview";
     }
@@ -121,8 +122,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @RequestMapping("/module/mergeconcepts/results")
     public void results(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
                         @RequestParam("newConceptId") Integer newConceptId) {
-        addConceptDetailsToModel(model, newConceptId, "new");
-        addConceptDetailsToModel(model, oldConceptId, "old");
+        addConceptDetailsToModel(model, newConceptId, ConceptType.NEW);
+        addConceptDetailsToModel(model, oldConceptId, ConceptType.OLD);
     }
 
     /**
@@ -151,15 +152,15 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
         return getConceptService().getConcept(oldConceptId);
     }
 
-    protected void addConceptDetailsToModel(ModelMap model, Integer conceptId, String conceptType) {
+    protected void addConceptDetailsToModel(ModelMap model, Integer conceptId, ConceptType conceptType) {
         Concept concept = getConceptService().getConcept(conceptId);
 
         MergeConceptsService service = Context.getService(MergeConceptsService.class);
 
-        Map<String, Object> attributes = service.getAttributes(conceptType, concept);
+        Map<String, Object> attributes = service.getAttributes(conceptType.toString(), concept);
 
-        for (String s : attributes.keySet()) {
-            model.addAttribute(s,attributes.get(s));
+        for (String type : attributes.keySet()) {
+            model.addAttribute(type, attributes.get(type));
         }
     }
 
