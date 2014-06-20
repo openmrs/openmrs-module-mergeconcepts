@@ -98,15 +98,15 @@ public class PreviewErrorValidatorImpl implements PreviewErrorValidator {
 
         List<ErrorBucket> errors = new ArrayList<ErrorBucket>();
 
-        errors.add(new ErrorBucket(anIDIsNull, "Please choose two concepts and try again"));
-        errors.add(new ErrorBucket(idsAreTheSame, "The same concept was chosen twice - please try again"));
-        errors.add(new ErrorBucket(differentDatatypes, "Please choose concepts with same datatypes and try again"));
+        errors.add(new ErrorBucket(anIDIsNull,          "Please choose two concepts and try again"));
+        errors.add(new ErrorBucket(idsAreTheSame,       "The same concept was chosen twice - please try again"));
+        errors.add(new ErrorBucket(differentDatatypes,  "Please choose concepts with same datatypes and try again"));
         errors.add(new ErrorBucket(differentAnswerSets, "Concept chosen to be retired has answers that the concept to keep does not have - please try again"));
-        errors.add(new ErrorBucket(retiredIsTooHigh, "Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again"));
-        errors.add(new ErrorBucket(retiredIsTooLow, "Absolute low for concept to be retired is less than absolute low for concept to keep - please try again"));
-        errors.add(new ErrorBucket(differentUnits, "Concepts you chose have different units - please try again"));
-        errors.add(new ErrorBucket(differentPrecision, "Concepts do not agree on precise (y/n) - please try again"));
-        errors.add(new ErrorBucket(differentHandlers, "Complex concepts do not have the same handler - please try again"));
+        errors.add(new ErrorBucket(retiredIsTooHigh,    "Absolute high for concept to be retired is greater than absolute high for concept to keep - please try again"));
+        errors.add(new ErrorBucket(retiredIsTooLow,     "Absolute low for concept to be retired is less than absolute low for concept to keep - please try again"));
+        errors.add(new ErrorBucket(differentUnits,      "Concepts you chose have different units - please try again"));
+        errors.add(new ErrorBucket(differentPrecision,  "Concepts do not agree on precise (y/n) - please try again"));
+        errors.add(new ErrorBucket(differentHandlers,   "Complex concepts do not have the same handler - please try again"));
 
         return errors;
     }
@@ -123,6 +123,7 @@ public class PreviewErrorValidatorImpl implements PreviewErrorValidator {
     private boolean isNumeric(Concept oldConcept) {
         return oldConcept.getDatatype().isNumeric();
     }
+
     class ErrorBucket {
         private boolean hasError;
         private String message;
