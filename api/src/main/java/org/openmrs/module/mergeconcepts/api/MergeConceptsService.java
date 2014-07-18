@@ -34,23 +34,43 @@ import java.util.Set;
 @Transactional
 public interface MergeConceptsService extends OpenmrsService {
 
-    public void setRelatedConceptsForDrugs(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept, List<Drug> drugsByDosageFormConcept);
+    public void update(Concept oldConcept, Concept newConcept);
 
-    public int getObsCount(Integer conceptId);
-	
-	public List<Integer> getObsIds(Integer conceptId);
-
-	public void updateObs(Concept oldConcept, Concept newConcept);
+    public void updateObs(Concept oldConcept, Concept newConcept);
 
     public void updateFields(Concept oldConcept, Concept newConcept);
 
-	public List<Drug> getDrugsByIngredient(Concept ingredient);
+    public void updateDrugs(Concept oldConcept, Concept newConcept);
 
-    void updateOrders(Concept oldConceptId, Concept newConceptId);
-
-    public List<Order> getMatchingOrders(Concept concept);
+    public void updateOrders(Concept oldConceptId, Concept newConceptId);
 
     public void updatePrograms(Concept oldConcept, Concept newConcept);
+
+    public void updateConceptSets(Concept oldConcept, Concept newConcept);
+
+    public void updateConceptAnswers(Concept oldConcept, Concept newConcept);
+
+    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept);
+
+    public void setRelatedConceptsForDrugs(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept, List<Drug> drugsByDosageFormConcept);
+
+    Map<String, Object> getAttributes(String conceptType, Concept concept);
+
+    public int getObsCount(Integer conceptId);
+
+	public List<Integer> getObsIds(Integer conceptId);
+
+    public List<Drug> getMatchingDrugsByConcept(Concept concept);
+
+	public List<Drug> getDrugsByIngredient(Concept ingredient);
+
+    public List<Drug> getDrugsByRouteConcept(Concept concept);
+
+    public List<Drug> getDrugsByDosageFormConcept(Concept concept);
+
+    void addDrugNames(Concept concept, List<String> drugNames);
+
+    public List<Order> getMatchingOrders(Concept concept);
 
     public List<Program> getMatchingPrograms(Concept concept);
 
@@ -58,31 +78,11 @@ public interface MergeConceptsService extends OpenmrsService {
 
     public Set<Form> getMatchingForms(Concept concept);
 
-    public List<Drug> getDrugsByRouteConcept(Concept concept);
-
-    public List<Drug> getDrugsByDosageFormConcept(Concept concept);
-
-    public void updateDrugs(Concept oldConcept, Concept newConcept);
-
-    public List<Drug> getMatchingDrugsByConcept(Concept concept);
-
-    public void updateConceptSets(Concept oldConcept, Concept newConcept);
-
-    public void updateConceptAnswers(Concept oldConcept, Concept newConcept);
-
     public List<ConceptSet> getMatchingConceptSetConcepts(Concept concept);
-
-    public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept);
 
     public List<ConceptSet> getMatchingConceptSets(Concept concept);
 
+    public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept);
+
     public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept);
-
-    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept);
-
-    public void update(Concept oldConcept, Concept newConcept);
-
-    Map<String, Object> getAttributes(String conceptType, Concept concept);
-
-    void addDrugNames(Concept concept, List<String> drugNames);
 }
