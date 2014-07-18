@@ -4,7 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Concept;
 import org.openmrs.ConceptSet;
+import org.openmrs.PersonAttributeType;
 import org.openmrs.api.ConceptService;
+import org.openmrs.api.PersonService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.test.BaseModuleContextSensitiveTest;
@@ -58,6 +60,23 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
         assertThat(conceptSet2.getConceptSet().getId(), is(3));
 
 
+    }
+
+    @Test
+    public void shouldUpdatePersonAttributeTypeWithForeignKey() {
+        PersonService personService = Context.getPersonService();
+
+        PersonAttributeType personAttributeType = personService.getPersonAttributeType(8);
+
+        int oldConceptId = 6;
+        int newConceptId = 7;
+        personAttributeType.setForeignKey(oldConceptId);
+        Concept oldConcept = conceptService.getConcept(oldConceptId);
+        Concept newConcept = conceptService.getConcept(newConceptId);
+
+        mergeConceptsService.updatePersonAttributeTypes(oldConcept, newConcept);
+
+        assertThat(personAttributeType.getForeignKey(), is(newConceptId));
     }
 
     private void setUpConceptSetTest() {
