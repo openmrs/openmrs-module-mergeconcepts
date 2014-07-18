@@ -57,8 +57,7 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertEquals(((List) modelMap.get("newPersonAttributeTypes")).size(), 0);
         assertEquals(((List) modelMap.get("newConceptAnswers")).size(), 0);
         assertEquals(((List) modelMap.get("newOrders")).size(), 0);
-        // Should be returning 1 drug name "NYQUIL"
-//        assertEquals(((List) modelMap.get("newDrugs")).size(), 0);
+        assertEquals(((List) modelMap.get("newDrugs")).size(), 0);
         assertEquals(((List) modelMap.get("newPrograms")).size(), 0);
         assertEquals((int) ((Form) ((HashSet)modelMap.get("newForms")).iterator().next()).getFormId(), 1);
         assertEquals(((List) modelMap.get("newConceptSets")).size(), 0);
