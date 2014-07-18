@@ -18,7 +18,7 @@ Are you sure you want to continue?
 </form>
 
 <a href="chooseConcepts.form">No</a>
-
+<br>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>
 
