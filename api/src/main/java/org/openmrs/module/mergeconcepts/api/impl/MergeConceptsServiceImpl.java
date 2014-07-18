@@ -298,64 +298,46 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         Map<String, Object> attributes = new HashMap<String, Object>();
 
         attributes.put(conceptType + "ConceptId", concept.getId());
+        attributes.put(conceptType + "ObsCount", getObsCount(concept.getId()));
+        attributes.put(conceptType + "Forms", getMatchingForms(concept));
+        attributes.put(conceptType + "Orders", getMatchingOrders(concept));
+        attributes.put(conceptType + "Programs", getMatchingPrograms(concept));
+        attributes.put(conceptType + "PersonAttributeTypes", getMatchingPersonAttributeTypes(concept));
 
         List<String> drugNames = new ArrayList<String>();
         addDrugNames(concept, drugNames);
         attributes.put(conceptType + "Drugs", drugNames);
 
-        //preview concept answers by id
         List<Integer> conceptAnswerIds = new ArrayList<Integer>();
-
-        int obsCount = getObsCount(concept.getId());
-        attributes.put(conceptType + "ObsCount", obsCount);
-
-        if (getMatchingConceptAnswers(concept) != null) {
-            for (ConceptAnswer a : getMatchingConceptAnswers(concept)) {
-                conceptAnswerIds.add(a.getConceptAnswerId());
-            }
-        }
-
-        List<Integer> conceptSetIds = new ArrayList<Integer>();
-        if (getMatchingConceptSets(concept) != null) {
-            for (ConceptSet c : getMatchingConceptSets(concept)) {
-                conceptSetIds.add(c.getConceptSetId());
-            }
-            if (getMatchingConceptSetConcepts(concept) != null) {
-                for (ConceptSet cs : getMatchingConceptSetConcepts(concept)) {
-                    conceptSetIds.add(cs.getConceptSetId());
-                }
-            }
-        }
-
-        attributes.put(conceptType + "ConceptSets", conceptSetIds);
+        getConceptAnswersIds(concept, conceptAnswerIds);
         attributes.put(conceptType + "ConceptAnswers", conceptAnswerIds);
 
-        if (getMatchingForms(concept) != null) {
-            attributes.put(conceptType + "Forms", getMatchingForms(concept));
-        }
-
-        if (getMatchingOrders(concept) != null){
-            attributes.put(conceptType + "Orders", getMatchingOrders(concept));
-        }
-
-        if (getMatchingPrograms(concept) != null){
-            attributes.put(conceptType + "Programs", getMatchingPrograms(concept));
-        }
-
-        if (getMatchingPersonAttributeTypes(concept) != null) {
-            attributes.put(conceptType + "PersonAttributeTypes", getMatchingPersonAttributeTypes(concept));
-        }
-
+        List<Integer> conceptSetIds = new ArrayList<Integer>();
+        getConceptSetIds(concept, conceptSetIds);
+        attributes.put(conceptType + "ConceptSets", conceptSetIds);
 
         return attributes;
     }
 
     @Override
     public void addDrugNames(Concept concept, List<String> drugNames) {
-        if (getMatchingDrugsByConcept(concept) != null) {
-            for (Drug od : getMatchingDrugsByConcept(concept)) {
-                drugNames.add(od.getFullName(null));
-            }
+        for (Drug od : getMatchingDrugsByConcept(concept)) {
+            drugNames.add(od.getFullName(null));
+        }
+    }
+
+    private void getConceptSetIds(Concept concept, List<Integer> conceptSetIds) {
+        for (ConceptSet c : getMatchingConceptSets(concept)) {
+            conceptSetIds.add(c.getConceptSetId());
+        }
+        for (ConceptSet cs : getMatchingConceptSetConcepts(concept)) {
+            conceptSetIds.add(cs.getConceptSetId());
+        }
+    }
+
+    private void getConceptAnswersIds(Concept concept, List<Integer> conceptAnswerIds) {
+        for (ConceptAnswer a : getMatchingConceptAnswers(concept)) {
+            conceptAnswerIds.add(a.getConceptAnswerId());
         }
     }
 }
