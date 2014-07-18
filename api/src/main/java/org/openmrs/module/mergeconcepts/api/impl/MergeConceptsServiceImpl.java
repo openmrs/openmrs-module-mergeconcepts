@@ -79,7 +79,6 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         List<Drug> drugsByDosageFormConcept = getDrugsByDosageFormConcept(oldConcept);
 
         setRelatedConceptsForDrugs(newConcept, drugsToUpdate, drugsByRouteConcept, drugsByDosageFormConcept);
-
     }
 
     public List<Drug> getMatchingDrugsByConcept(Concept concept) {
@@ -89,22 +88,14 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 
     @Override
     public void setRelatedConceptsForDrugs(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept, List<Drug> drugsByDosageFormConcept) {
-        if (drugsToUpdate != null) {
-            for (Drug d : drugsToUpdate) {
-                d.setConcept(newConcept);
-            }
+        for (Drug d : drugsToUpdate) {
+            d.setConcept(newConcept);
         }
-
-        if (drugsByRouteConcept != null) {
-            for (Drug d : drugsByRouteConcept) {
-                d.setRoute(newConcept);
-            }
+        for (Drug d : drugsByRouteConcept) {
+            d.setRoute(newConcept);
         }
-
-        if (drugsByDosageFormConcept != null) {
-            for (Drug d : drugsByDosageFormConcept) {
-                d.setDosageForm(newConcept);
-            }
+        for (Drug d : drugsByDosageFormConcept) {
+            d.setDosageForm(newConcept);
         }
     }
 
@@ -120,24 +111,14 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     private void updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(Concept oldConcept, Concept newConcept) {
-        ConceptService conceptService = Context.getConceptService();
-
-        List<ConceptSet> conceptSetConceptsToUpdate = conceptService.getSetsContainingConcept(oldConcept);
-        if (conceptSetConceptsToUpdate != null) {
-            for (ConceptSet conceptSet : conceptSetConceptsToUpdate) {
-                conceptSet.setConcept(newConcept);
-            }
+        for (ConceptSet conceptSet : getMatchingConceptSetConcepts(oldConcept)) {
+            conceptSet.setConcept(newConcept);
         }
     }
 
     private void updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(Concept oldConcept, Concept newConcept) {
-        ConceptService conceptService = Context.getConceptService();
-
-        List<ConceptSet> conceptSetsToUpdate = conceptService.getConceptSetsByConcept(oldConcept);
-        if (conceptSetsToUpdate != null) {
-            for (ConceptSet conceptSet : conceptSetsToUpdate) {
-                conceptSet.setConceptSet(newConcept);
-            }
+        for (ConceptSet conceptSet : getMatchingConceptSets(oldConcept)) {
+            conceptSet.setConceptSet(newConcept);
         }
     }
 
@@ -157,17 +138,11 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
      * @param newConcept
      */
     public void updateConceptAnswers(Concept oldConcept, Concept newConcept) {
-        List<ConceptAnswer> conceptAnswerQuestionsToUpdate = getMatchingConceptAnswerQuestions(oldConcept);
-
-        //update concept_id
-        for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate) {
+        for (ConceptAnswer caq : getMatchingConceptAnswerQuestions(oldConcept)) {
             caq.setConcept(newConcept);
         }
 
-        List<ConceptAnswer> conceptAnswerAnswersToUpdate = getMatchingConceptAnswerAnswers(oldConcept);
-
-        //update answer_concepts
-        for (ConceptAnswer caa : conceptAnswerAnswersToUpdate) {
+        for (ConceptAnswer caa : getMatchingConceptAnswerAnswers(oldConcept)) {
             caa.setAnswerConcept(newConcept);
         }
     }
@@ -181,46 +156,46 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     public List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept) {
-        ConceptService conceptService = Context.getConceptService();
         List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
-
         //Concepts that are questions answered by this concept, and possibly others
-        for (Concept c : conceptService.getConceptsByAnswer(concept)) {
+        for (Concept c : getConceptsByAnswerForAConcept(concept)) {
             //ConceptAnswers of all possible answers to question concept above
             for (ConceptAnswer a : c.getAnswers()) {
-
                 //only add ConceptAnswers with an answer matching this concept
                 if (a.getAnswerConcept().equals(concept)) {
                     matchingConceptAnswers.add(a);
                 }
             }
         }
-
         return matchingConceptAnswers;
     }
 
-    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept) {
-        List<PersonAttributeType> matchingPersonAttributeTypes = getMatchingPersonAttributeTypes(oldConcept);
+    private List<Concept> getConceptsByAnswerForAConcept(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getConceptsByAnswer(concept);
+    }
 
-        for (PersonAttributeType m : matchingPersonAttributeTypes) {
+    public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept) {
+        for (PersonAttributeType m : getMatchingPersonAttributeTypes(oldConcept)) {
             m.setForeignKey(newConcept.getConceptId());
         }
     }
 
     public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept) {
-        PersonService personService = Context.getPersonService();
-        List<PersonAttributeType> allPersonAttributeTypes = personService.getAllPersonAttributeTypes();
         List<PersonAttributeType> matchingPersonAttributeTypes = new ArrayList<PersonAttributeType>();
-
-        for (PersonAttributeType p : allPersonAttributeTypes) {
+        for (PersonAttributeType p : getPersonAttributeTypes()) {
             if (p.getFormat().toLowerCase().contains("concept")) {
                 if (p.getForeignKey() != null && p.getForeignKey().equals(concept.getConceptId())) {
                     matchingPersonAttributeTypes.add(p);
                 }
             }
         }
-
         return matchingPersonAttributeTypes;
+    }
+
+    private List<PersonAttributeType> getPersonAttributeTypes() {
+        PersonService personService = Context.getPersonService();
+        return personService.getAllPersonAttributeTypes();
     }
 
     public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {

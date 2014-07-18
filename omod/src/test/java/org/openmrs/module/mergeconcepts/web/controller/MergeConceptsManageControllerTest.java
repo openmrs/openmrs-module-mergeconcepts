@@ -13,9 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiveTest {
@@ -49,23 +47,28 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
 
     @Test
     public void results_shouldGetObsCountsForBothConceptsAndAttachThemToTheModelForDisplay() {
-        int oldConceptSetId = 1;
         ModelMap modelMap = new ModelMap();
+        int oldConceptId = knownQuestionConcept.getConceptId();
+        int oldConceptSetId = getConceptSetIdFromConcept(knownQuestionConcept);
+        int newConceptId = knownConceptId;
 
-        controller.results(modelMap, knownQuestionConcept.getConceptId(), knownConceptId);
+        controller.results(modelMap, oldConceptId, newConceptId);
 
-        assertEquals(((List) modelMap.get("newPersonAttributeTypes")).size(), 0);
-        assertEquals(((List) modelMap.get("newConceptAnswers")).size(), 0);
-        assertEquals(((List) modelMap.get("newOrders")).size(), 0);
-        assertEquals(((List) modelMap.get("newDrugs")).size(), 0);
-        assertEquals(((List) modelMap.get("newPrograms")).size(), 0);
-        assertEquals((int) ((Form) ((HashSet)modelMap.get("newForms")).iterator().next()).getFormId(), 1);
-        assertEquals(((List) modelMap.get("newConceptSets")).size(), 0);
-        assertEquals(((Integer) modelMap.get("newConceptId")).intValue(), 3);
-        assertEquals(((Integer) modelMap.get("newObsCount")).intValue(), 0);
+        compareModelMapDataToNewConceptData(modelMap, newConceptId);
+        compareModelMapDataToOldConceptData(modelMap, oldConceptId, oldConceptSetId);
+	}
 
+    private Concept getConceptFromConceptId(int conceptId) {
+        return Context.getConceptService().getConcept(conceptId);
+    }
+
+    private int getConceptSetIdFromConcept(Concept concept) {
+        return Context.getConceptService().getSetsContainingConcept(concept).get(0).getConceptSetId();
+    }
+
+    private void compareModelMapDataToOldConceptData(ModelMap modelMap, int oldConceptId, int oldConceptSetId) {
         assertEquals(((Integer) modelMap.get("oldObsCount")).intValue(), 1);
-        assertEquals(((Integer) modelMap.get("oldConceptId")).intValue(), 18);
+        assertEquals(((Integer) modelMap.get("oldConceptId")).intValue(), oldConceptId);
         assertEquals(((List) modelMap.get("oldConceptAnswers")).size(), 0);
         assertEquals(((List) modelMap.get("oldPrograms")).size(), 0);
         assertEquals(((List) modelMap.get("oldPersonAttributeTypes")).size(), 0);
@@ -73,9 +76,17 @@ public class MergeConceptsManageControllerTest extends BaseModuleContextSensitiv
         assertEquals(((List) modelMap.get("oldOrders")).size(), 0);
         assertEquals(((HashSet) modelMap.get("oldForms")).size(), 0);
         assertEquals(((List) modelMap.get("oldDrugs")).size(), 0);
-	}
+    }
 
-    private Concept getConceptFromConceptId(int conceptId) {
-        return Context.getConceptService().getConcept(conceptId);
+    private void compareModelMapDataToNewConceptData(ModelMap modelMap, int newConceptId) {
+        assertEquals(((List) modelMap.get("newPersonAttributeTypes")).size(), 0);
+        assertEquals(((List) modelMap.get("newConceptAnswers")).size(), 0);
+        assertEquals(((List) modelMap.get("newOrders")).size(), 0);
+        assertEquals(((List) modelMap.get("newDrugs")).size(), 0);
+        assertEquals(((List) modelMap.get("newPrograms")).size(), 0);
+        assertEquals((int) ((Form) ((HashSet)modelMap.get("newForms")).iterator().next()).getFormId(), 1);
+        assertEquals(((List) modelMap.get("newConceptSets")).size(), 0);
+        assertEquals(((Integer) modelMap.get("newConceptId")).intValue(), newConceptId);
+        assertEquals(((Integer) modelMap.get("newObsCount")).intValue(), 0);
     }
 }
