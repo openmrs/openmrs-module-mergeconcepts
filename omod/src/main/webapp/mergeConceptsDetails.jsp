@@ -21,14 +21,14 @@
 		<tr>
 			<td valign="top">
 				<h4>Concept Name: </h4>
-				<ul type="none" id="name1">
+				<ul type="none">
 					<li>${ newConcept.name }
 				</ul>
 			</td>
 
 			<td><!--  valign="top" -->
 				<h4>Concept Name: </h4>
-				<ul type="none" id="name2">
+				<ul type="none">
 					<li>${ oldConcept.name }
 				</ul>
 			</td>
@@ -36,14 +36,14 @@
 		<tr>
 			<td valign="top">
 				<h4>Concept Id: </h4>
-				<ul type="none" id="id1">
+				<ul type="none">
 					<li>${ newConcept.conceptId }
 				</ul>
 			</td>
 
 			<td valign="top">
 				<h4>Concept Id: </h4>
-				<ul type="none" id="id2">
+				<ul type="none">
 					<li>${ oldConcept.conceptId }
 				</ul>
 			</td>
@@ -58,12 +58,12 @@
 	<table>
 		<tr>
 			<th align="left">Obs Count</th>
-			<td id="ref10">${ newObsCount }</td>
+			<td>${ newObsCount }</td>
 		</tr>
 		<tr>
 			<th align="left" valign="top">Forms</th>
-			<td id="ref11">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="f" items="${ newForms }">
 				<li>${ f }
 				</c:forEach>
@@ -72,8 +72,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">Drugs</th>
-			<td id="ref12">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="d" items="${ newDrugs }">
 				<li>${ d }
 				</c:forEach>
@@ -82,8 +82,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">Orders</th>
-			<td id="ref13">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="o" items="${ newOrders }">
 				<li>${ o }
 				</c:forEach>
@@ -92,18 +92,18 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">Programs</th>
-			<td id="ref14">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="p" items="${ newPrograms }">
-				<li>${ p }
+				<li>${ p.name }
 				</c:forEach>
 			</ul>
 			</td>
 		</tr>
 		<tr>
 			<th align="left" valign="top">ConceptAnswers</th>
-			<td id="ref15">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="ca" items="${ newConceptAnswers }">
 				<li>${ ca }
 				</c:forEach>
@@ -112,8 +112,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">ConceptSets</th>
-			<td id="ref16">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="cs" items="${ newConceptSets }">
 				<li>${ cs }
 				</c:forEach>
@@ -122,8 +122,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">PersonAttributeTypes</th>
-			<td id="ref17">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="pat" items="${ newPersonAttributeTypes }">
 				<li>${ pat }
 				</c:forEach>
@@ -139,12 +139,12 @@
 	<table>
 		<tr>
 			<th align="left">Obs Count</th>
-			<td id="ref20">${ oldObsCount }</td>
+			<td>${ oldObsCount }</td>
 		</tr>
 		<tr>
 			<th align="left" valign="top">Forms</th>
-			<td id="ref21">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="f" items="${ oldForms }">
 				<li>${ f }
 				</c:forEach>
@@ -153,8 +153,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">Drugs</th>
-			<td id="ref22">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="d" items="${ oldDrugs }">
 				<li>${ d }
 				</c:forEach>
@@ -163,8 +163,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">Orders</th>
-			<td id="ref23">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="o" items="${ oldOrders }">
 				<li>${ o }
 				</c:forEach>
@@ -173,18 +173,18 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">Programs</th>
-			<td id="ref24">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="p" items="${ oldPrograms }">
-				<li>${ p }
+				<li>${ p.name }
 				</c:forEach>
 			</ul>
 			</td>
 		</tr>
 		<tr>
 			<th align="left" valign="top">ConceptAnswers</th>
-			<td id="ref25">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="ca" items="${ oldConceptAnswers }">
 				<li>${ ca }
 				</c:forEach>
@@ -193,8 +193,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">ConceptSets</th>
-			<td id="ref26">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="cs" items="${ oldConceptSets }">
 				<li>${ cs }
 				</c:forEach>
@@ -203,8 +203,8 @@
 		</tr>
 		<tr>
 			<th align="left" valign="top">PersonAttributeTypes</th>
-			<td id="ref27">
-			<ul type="none" id="id3">
+			<td>
+			<ul type="none">
 				<c:forEach var="pat" items="${ oldPersonAttributeTypes }">
 				<li>${ pat }
 				</c:forEach>
