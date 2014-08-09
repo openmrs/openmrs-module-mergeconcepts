@@ -61,10 +61,11 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @should return a count of the obs
      */
     @Transactional
+    @Override
     public Integer getObsCount(Integer conceptId){
     	Long obsWithQuestionConceptCount = null;
     	Long obsWithAnswerConceptCount = null;
-    	
+
     	Query query = sessionFactory.getCurrentSession().createQuery("select count(*) from Obs where concept_id = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
     	obsWithQuestionConceptCount = (Long)query.uniqueResult();
@@ -87,9 +88,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		Query pquery = sessionFactory.getCurrentSession().createQuery(pq);
 		pquery.setEntity("concept", concept);
 
-		List<Program> matchingPrograms = pquery.list();
-
-		return matchingPrograms;
+        return (List<Program>) pquery.list();
 
 	}
 
@@ -104,7 +103,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		Query wquery = sessionFactory.getCurrentSession().createQuery(wq);
 		wquery.setEntity("concept", concept);
 
-		return wquery.list();
+		return (List<ProgramWorkflow>) wquery.list();
 
 	}
 
@@ -119,7 +118,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		Query squery = sessionFactory.getCurrentSession().createQuery(sq);
 		squery.setEntity("concept", concept);
 
-		return squery.list();
+		return (List<ProgramWorkflowState>) squery.list();
 
 	}
 
@@ -128,6 +127,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	 */
 	@SuppressWarnings("unchecked")
     @Transactional
+    @Override
 	public List<Drug> getDrugsByIngredient(Concept ingredient) {
 		Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
 		Criterion rhs = Restrictions.eq("drug.concept", ingredient);
@@ -139,6 +139,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 	}
 
     @Transactional
+    @Override
     public List<Drug> getDrugsByRouteConcept(Concept route) {
         Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
         Criterion rhs = Restrictions.eq("drug.route", route);
@@ -148,6 +149,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     }
 
     @Transactional
+    @Override
     public List<Drug> getDrugsByDosageFormConcept(Concept route) {
         Criteria searchDrugCriteria = sessionFactory.getCurrentSession().createCriteria(Drug.class, "drug");
         Criterion rhs = Restrictions.eq("drug.dosageForm", route);
@@ -157,12 +159,12 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     }
 
     @Transactional
+    @Override
     public List<Order> getMatchingOrders(Concept concept) {
         List<Concept> conceptList = new ArrayList<Concept>();
         conceptList.add(concept);
         OrderService orderService = Context.getOrderService();
-        List<Order> ordersToUpdate = orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
-        return ordersToUpdate;
+        return orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
     }
 
     @Transactional
@@ -181,15 +183,12 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @should return a list of the obs
      */
     @Transactional
+    @Override
     public List<Integer> getObsIdsWithQuestionConcept(Integer conceptId) throws APIException {
-    	List<Integer> obsIds = null;
-    	
-    	Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where concept_id = :conceptId and voided = 0")
+        Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where concept_id = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
-    	
-    	obsIds = (List<Integer>) query.list();
-    	
-    	return obsIds;
+
+        return (List<Integer>) query.list();
     }
     
     /**
@@ -199,15 +198,12 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @should return a list of the obs
      */
     @Transactional
+    @Override
     public List<Integer> getObsIdsWithAnswerConcept(Integer conceptId) throws APIException {
-    	List<Integer> obsIds = null; //for obs in value_coded column
-    	
-    	Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where value_coded = :conceptId and voided = 0")
+        Query query = sessionFactory.getCurrentSession().createQuery("select obs.obsId from Obs obs where value_coded = :conceptId and voided = 0")
 		        .setParameter("conceptId", conceptId);
-    	
-    	obsIds = (List<Integer>) query.list();
-    	
-    	return obsIds;
+
+        return (List<Integer>) query.list();
     	
     }
 
@@ -218,8 +214,8 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @return
      */
     @Transactional
+    @Override
     public void updateObs(Concept oldConcept, Concept newConcept){
-
 		String msg = "Converted concept references from " + oldConcept + " to " + newConcept;
 
         Integer oldConceptId = oldConcept.getId();
@@ -248,10 +244,11 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
      * @param newConcept
      */
     @Transactional
+    @Override
     public void updatePrograms(Concept oldConcept, Concept newConcept) {
-        List<Program> programsToUpdate = this.getProgramsByConcept(oldConcept);
-        List<ProgramWorkflow> programWorkflowsToUpdate = this.getProgramWorkflowsByConcept(oldConcept);
-        List<ProgramWorkflowState> programWorkflowStatesToUpdate = this.getProgramWorkflowStatesByConcept(oldConcept);
+        List<Program> programsToUpdate = getProgramsByConcept(oldConcept);
+        List<ProgramWorkflow> programWorkflowsToUpdate = getProgramWorkflowsByConcept(oldConcept);
+        List<ProgramWorkflowState> programWorkflowStatesToUpdate = getProgramWorkflowStatesByConcept(oldConcept);
 
         for (Program p : programsToUpdate) {
             p.setConcept(newConcept);
@@ -276,7 +273,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     public void updateFields(Concept oldConcept, Concept newConcept) {
         String newConceptName = newConcept.getName().toString();
 
-        Set<FormField> formFieldsToUpdate = this.getMatchingFormFields(oldConcept);
+        Set<FormField> formFieldsToUpdate = getMatchingFormFields(oldConcept);
         FormService formService = Context.getFormService();
 
         for (FormField formField : formFieldsToUpdate) {
@@ -312,19 +309,14 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
     @Transactional
     @Override
     public Set<Form> getMatchingForms(Concept concept) {
-
         Set<FormField> formFields = Context.getService(MergeConceptsService.class).getMatchingFormFields(concept);
         Set<Form> conceptForms = new HashSet<Form>();
-
         for (FormField f : formFields) {
-
             //forms that ref oldConcept
             if (!f.getForm().equals(null)) {
                 conceptForms.add(f.getForm());
             }
-
         }
-
         return conceptForms;
     }
 }

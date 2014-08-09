@@ -12,7 +12,6 @@ This page lets you see the updated references to each concept
 
 
 <a href="chooseConcepts.form">Merge More Concepts</a>
-
-
+<br>
 
 <%@ include file="/WEB-INF/template/footer.jsp"%>

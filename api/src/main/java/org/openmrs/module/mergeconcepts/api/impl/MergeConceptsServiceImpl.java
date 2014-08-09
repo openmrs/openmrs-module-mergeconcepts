@@ -64,6 +64,7 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     @Transactional
+    @Override
     public void updateObs(Concept oldConcept, Concept newConcept){
         dao.updateObs(oldConcept, newConcept);
     }
@@ -73,39 +74,18 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         dao.updateFields(oldConcept, newConcept);
     }
 
+    @Override
     public void updateDrugs(Concept oldConcept, Concept newConcept) {
         List<Drug> drugsToUpdate = getMatchingDrugsByConcept(oldConcept);
         List<Drug> drugsByRouteConcept = getDrugsByRouteConcept(oldConcept);
         List<Drug> drugsByDosageFormConcept = getDrugsByDosageFormConcept(oldConcept);
 
         setRelatedConceptsForDrugs(newConcept, drugsToUpdate, drugsByRouteConcept, drugsByDosageFormConcept);
-
-    }
-
-    public List<Drug> getMatchingDrugsByConcept(Concept concept) {
-        ConceptService conceptService = Context.getConceptService();
-        return conceptService.getDrugsByConcept(concept);
     }
 
     @Override
-    public void setRelatedConceptsForDrugs(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept, List<Drug> drugsByDosageFormConcept) {
-        if (drugsToUpdate != null) {
-            for (Drug d : drugsToUpdate) {
-                d.setConcept(newConcept);
-            }
-        }
-
-        if (drugsByRouteConcept != null) {
-            for (Drug d : drugsByRouteConcept) {
-                d.setRoute(newConcept);
-            }
-        }
-
-        if (drugsByDosageFormConcept != null) {
-            for (Drug d : drugsByDosageFormConcept) {
-                d.setDosageForm(newConcept);
-            }
-        }
+    public void updateOrders(Concept oldConcept, Concept newConcept) {
+        dao.updateOrders(oldConcept, newConcept);
     }
 
     @Override
@@ -113,144 +93,104 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
         dao.updatePrograms(oldConcept, newConcept);
     }
 
+    @Override
     public void updateConceptSets(Concept oldConcept, Concept newConcept) {
         updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(oldConcept, newConcept);
 
         updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(oldConcept, newConcept);
     }
 
-    private void updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(Concept oldConcept, Concept newConcept) {
-        ConceptService conceptService = Context.getConceptService();
-
-        List<ConceptSet> conceptSetConceptsToUpdate = conceptService.getSetsContainingConcept(oldConcept);
-        if (conceptSetConceptsToUpdate != null) {
-            for (ConceptSet conceptSet : conceptSetConceptsToUpdate) {
-                conceptSet.setConcept(newConcept);
-            }
-        }
-    }
-
-    private void updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(Concept oldConcept, Concept newConcept) {
-        ConceptService conceptService = Context.getConceptService();
-
-        List<ConceptSet> conceptSetsToUpdate = conceptService.getConceptSetsByConcept(oldConcept);
-        if (conceptSetsToUpdate != null) {
-            for (ConceptSet conceptSet : conceptSetsToUpdate) {
-                conceptSet.setConceptSet(newConcept);
-            }
-        }
-    }
-
-    public List<ConceptSet> getMatchingConceptSetConcepts(Concept concept) {
-        ConceptService conceptService = Context.getConceptService();
-        return conceptService.getSetsContainingConcept(concept);
-    }
-
-    public List<ConceptSet> getMatchingConceptSets(Concept concept) {
-        ConceptService conceptService = Context.getConceptService();
-        return conceptService.getConceptSetsByConcept(concept);
-    }
-
-    /**
-     * ConceptAnswers contain references to concepts
-     *  @param oldConcept
-     * @param newConcept
-     */
+    @Override
     public void updateConceptAnswers(Concept oldConcept, Concept newConcept) {
-        List<ConceptAnswer> conceptAnswerQuestionsToUpdate = getMatchingConceptAnswerQuestions(oldConcept);
-
-        //update concept_id
-        for (ConceptAnswer caq : conceptAnswerQuestionsToUpdate) {
+        for (ConceptAnswer caq : getMatchingConceptAnswerQuestions(oldConcept)) {
             caq.setConcept(newConcept);
         }
 
-        List<ConceptAnswer> conceptAnswerAnswersToUpdate = getMatchingConceptAnswerAnswers(oldConcept);
-
-        //update answer_concepts
-        for (ConceptAnswer caa : conceptAnswerAnswersToUpdate) {
+        for (ConceptAnswer caa : getMatchingConceptAnswerAnswers(oldConcept)) {
             caa.setAnswerConcept(newConcept);
         }
     }
 
-    public List<ConceptAnswer> getMatchingConceptAnswerQuestions(Concept concept) {
-        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
-        for (ConceptAnswer ca : concept.getAnswers()) {
-            matchingConceptAnswers.add(ca);
-        }
-        return matchingConceptAnswers;
-    }
-
-    public List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept) {
-        ConceptService conceptService = Context.getConceptService();
-        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
-
-        //Concepts that are questions answered by this concept, and possibly others
-        for (Concept c : conceptService.getConceptsByAnswer(concept)) {
-            //ConceptAnswers of all possible answers to question concept above
-            for (ConceptAnswer a : c.getAnswers()) {
-
-                //only add ConceptAnswers with an answer matching this concept
-                if (a.getAnswerConcept().equals(concept)) {
-                    matchingConceptAnswers.add(a);
-                }
-            }
-        }
-
-        return matchingConceptAnswers;
-    }
-
+    @Override
     public void updatePersonAttributeTypes(Concept oldConcept, Concept newConcept) {
-        List<PersonAttributeType> matchingPersonAttributeTypes = getMatchingPersonAttributeTypes(oldConcept);
-
-        for (PersonAttributeType m : matchingPersonAttributeTypes) {
+        for (PersonAttributeType m : getMatchingPersonAttributeTypes(oldConcept)) {
             m.setForeignKey(newConcept.getConceptId());
         }
     }
 
-    public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept) {
-        PersonService personService = Context.getPersonService();
-        List<PersonAttributeType> allPersonAttributeTypes = personService.getAllPersonAttributeTypes();
-        List<PersonAttributeType> matchingPersonAttributeTypes = new ArrayList<PersonAttributeType>();
-
-        for (PersonAttributeType p : allPersonAttributeTypes) {
-            if (p.getFormat().toLowerCase().contains("concept")) {
-                if (p.getForeignKey() != null && p.getForeignKey().equals(concept.getConceptId())) {
-                    matchingPersonAttributeTypes.add(p);
-                }
-            }
+    @Override
+    public void setRelatedConceptsForDrugs(Concept newConcept, List<Drug> drugsToUpdate, List<Drug> drugsByRouteConcept, List<Drug> drugsByDosageFormConcept) {
+        for (Drug d : drugsToUpdate) {
+            d.setConcept(newConcept);
         }
-
-        return matchingPersonAttributeTypes;
+        for (Drug d : drugsByRouteConcept) {
+            d.setRoute(newConcept);
+        }
+        for (Drug d : drugsByDosageFormConcept) {
+            d.setDosageForm(newConcept);
+        }
     }
 
-    public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {
-        List<ConceptAnswer> conceptAnswers = getMatchingConceptAnswerAnswers(concept);
-        for (ConceptAnswer c : getMatchingConceptAnswerQuestions(concept)) {
-            conceptAnswers.add(c);
+    private void updateConceptSetsByPuttingNewConceptWhereOldConceptWasChild(Concept oldConcept, Concept newConcept) {
+        for (ConceptSet conceptSet : getMatchingConceptSetConcepts(oldConcept)) {
+            conceptSet.setConcept(newConcept);
         }
-        return conceptAnswers;
     }
 
-    /**
-     * @param dao the dao to set
-     */
+    private void updateConceptSetsByChangingTheChildrenOfOldConceptToHaveNewConceptAsParent(Concept oldConcept, Concept newConcept) {
+        for (ConceptSet conceptSet : getMatchingConceptSets(oldConcept)) {
+            conceptSet.setConceptSet(newConcept);
+        }
+    }
+
     public void setDao(MergeConceptsDAO dao) {
 	    this.dao = dao;
     }
 
-    /**
-     * @return the dao
-     */
     public MergeConceptsDAO getDao() {
 	    return dao;
     }
 
+    @Override
+    public Map<String, Object> getAttributes(String conceptType, Concept concept) {
+        Map<String, Object> attributes = new HashMap<String, Object>();
+
+        attributes.put(conceptType + "ConceptId", concept.getId());
+        attributes.put(conceptType + "ObsCount", getObsCount(concept.getId()));
+        attributes.put(conceptType + "Forms", getMatchingForms(concept));
+        attributes.put(conceptType + "Orders", getMatchingOrders(concept));
+        attributes.put(conceptType + "Programs", getMatchingPrograms(concept));
+        attributes.put(conceptType + "PersonAttributeTypes", getMatchingPersonAttributeTypes(concept));
+
+        List<String> drugNames = new ArrayList<String>();
+        addDrugNames(concept, drugNames);
+        attributes.put(conceptType + "Drugs", drugNames);
+
+        List<Integer> conceptAnswerIds = new ArrayList<Integer>();
+        getConceptAnswersIds(concept, conceptAnswerIds);
+        attributes.put(conceptType + "ConceptAnswers", conceptAnswerIds);
+
+        List<Integer> conceptSetIds = new ArrayList<Integer>();
+        getConceptSetIds(concept, conceptSetIds);
+        attributes.put(conceptType + "ConceptSets", conceptSetIds);
+
+        return attributes;
+    }
+
+    @Override
     public int getObsCount(Integer conceptId){
     	return dao.getObsCount(conceptId);
     }
 
+    @Override
     public List<Integer> getObsIds(Integer conceptId){
     	return dao.getObsIdsWithQuestionConcept(conceptId);
+    }
+
+    @Override
+    public List<Drug> getMatchingDrugsByConcept(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getDrugsByConcept(concept);
     }
 
     @Override
@@ -259,8 +199,20 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
 	}
 
     @Override
-    public void updateOrders(Concept oldConcept, Concept newConcept) {
-        dao.updateOrders(oldConcept, newConcept);
+    public List<Drug> getDrugsByRouteConcept(Concept concept) {
+        return dao.getDrugsByRouteConcept(concept);
+    }
+
+    @Override
+    public List<Drug> getDrugsByDosageFormConcept(Concept concept) {
+        return dao.getDrugsByDosageFormConcept(concept);
+    }
+
+    @Override
+    public void addDrugNames(Concept concept, List<String> drugNames) {
+        for (Drug od : getMatchingDrugsByConcept(concept)) {
+            drugNames.add(od.getFullName(null));
+        }
     }
 
     @Override
@@ -284,78 +236,84 @@ public class MergeConceptsServiceImpl extends BaseOpenmrsService implements Merg
     }
 
     @Override
-    public List<Drug> getDrugsByRouteConcept(Concept concept) {
-        return dao.getDrugsByRouteConcept(concept);
+    public List<ConceptSet> getMatchingConceptSetConcepts(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getSetsContainingConcept(concept);
     }
 
     @Override
-    public List<Drug> getDrugsByDosageFormConcept(Concept concept) {
-        return dao.getDrugsByDosageFormConcept(concept);
+    public List<ConceptSet> getMatchingConceptSets(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getConceptSetsByConcept(concept);
     }
 
     @Override
-    public Map<String, Object> getAttributes(String conceptType, Concept concept) {
-        Map<String, Object> attributes = new HashMap<String, Object>();
-
-        attributes.put(conceptType + "ConceptId", concept.getId());
-
-        List<String> drugNames = new ArrayList<String>();
-        addDrugNames(concept, drugNames);
-        attributes.put(conceptType + "Drugs", drugNames);
-
-        //preview concept answers by id
-        List<Integer> conceptAnswerIds = new ArrayList<Integer>();
-
-        int obsCount = getObsCount(concept.getId());
-        attributes.put(conceptType + "ObsCount", obsCount);
-
-        if (getMatchingConceptAnswers(concept) != null) {
-            for (ConceptAnswer a : getMatchingConceptAnswers(concept)) {
-                conceptAnswerIds.add(a.getConceptAnswerId());
-            }
-        }
-
-        List<Integer> conceptSetIds = new ArrayList<Integer>();
-        if (getMatchingConceptSets(concept) != null) {
-            for (ConceptSet c : getMatchingConceptSets(concept)) {
-                conceptSetIds.add(c.getConceptSetId());
-            }
-            if (getMatchingConceptSetConcepts(concept) != null) {
-                for (ConceptSet cs : getMatchingConceptSetConcepts(concept)) {
-                    conceptSetIds.add(cs.getConceptSetId());
+    public List<PersonAttributeType> getMatchingPersonAttributeTypes(Concept concept) {
+        List<PersonAttributeType> matchingPersonAttributeTypes = new ArrayList<PersonAttributeType>();
+        for (PersonAttributeType p : getPersonAttributeTypes()) {
+            if (p.getFormat().toLowerCase().contains("concept")) {
+                if (p.getForeignKey() != null && p.getForeignKey().equals(concept.getConceptId())) {
+                    matchingPersonAttributeTypes.add(p);
                 }
             }
         }
-
-        attributes.put(conceptType + "ConceptSets", conceptSetIds);
-        attributes.put(conceptType + "ConceptAnswers", conceptAnswerIds);
-
-        if (getMatchingForms(concept) != null) {
-            attributes.put(conceptType + "Forms", getMatchingForms(concept));
-        }
-
-        if (getMatchingOrders(concept) != null){
-            attributes.put(conceptType + "Orders", getMatchingOrders(concept));
-        }
-
-        if (getMatchingPrograms(concept) != null){
-            attributes.put(conceptType + "Programs", getMatchingPrograms(concept));
-        }
-
-        if (getMatchingPersonAttributeTypes(concept) != null) {
-            attributes.put(conceptType + "PersonAttributeTypes", getMatchingPersonAttributeTypes(concept));
-        }
-
-
-        return attributes;
+        return matchingPersonAttributeTypes;
     }
 
     @Override
-    public void addDrugNames(Concept concept, List<String> drugNames) {
-        if (getMatchingDrugsByConcept(concept) != null) {
-            for (Drug od : getMatchingDrugsByConcept(concept)) {
-                drugNames.add(od.getFullName(null));
+    public List<ConceptAnswer> getMatchingConceptAnswers(Concept concept) {
+        List<ConceptAnswer> conceptAnswers = getMatchingConceptAnswerAnswers(concept);
+        for (ConceptAnswer c : getMatchingConceptAnswerQuestions(concept)) {
+            conceptAnswers.add(c);
+        }
+        return conceptAnswers;
+    }
+
+    public List<ConceptAnswer> getMatchingConceptAnswerQuestions(Concept concept) {
+        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
+        for (ConceptAnswer ca : concept.getAnswers()) {
+            matchingConceptAnswers.add(ca);
+        }
+        return matchingConceptAnswers;
+    }
+
+    public List<ConceptAnswer> getMatchingConceptAnswerAnswers(Concept concept) {
+        List<ConceptAnswer> matchingConceptAnswers = new ArrayList<ConceptAnswer>();
+        //Concepts that are questions answered by this concept, and possibly others
+        for (Concept c : getConceptsByAnswerForAConcept(concept)) {
+            //ConceptAnswers of all possible answers to question concept above
+            for (ConceptAnswer a : c.getAnswers()) {
+                //only add ConceptAnswers with an answer matching this concept
+                if (a.getAnswerConcept().equals(concept)) {
+                    matchingConceptAnswers.add(a);
+                }
             }
+        }
+        return matchingConceptAnswers;
+    }
+
+    private List<Concept> getConceptsByAnswerForAConcept(Concept concept) {
+        ConceptService conceptService = Context.getConceptService();
+        return conceptService.getConceptsByAnswer(concept);
+    }
+
+    private List<PersonAttributeType> getPersonAttributeTypes() {
+        PersonService personService = Context.getPersonService();
+        return personService.getAllPersonAttributeTypes();
+    }
+
+    private void getConceptSetIds(Concept concept, List<Integer> conceptSetIds) {
+        for (ConceptSet c : getMatchingConceptSets(concept)) {
+            conceptSetIds.add(c.getConceptSetId());
+        }
+        for (ConceptSet cs : getMatchingConceptSetConcepts(concept)) {
+            conceptSetIds.add(cs.getConceptSetId());
+        }
+    }
+
+    private void getConceptAnswersIds(Concept concept, List<Integer> conceptAnswerIds) {
+        for (ConceptAnswer a : getMatchingConceptAnswers(concept)) {
+            conceptAnswerIds.add(a.getConceptAnswerId());
         }
     }
 }
