@@ -29,7 +29,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest {
-    int FOOD_ASSISTANCE_CONCEPT_ID = 18; // name="FOOD ASSISTANCE"
+    int FAVORITE_FOOD_NON_CODED = 19; // name="FAVORITE FOOD, NON-CODED"
 
     private ConceptService conceptService;
     private MergeConceptsService mergeConceptsService;
@@ -111,9 +111,9 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
     public void getObsCount_shouldReturnACountOfQuestionAndAnswerConceptObs()
             throws Exception {
         int knownObsId = 7;
-        updateObsWithConceptAnswer(knownObsId, FOOD_ASSISTANCE_CONCEPT_ID);
+        updateObsWithConceptAnswer(knownObsId, FAVORITE_FOOD_NON_CODED);
 
-        Integer actualServiceObsCount = mergeConceptsService.getObsCount(FOOD_ASSISTANCE_CONCEPT_ID);
+        Integer actualServiceObsCount = mergeConceptsService.getObsCount(FAVORITE_FOOD_NON_CODED);
 
         Integer expectedServiceObsCount = 2;
         assertEquals(expectedServiceObsCount, actualServiceObsCount);
@@ -121,11 +121,11 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
 
     @Test
     public void updateObs_shouldUpdateObsWithNewConceptInQuestionsAndAnswerConcepts() {
-        Obs savedObsWithId10 = updateObsWithConceptAnswer(10, FOOD_ASSISTANCE_CONCEPT_ID);
-        Obs savedObsWithId12 = updateObsWithConceptQuestion(12, FOOD_ASSISTANCE_CONCEPT_ID);
+        Obs savedObsWithId10 = updateObsWithConceptAnswer(10, FAVORITE_FOOD_NON_CODED);
+        Obs savedObsWithId12 = updateObsWithConceptQuestion(12, FAVORITE_FOOD_NON_CODED);
         int newConceptId = 22;
 
-        Concept knownConcept = conceptService.getConcept(FOOD_ASSISTANCE_CONCEPT_ID);
+        Concept knownConcept = conceptService.getConcept(FAVORITE_FOOD_NON_CODED);
         Concept newConcept = conceptService.getConcept(newConceptId);
 
         mergeConceptsService.updateObs(knownConcept, newConcept);
@@ -136,15 +136,16 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
 
     @Test
     public void updateOrders_shouldUpdateOrdersWithNewConcept() throws Exception {
-        int oldConceptId = 23;
-        Order orderWithId4 = updateOrderWithConcept(4, 23);
-        Order orderWithId5 = updateOrderWithConcept(5, 23);
-        int newConceptId = 18;
+        int oldConceptId = 88;
+        int newConceptId = 792;
 
         Concept oldConcept = conceptService.getConcept(oldConceptId);
         Concept newConcept = conceptService.getConcept(newConceptId);
 
         mergeConceptsService.updateOrders(oldConcept,newConcept);
+
+        Order orderWithId4 = Context.getOrderService().getOrder(4);
+        Order orderWithId5 = Context.getOrderService().getOrder(4);
 
         assertEquals(new Integer(newConceptId), orderWithId4.getConcept().getId());
         assertEquals(new Integer(newConceptId), orderWithId5.getConcept().getId());
@@ -268,20 +269,11 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
         return Context.getConceptService().getDrug(drugId);
     }
 
-
-    private Order updateOrderWithConcept(int orderId, int conceptId) {
-        OrderService orderService = Context.getOrderService();
-        Order knownOrder = orderService.getOrder(orderId);
-        knownOrder.setConcept(Context.getConceptService().getConcept(conceptId));
-        return orderService.saveOrder(knownOrder);
-    }
-
-
     private Obs updateObsWithConceptAnswer(int obsId, int conceptId) {
         ObsService obsService = Context.getObsService();
         Obs knownAnswerObs = obsService.getObs(obsId);
         knownAnswerObs.setValueCoded(Context.getConceptService().getConcept(conceptId));
-        return obsService.saveObs(knownAnswerObs,"");
+        return obsService.saveObs(knownAnswerObs,"Updating observation with new concept answer");
     }
 
 
@@ -289,6 +281,6 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
         ObsService obsService = Context.getObsService();
         Obs knownAnswerObs = obsService.getObs(obsId);
         knownAnswerObs.setConcept(Context.getConceptService().getConcept(conceptId));
-        return obsService.saveObs(knownAnswerObs,"");
+        return obsService.saveObs(knownAnswerObs,"Updating observation with new concept question");
     }
 }
