@@ -1,0 +1,11 @@
+java_version: 7u71-linux-x64
+java_rpm: jdk-{{ java_version }}.rpm
+java_folder: jdk-{{ java_version }}
+java_wget_args: -O {{ ansible_cache_folder }}/{{ java_rpm }} --no-check-certificate --no-cookies --header "Cookie:oraclelicense=accept-securebackup-cookie"
+
+openmrs_version: 1.9.7
+openmrs_folder: openmrs-standalone-{{ openmrs_version }}
+openmrs_archive: "{{ openmrs_folder }}.zip"
+openmrs_url: http://downloads.sourceforge.net/project/openmrs/releases/OpenMRS_{{ openmrs_version }}/{{ openmrs_archive }}?r=&ts=1416072081&use_mirror=hivelocity
+openmrs_run_with_custom_args:
+  - { regexp: "^.*java -jar openmrs-standalone.jar.*$", guc: "echo demo | java -jar openmrs-standalone.jar -commandline" }
