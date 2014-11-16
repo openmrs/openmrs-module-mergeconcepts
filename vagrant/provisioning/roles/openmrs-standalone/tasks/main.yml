@@ -32,7 +32,7 @@
     path=/home/vagrant/{{ openmrs_folder }}/run-on-linux.sh
     mode=0755
 
-- name: Run openmrs-standalone - wait a few minutes for loading then visit localhost:9595/openmrs-standalone/index.html (use control+C to quit)
+- name: Run openmrs-standalone - wait a few minutes for loading then visit localhost:9595/openmrs-standalone/index.htm (use control+C to quit)
   sudo: no
   command:
     sh run-on-linux.sh

@@ -3,6 +3,10 @@ java_rpm: jdk-{{ java_version }}.rpm
 java_folder: jdk-{{ java_version }}
 java_wget_args: -O {{ ansible_cache_folder }}/{{ java_rpm }} --no-check-certificate --no-cookies --header "Cookie:oraclelicense=accept-securebackup-cookie"
 
+
+mvn_version: 3.2.3
+mvn_url: http://apache.proserve.nl/maven/maven-3/{{ mvn_version }}/binaries/apache-maven-{{ mvn_version }}-bin.tar.gz
+
 openmrs_version: 1.9.7
 openmrs_folder: openmrs-standalone-{{ openmrs_version }}
 openmrs_archive: "{{ openmrs_folder }}.zip"

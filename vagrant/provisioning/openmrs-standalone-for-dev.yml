@@ -8,5 +8,6 @@
   roles:
     - base
     - java_jdk
+    - mvn
     - mysql
     - openmrs-standalone
