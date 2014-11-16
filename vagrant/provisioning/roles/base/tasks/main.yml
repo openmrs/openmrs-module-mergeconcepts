@@ -1,0 +1,21 @@
+---
+
+
+- name: Install base packages
+  yum:
+    pkg={{ item }}
+    state=latest
+  with_items:
+    - libselinux-python
+    - unzip
+    - wget
+
+- name: Create ansible-cache directory
+  file:
+    path={{ ansible_cache_folder }}
+    state=directory
+
+- name: Automatically change directory into project on 'vagrant ssh'
+  lineinfile:
+    line="cd /home/vagrant/mcm"
+    dest=/home/vagrant/.bashrc

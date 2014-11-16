@@ -1,0 +1,39 @@
+---
+
+
+- name: Download openmrs-standalone archive
+  get_url:
+    url={{ openmrs_url }}
+    dest={{ ansible_cache_folder }}/{{ openmrs_archive }}
+
+- name: Unpack openmrs-standalone archive
+  unarchive:
+    copy=no
+    src={{ ansible_cache_folder }}/{{ openmrs_archive }}
+    dest=/home/vagrant
+    creates=/home/vagrant/{{ openmrs_folder }}
+  register: unpacked_new_standalone
+
+- name: Change privileges to openmrs-standalone directory
+  command:
+    "sudo chown -R vagrant:vagrant /home/vagrant/{{ openmrs_folder }}"
+  when: unpacked_new_standalone.changed
+
+- name: Customize run-on-linux.sh for commandline
+  lineinfile:
+    dest=/home/vagrant/{{ openmrs_folder }}/run-on-linux.sh
+    state=present
+    regexp="{{ item.regexp }}"
+    line="{{ item.guc }}"
+  with_items: openmrs_run_with_custom_args
+
+- name: Make run-on-linux.sh executable
+  file:
+    path=/home/vagrant/{{ openmrs_folder }}/run-on-linux.sh
+    mode=0755
+
+- name: Run openmrs-standalone - wait a few minutes for loading then visit localhost:9595/openmrs-standalone/index.htm (use control+C to quit)
+  sudo: no
+  command:
+    sh run-on-linux.sh
+    chdir=/home/vagrant/{{ openmrs_folder }}
