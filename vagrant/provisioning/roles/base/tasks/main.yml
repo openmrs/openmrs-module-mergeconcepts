@@ -8,7 +8,10 @@
   with_items:
     - libselinux-python
     - unzip
+    - tar
     - wget
+    - java-1.7.0-openjdk
+    - java-1.7.0-openjdk-devel
 
 - name: Create ansible-cache directory
   file:
