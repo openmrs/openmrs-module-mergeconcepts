@@ -1,0 +1,12 @@
+---
+
+
+- name: Download Java JDK
+  command:
+    wget {{ java_wget_args }} http://download.oracle.com/otn-pub/java/jdk/7u71-b14/{{ java_rpm }}
+    creates={{ ansible_cache_folder }}/{{ java_rpm }}
+
+- name: Install Java JDK
+  yum:
+    name={{ ansible_cache_folder }}/{{ java_rpm }}
+    state=present

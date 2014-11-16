@@ -1,0 +1,13 @@
+---
+
+
+- hosts: all
+  sudo: yes
+  vars:
+      ansible_cache_folder: /var/local/ansible-cache
+  roles:
+    - base
+    - java_jdk
+    - mvn
+    - mysql
+    - openmrs-standalone

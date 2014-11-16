@@ -1,0 +1,34 @@
+---
+
+
+- name: Create /opt directory
+  file: 
+    path=/opt 
+    state=directory
+
+- name: Download Maven3
+  get_url: 
+    dest=/opt/maven3.tar.gz 
+    url={{ mvn_url }}
+
+- name: Unpack Maven3
+  action: command 
+    creates=/opt/maven 
+    chdir=/opt 
+    tar zxvf /opt/maven3.tar.gz
+
+- name: Create Maven3 directory link
+  file: 
+    path=/opt/maven 
+    src=/opt/apache-maven-{{ mvn_version }} 
+    state=link
+
+- name: Set mvn link
+  action: command update-alternatives --install /usr/bin/mvn mvn /opt/maven/bin/mvn 1
+
+- name: Remove Maven3 archive
+  file: 
+    path=/opt/maven3.tar.gz 
+    state=absent
+
+
