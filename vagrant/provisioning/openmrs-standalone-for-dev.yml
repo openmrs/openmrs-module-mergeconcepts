@@ -7,7 +7,6 @@
       ansible_cache_folder: /var/local/ansible-cache
   roles:
     - base
-    - java_jdk
-    - mvn
+    - maven
     - mysql
     - openmrs-standalone
