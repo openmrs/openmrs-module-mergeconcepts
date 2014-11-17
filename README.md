@@ -41,5 +41,3 @@ openmrs-module-mergeconcepts
   - MYSQL Server Port: 3316
   - Username: openmrs
   - Password: (ssh into vagrant box and look at openmrs-standalone-runtime.properties in openmrs-standalone-1.9.7/)
-
- 
