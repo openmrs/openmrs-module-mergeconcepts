@@ -1,0 +1,33 @@
+---
+
+
+- name: Check to see if the proper Maven3 is installed
+  stat:
+    path=/opt/{{ maven_folder }}
+  register: maven_installation
+
+- name: Download Maven3
+  get_url: 
+    url={{ maven_url }}
+    dest={{ ansible_cache_folder }}/{{ maven_archive }}
+  when: maven_installation.stat.isdir is not defined or maven_installation.stat.isdir==false
+
+- name: Unpack Maven3
+  unarchive:
+    copy=no
+    src={{ ansible_cache_folder }}/{{ maven_archive }}
+    dest=/opt
+    creates=/opt/{{ maven_folder }}
+  when: maven_installation.stat.isdir is not defined or maven_installation.stat.isdir==false
+
+- name: Create Maven3 directory link
+  file: 
+    path=/opt/maven
+    src=/opt/{{ maven_folder }}
+    state=link
+
+- name: Add maven executable symlink to path
+  file:
+    src=/opt/maven/bin/mvn
+    dest=/usr/local/bin/mvn
+    state=link
