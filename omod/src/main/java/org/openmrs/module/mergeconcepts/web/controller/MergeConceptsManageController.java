@@ -5,7 +5,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.api.APIException;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.mergeconcepts.ConceptType;
+import org.openmrs.module.mergeconcepts.MergeConceptType;
 import org.openmrs.module.mergeconcepts.api.MergeConceptsService;
 import org.openmrs.module.mergeconcepts.api.PreviewErrorValidator;
 import org.openmrs.module.mergeconcepts.api.impl.PreviewErrorValidatorImpl;
@@ -66,11 +66,22 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
             return "redirect:chooseConcepts.form";
         }
 
-        // TODO: Make conceptType Enum
-        addConceptDetailsToModel(model, oldConceptId, ConceptType.OLD);
-        addConceptDetailsToModel(model, newConceptId, ConceptType.NEW);
+        addConceptReferencesToView(model, oldConceptId, MergeConceptType.OLD);
+        addConceptReferencesToView(model, newConceptId, MergeConceptType.NEW);
 
         return "/module/mergeconcepts/preview";
+    }
+
+    protected void addConceptReferencesToView(ModelMap model, Integer conceptId, MergeConceptType mergeConceptType) {
+        Concept concept = getConceptService().getConcept(conceptId);
+
+        MergeConceptsService service = Context.getService(MergeConceptsService.class);
+
+        Map<String, Object> attributes = service.getAttributes(mergeConceptType.toString(), concept);
+
+        for (String type : attributes.keySet()) {
+            model.addAttribute(type, attributes.get(type));
+        }
     }
 
     /**
@@ -122,8 +133,8 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     @RequestMapping("/module/mergeconcepts/results")
     public void results(ModelMap model, @RequestParam("oldConceptId") Integer oldConceptId,
                         @RequestParam("newConceptId") Integer newConceptId) {
-        addConceptDetailsToModel(model, newConceptId, ConceptType.NEW);
-        addConceptDetailsToModel(model, oldConceptId, ConceptType.OLD);
+        addConceptReferencesToView(model, newConceptId, MergeConceptType.NEW);
+        addConceptReferencesToView(model, oldConceptId, MergeConceptType.OLD);
     }
 
     /**
@@ -150,18 +161,6 @@ public class MergeConceptsManageController extends BaseOpenmrsObject {
     public Concept getOldConcept(@RequestParam(required = false, value = "oldConceptId") String oldConceptId) {
         //going to make this use ConceptEditor instead
         return getConceptService().getConcept(oldConceptId);
-    }
-
-    protected void addConceptDetailsToModel(ModelMap model, Integer conceptId, ConceptType conceptType) {
-        Concept concept = getConceptService().getConcept(conceptId);
-
-        MergeConceptsService service = Context.getService(MergeConceptsService.class);
-
-        Map<String, Object> attributes = service.getAttributes(conceptType.toString(), concept);
-
-        for (String type : attributes.keySet()) {
-            model.addAttribute(type, attributes.get(type));
-        }
     }
 
 

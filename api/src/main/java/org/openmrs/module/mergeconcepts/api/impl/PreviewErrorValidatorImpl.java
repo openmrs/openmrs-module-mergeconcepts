@@ -11,64 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PreviewErrorValidatorImpl implements PreviewErrorValidator {
-    //if both concepts' types are numeric, make sure both precision (y/n)s are the same
-    private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId) {
-        return getConceptService().getConceptNumeric(oldConceptId).getPrecise().equals(getConceptService().getConceptNumeric(newConceptId).getPrecise());
-    }
-
-    /**
-     * check if concepts have matching datatypes
-     * TO DO - unless oldConcept is N/A (what if it's the other way around?)
-     */
-    private static boolean hasMatchingDatatypes(Concept oldConcept, Concept newConcept) {
-        return (oldConcept.getDatatype().equals(newConcept.getDatatype()));
-    }
-
-    /**
-     * newConcept should have all answers of oldConcept
-     */
-    private static boolean hasCodedAnswers(Concept oldConcept, Concept newConcept) {
-        if (newConcept.getAnswers(false) == null) {
-            if (oldConcept.getAnswers(false) == null) {
-                return true;
-            } else return false;
-        } else if (oldConcept.getAnswers(false) == null) return true;
-
-        return newConcept.getAnswers(false).containsAll(oldConcept.getAnswers(false));
-    }
-
-    private boolean hasCorrectAbsoluteHi(Integer oldConceptId, Integer newConceptId) {
-        if (getConceptService().getConceptNumeric(newConceptId).getHiAbsolute() == null) {
-            return true;
-        } else if (getConceptService().getConceptNumeric(oldConceptId).getHiAbsolute() == null) {
-            return false;
-        }
-
-        return (getConceptService().getConceptNumeric(oldConceptId).getHiAbsolute() <= getConceptService().getConceptNumeric(newConceptId).getHiAbsolute());
-    }
-
-    private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId) {
-        if (getConceptService().getConceptNumeric(newConceptId).getLowAbsolute() == null) {
-            return true;
-        } else if (getConceptService().getConceptNumeric(oldConceptId).getLowAbsolute() == null) {
-            return false;
-        }
-
-        return (getConceptService().getConceptNumeric(oldConceptId).getLowAbsolute() >= getConceptService().getConceptNumeric(newConceptId).getLowAbsolute());
-
-    }
-
-    //if both concepts' types are numeric, make sure units are the same
-    private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId) {
-        if (getConceptService().getConceptNumeric(oldConceptId).getUnits() == null)
-            return true;
-        return getConceptService().getConceptNumeric(oldConceptId).getUnits().equals(getConceptService().getConceptNumeric(newConceptId).getUnits());
-    }
-
-    //if both concepts' types are complex, make sure handlers are the same
-    private boolean hasMatchingComplexHandler(Integer oldConceptId, Integer newConceptId) {
-        return getConceptService().getConceptComplex(oldConceptId).getHandler().equals(getConceptService().getConceptComplex(newConceptId).getHandler());
-    }
 
     public boolean hasErrors(Integer oldConceptId, Integer newConceptId, HttpSession httpSession) {
         List<ErrorBucket> errorBuckets = getErrorBuckets(oldConceptId, newConceptId);
@@ -114,6 +56,64 @@ public class PreviewErrorValidatorImpl implements PreviewErrorValidator {
     private void setErrorMessage(HttpSession httpSession, String message) {
         httpSession.setAttribute(WebConstants.OPENMRS_ERROR_ATTR,
                 message);
+    }
+
+    /**
+     * check if concepts have matching datatypes
+     * TO DO - unless oldConcept is N/A (what if it's the other way around?)
+     */
+    private static boolean hasMatchingDatatypes(Concept oldConcept, Concept newConcept) {
+        return (oldConcept.getDatatype().equals(newConcept.getDatatype()));
+    }
+
+    //if both concepts' types are numeric, make sure both precision (y/n)s are the same
+    private boolean hasMatchingPrecise(Integer oldConceptId, Integer newConceptId) {
+        return getConceptService().getConceptNumeric(oldConceptId).getPrecise().equals(getConceptService().getConceptNumeric(newConceptId).getPrecise());
+    }
+
+    /**
+     * newConcept should have all answers of oldConcept
+     */
+    private static boolean hasCodedAnswers(Concept oldConcept, Concept newConcept) {
+        if (newConcept.getAnswers(false) == null) {
+            if (oldConcept.getAnswers(false) == null) {
+                return true;
+            } else return false;
+        } else if (oldConcept.getAnswers(false) == null) return true;
+
+        return newConcept.getAnswers(false).containsAll(oldConcept.getAnswers(false));
+    }
+
+    private boolean hasCorrectAbsoluteHi(Integer oldConceptId, Integer newConceptId) {
+        if (getConceptService().getConceptNumeric(newConceptId).getHiAbsolute() == null) {
+            return true;
+        } else if (getConceptService().getConceptNumeric(oldConceptId).getHiAbsolute() == null) {
+            return false;
+        }
+
+        return (getConceptService().getConceptNumeric(oldConceptId).getHiAbsolute() <= getConceptService().getConceptNumeric(newConceptId).getHiAbsolute());
+    }
+
+    private boolean hasCorrectAbsoluteLow(Integer oldConceptId, Integer newConceptId) {
+        if (getConceptService().getConceptNumeric(newConceptId).getLowAbsolute() == null) {
+            return true;
+        } else if (getConceptService().getConceptNumeric(oldConceptId).getLowAbsolute() == null) {
+            return false;
+        }
+
+        return (getConceptService().getConceptNumeric(oldConceptId).getLowAbsolute() >= getConceptService().getConceptNumeric(newConceptId).getLowAbsolute());
+    }
+
+    //if both concepts' types are numeric, make sure units are the same
+    private boolean hasMatchingUnits(Integer oldConceptId, Integer newConceptId) {
+        if (getConceptService().getConceptNumeric(oldConceptId).getUnits() == null)
+            return true;
+        return getConceptService().getConceptNumeric(oldConceptId).getUnits().equals(getConceptService().getConceptNumeric(newConceptId).getUnits());
+    }
+
+    //if both concepts' types are complex, make sure handlers are the same
+    private boolean hasMatchingComplexHandler(Integer oldConceptId, Integer newConceptId) {
+        return getConceptService().getConceptComplex(oldConceptId).getHandler().equals(getConceptService().getConceptComplex(newConceptId).getHandler());
     }
 
     private ConceptService getConceptService() {

@@ -167,17 +167,8 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
         return orderService.getOrders(Order.class, null, conceptList, null, null, null, null);
     }
 
-    @Transactional
-    @Override
-    public void updateOrders(Concept oldConcept, Concept newConcept) {
-        List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
-        for (Order o : ordersToUpdate) {
-            o.setConcept(newConcept);
-        }
-    }
-
     /**
-     * 
+     *
      * @param conceptId
      * @return
      * @should return a list of the obs
@@ -190,7 +181,7 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
         return (List<Integer>) query.list();
     }
-    
+
     /**
      * for concepts used as an answer
      * @param conceptId
@@ -204,11 +195,37 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		        .setParameter("conceptId", conceptId);
 
         return (List<Integer>) query.list();
-    	
+
+    }
+
+    @Transactional
+    @Override
+    public Set<FormField> getMatchingFormFields(Concept concept) {
+        Set<FormField> formFields = new HashSet<FormField>();
+        List<Form> allForms = Context.getFormService().getFormsContainingConcept(concept); //instead of Context.getFormService().getAllForms();
+        //FormFields with old concept (might be a better way to do this)
+        for (Form f : allForms) {
+            formFields.add(Context.getFormService().getFormField(f, concept));
+        }
+        return formFields;
+    }
+
+    @Transactional
+    @Override
+    public Set<Form> getMatchingForms(Concept concept) {
+        Set<FormField> formFields = Context.getService(MergeConceptsService.class).getMatchingFormFields(concept);
+        Set<Form> conceptForms = new HashSet<Form>();
+        for (FormField f : formFields) {
+            //forms that ref oldConcept
+            if (!f.getForm().equals(null)) {
+                conceptForms.add(f.getForm());
+            }
+        }
+        return conceptForms;
     }
 
     /**
-     * 
+     *
      * @param oldConcept
      * @param newConcept
      * @return
@@ -222,15 +239,15 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
         List<Integer> questionObsToConvert = getObsIdsWithQuestionConcept(oldConceptId);
 		List<Integer> answerObsToConvert = getObsIdsWithAnswerConcept(oldConceptId);
-		
+
 		ObsService obsService = Context.getObsService();
-		
+
 		for(Integer obsId: questionObsToConvert){
 			Obs o = obsService.getObs(obsId);
 			o.setConcept(newConcept);
 			obsService.saveObs(o, msg);
 		}
-		
+
 		for(Integer obsId: answerObsToConvert){
 			Obs o = obsService.getObs(obsId);
 			o.setValueCoded(newConcept);
@@ -238,6 +255,14 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 		}
     }
 
+    @Transactional
+    @Override
+    public void updateOrders(Concept oldConcept, Concept newConcept) {
+        List<Order> ordersToUpdate = this.getMatchingOrders(oldConcept);
+        for (Order o : ordersToUpdate) {
+            o.setConcept(newConcept);
+        }
+    }
 
     /**
      * @param oldConcept
@@ -252,7 +277,6 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
 
         for (Program p : programsToUpdate) {
             p.setConcept(newConcept);
-            p.setName(newConcept.getName().toString());
 
             if(newConcept.getDescription() != null){
                 p.setDescription(newConcept.getDescription().toString());
@@ -292,31 +316,5 @@ public class HibernateMergeConceptsDAO implements MergeConceptsDAO {
             formService.saveFormField(formField);
             formService.saveForm(formField.getForm());
         }
-    }
-
-    @Transactional
-    @Override
-    public Set<FormField> getMatchingFormFields(Concept concept) {
-        Set<FormField> formFields = new HashSet<FormField>();
-        List<Form> allForms = Context.getFormService().getFormsContainingConcept(concept); //instead of Context.getFormService().getAllForms();
-        //FormFields with old concept (might be a better way to do this)
-        for (Form f : allForms) {
-            formFields.add(Context.getFormService().getFormField(f, concept));
-        }
-        return formFields;
-    }
-
-    @Transactional
-    @Override
-    public Set<Form> getMatchingForms(Concept concept) {
-        Set<FormField> formFields = Context.getService(MergeConceptsService.class).getMatchingFormFields(concept);
-        Set<Form> conceptForms = new HashSet<Form>();
-        for (FormField f : formFields) {
-            //forms that ref oldConcept
-            if (!f.getForm().equals(null)) {
-                conceptForms.add(f.getForm());
-            }
-        }
-        return conceptForms;
     }
 }

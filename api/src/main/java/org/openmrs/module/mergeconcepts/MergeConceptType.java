@@ -1,6 +1,6 @@
 package org.openmrs.module.mergeconcepts;
 
-public enum ConceptType {
+public enum MergeConceptType {
     OLD, NEW;
 
     @Override
