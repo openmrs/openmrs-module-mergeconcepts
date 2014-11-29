@@ -186,7 +186,7 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
         int oldConceptId = 10;
 
         ConceptService conceptService = Context.getConceptService();
-        String newName = conceptService.getConcept(newConceptId).getName().toString();
+        String programName = "MDR program";
         String newDescription = conceptService.getConcept(newConceptId).getDescription().toString();
 
         mergeConceptsService.updatePrograms(Context.getConceptService().getConcept(oldConceptId), Context.getConceptService().getConcept(newConceptId));
@@ -200,7 +200,7 @@ public class MergeConceptsServiceImplTest extends BaseModuleContextSensitiveTest
         int updatedConceptId = program.getConcept().getId();
 
         assertEquals(newConceptId, updatedConceptId);
-        assertEquals(newName, updatedName);
+        assertEquals(programName, updatedName);
         assertEquals(newDescription, updatedDescription);
     }
 
