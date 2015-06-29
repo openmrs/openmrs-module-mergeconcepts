@@ -1,4 +1,4 @@
-maven_version: 3.2.3
+maven_version: 3.2.5
 maven_folder: apache-maven-{{ maven_version }}
 maven_archive: "{{ maven_folder }}-bin.tar.gz"
 maven_url: http://apache.proserve.nl/maven/maven-3/{{ maven_version }}/binaries/{{ maven_archive }}
@@ -6,6 +6,6 @@ maven_url: http://apache.proserve.nl/maven/maven-3/{{ maven_version }}/binaries/
 openmrs_version: 1.9.7
 openmrs_folder: openmrs-standalone-{{ openmrs_version }}
 openmrs_archive: "{{ openmrs_folder }}.zip"
-openmrs_url: http://downloads.sourceforge.net/project/openmrs/releases/OpenMRS_{{ openmrs_version }}/{{ openmrs_archive }}?r=&ts=1416072081&use_mirror=hivelocity
+openmrs_url: http://downloads.sourceforge.net/project/openmrs/releases/OpenMRS_{{ openmrs_version }}/{{ openmrs_archive }}
 openmrs_run_with_custom_args:
   - { regexp: "^.*java -jar openmrs-standalone.jar.*$", guc: "echo demo | java -jar openmrs-standalone.jar -commandline" }
